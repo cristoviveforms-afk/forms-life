@@ -54,7 +54,7 @@ export default function Visitantes() {
       return date && date.toDateString() === today.toDateString();
     }).length,
     primeiraVez: visitantes.filter(v => v.visitor_first_time).length,
-    aguardando contato: visitantes.filter(v => v.visitor_wants_contact).length,
+    'aguardando contato': visitantes.filter(v => v.visitor_wants_contact).length,
   };
 
   return (
