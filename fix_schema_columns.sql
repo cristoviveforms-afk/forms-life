@@ -4,7 +4,7 @@
 
 -- Core Columns
 ALTER TABLE people ADD COLUMN IF NOT EXISTS type text;
-ALTER TABLE people ADD COLUMN IF NOT EXISTS name text;
+ALTER TABLE people ADD COLUMN IF NOT EXISTS full_name text;
 ALTER TABLE people ADD COLUMN IF NOT EXISTS phone text;
 ALTER TABLE people ADD COLUMN IF NOT EXISTS email text;
 ALTER TABLE people ADD COLUMN IF NOT EXISTS address text;

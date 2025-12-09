@@ -42,7 +42,7 @@ export default function Visitantes() {
   };
 
   const filteredVisitantes = visitantes.filter((v) =>
-    v.name.toLowerCase().includes(searchTerm.toLowerCase())
+    v.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate stats
@@ -135,10 +135,10 @@ export default function Visitantes() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                          {visitante.name.charAt(0)}
+                          {visitante.full_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium">{visitante.name}</p>
+                          <p className="font-medium">{visitante.full_name}</p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Phone className="h-3 w-3" />
                             {visitante.phone}

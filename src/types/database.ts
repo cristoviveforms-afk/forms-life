@@ -6,7 +6,7 @@ export interface Person {
     type: PersonType;
 
     // Personal
-    name: string;
+    full_name: string;
     birth_date?: string;
     gender?: string;
     civil_status?: string;

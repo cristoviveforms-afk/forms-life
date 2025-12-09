@@ -85,7 +85,7 @@ export default function Cadastro() {
         .from('people')
         .insert({
           type: tipoPessoa,
-          name: nome,
+          full_name: nome,
           birth_date: nascimento || null,
           gender: sexo || null,
           civil_status: estadoCivil || null,

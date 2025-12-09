@@ -42,7 +42,7 @@ export default function Convertidos() {
   };
 
   const filteredConvertidos = convertidos.filter((c) =>
-    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    c.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate stats
@@ -139,7 +139,7 @@ export default function Convertidos() {
                           <Heart className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium">{convertido.name}</p>
+                          <p className="font-medium">{convertido.full_name}</p>
                           <p className="text-sm text-muted-foreground">
                             Conversão: {convertido.conversion_date ? new Date(convertido.conversion_date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
                           </p>

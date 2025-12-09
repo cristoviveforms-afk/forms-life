@@ -42,7 +42,7 @@ export default function Membros() {
   };
 
   const filteredMembros = membros.filter((m) =>
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
+    m.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Calculate stats
@@ -131,10 +131,10 @@ export default function Membros() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                          {membro.name.charAt(0)}
+                          {membro.full_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium">{membro.name}</p>
+                          <p className="font-medium">{membro.full_name}</p>
                           <p className="text-sm text-muted-foreground">{membro.phone}</p>
                         </div>
                       </div>
