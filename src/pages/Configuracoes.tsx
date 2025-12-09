@@ -72,7 +72,7 @@ export default function Configuracoes() {
   const handleExport = async (type: 'membro' | 'visitante') => {
     try {
       const { data, error } = await supabase
-        .from('people')
+        .from('people' as any)
         .select('*')
         .eq('type', type);
 
@@ -84,7 +84,7 @@ export default function Configuracoes() {
 
       // Simple CSV export
       const headers = Object.keys(data[0]).join(',');
-      const rows = data.map(row => Object.values(row).map(val => `"${val}"`).join(','));
+      const rows = data.map((row: any) => Object.values(row).map(val => `"${val}"`).join(','));
       const csvContent = [headers, ...rows].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

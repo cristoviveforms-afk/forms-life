@@ -14,7 +14,193 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      accompaniments: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_contact_date: string | null
+          observacoes: string | null
+          person_id: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_contact_date?: string | null
+          observacoes?: string | null
+          person_id?: string | null
+          status?: string
+          type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_contact_date?: string | null
+          observacoes?: string | null
+          person_id?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accompaniments_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          age: string | null
+          id: string
+          name: string
+          parent_id: string | null
+        }
+        Insert: {
+          age?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+        }
+        Update: {
+          age?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ministries: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          leader: string | null
+          name: string
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          leader?: string | null
+          name: string
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          leader?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      people: {
+        Row: {
+          address: string | null
+          baptism_date: string | null
+          baptized_spirit: boolean | null
+          baptized_water: boolean | null
+          birth_date: string | null
+          civil_status: string | null
+          conversion_date: string | null
+          convert_needs: string | null
+          convert_wants_accompaniment: boolean | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          has_ministry: boolean | null
+          how_met: string | null
+          id: string
+          integration_date: string | null
+          member_has_served: boolean | null
+          member_prev_ministry: string | null
+          ministries: string[] | null
+          natural_skills: string | null
+          phone: string
+          spiritual_gifts: string | null
+          spouse_name: string | null
+          type: string
+          visitor_first_time: boolean | null
+          visitor_wants_contact: boolean | null
+          visitor_wants_discipleship: boolean | null
+        }
+        Insert: {
+          address?: string | null
+          baptism_date?: string | null
+          baptized_spirit?: boolean | null
+          baptized_water?: boolean | null
+          birth_date?: string | null
+          civil_status?: string | null
+          conversion_date?: string | null
+          convert_needs?: string | null
+          convert_wants_accompaniment?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          has_ministry?: boolean | null
+          how_met?: string | null
+          id?: string
+          integration_date?: string | null
+          member_has_served?: boolean | null
+          member_prev_ministry?: string | null
+          ministries?: string[] | null
+          natural_skills?: string | null
+          phone: string
+          spiritual_gifts?: string | null
+          spouse_name?: string | null
+          type: string
+          visitor_first_time?: boolean | null
+          visitor_wants_contact?: boolean | null
+          visitor_wants_discipleship?: boolean | null
+        }
+        Update: {
+          address?: string | null
+          baptism_date?: string | null
+          baptized_spirit?: boolean | null
+          baptized_water?: boolean | null
+          birth_date?: string | null
+          civil_status?: string | null
+          conversion_date?: string | null
+          convert_needs?: string | null
+          convert_wants_accompaniment?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          has_ministry?: boolean | null
+          how_met?: string | null
+          id?: string
+          integration_date?: string | null
+          member_has_served?: boolean | null
+          member_prev_ministry?: string | null
+          ministries?: string[] | null
+          natural_skills?: string | null
+          phone?: string
+          spiritual_gifts?: string | null
+          spouse_name?: string | null
+          type?: string
+          visitor_first_time?: boolean | null
+          visitor_wants_contact?: boolean | null
+          visitor_wants_discipleship?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

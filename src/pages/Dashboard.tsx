@@ -26,7 +26,7 @@ export default function Dashboard() {
     visitantes: 0,
     convertidos: 0,
     acompanhamento: 0,
-    ministerios: 12, // Placeholder
+    ministerios: 10,
     servindo: 0,
   });
 
@@ -44,11 +44,11 @@ export default function Dashboard() {
         { count: servindoCount },
         { count: acompanhamentoCount },
       ] = await Promise.all([
-        supabase.from('people').select('*', { count: 'exact', head: true }).eq('type', 'membro'),
-        supabase.from('people').select('*', { count: 'exact', head: true }).eq('type', 'visitante'),
-        supabase.from('people').select('*', { count: 'exact', head: true }).eq('type', 'convertido'),
-        supabase.from('people').select('*', { count: 'exact', head: true }).eq('member_has_served', true),
-        supabase.from('people').select('*', { count: 'exact', head: true }).or('convert_wants_accompaniment.eq.true,visitor_wants_contact.eq.true'),
+        supabase.from('people' as any).select('*', { count: 'exact', head: true }).eq('type', 'membro'),
+        supabase.from('people' as any).select('*', { count: 'exact', head: true }).eq('type', 'visitante'),
+        supabase.from('people' as any).select('*', { count: 'exact', head: true }).eq('type', 'convertido'),
+        supabase.from('people' as any).select('*', { count: 'exact', head: true }).eq('member_has_served', true),
+        supabase.from('people' as any).select('*', { count: 'exact', head: true }).or('convert_wants_accompaniment.eq.true,visitor_wants_contact.eq.true'),
       ]);
 
       setStats({
@@ -56,7 +56,7 @@ export default function Dashboard() {
         visitantes: visitantesCount || 0,
         convertidos: convertidosCount || 0,
         acompanhamento: acompanhamentoCount || 0,
-        ministerios: 12, // Static for now
+        ministerios: 10,
         servindo: servindoCount || 0,
       });
     } catch (error) {

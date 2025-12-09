@@ -22,8 +22,8 @@ export interface Person {
     baptized_water: boolean;
     baptism_date?: string;
     baptized_spirit: boolean;
-    has_cell: boolean;
-    cell_name?: string;
+    has_ministry: boolean;
+    ministries: string[];
     natural_skills?: string;
     spiritual_gifts?: string;
 
