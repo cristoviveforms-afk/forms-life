@@ -128,7 +128,7 @@ export default function Cadastro() {
           .map(f => ({
             parent_id: person.id,
             name: f.nome,
-            age: f.idade
+            age: f.idade ? f.idade : null
           }));
 
         if (childrenToInsert.length > 0) {
