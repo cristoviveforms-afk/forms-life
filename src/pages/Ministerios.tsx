@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, MoreHorizontal, Users } from 'lucide-react';
+import { Search, Plus, MoreHorizontal, Users, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,25 +19,80 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-
-const mockMinisterios = [
-  { id: 1, nome: 'Louvor e Adoração', membros: 15, lider: 'Maria Silva', ativo: true },
-  { id: 2, nome: 'Mídia e Comunicação', membros: 8, lider: 'João Pedro', ativo: true },
-  { id: 3, nome: 'Infantil', membros: 12, lider: 'Ana Costa', ativo: true },
-  { id: 4, nome: 'Jovens', membros: 20, lider: 'Carlos Oliveira', ativo: true },
-  { id: 5, nome: 'Intercessão', membros: 10, lider: 'Fernanda Lima', ativo: true },
-  { id: 6, nome: 'Diaconia', membros: 6, lider: 'Roberto Souza', ativo: false },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { Ministry } from '@/types/database';
+import { toast } from 'sonner';
 
 export default function Ministerios() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [ministerios, setMinisterios] = useState<Ministry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const filteredMinisterios = mockMinisterios.filter((m) =>
-    m.nome.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // NewMinistry Form State
+  const [newMinistry, setNewMinistry] = useState({
+    name: '',
+    leader: '',
+    description: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalMembrosServindo = mockMinisterios.reduce((acc, m) => acc + m.membros, 0);
+  useEffect(() => {
+    fetchMinisterios();
+  }, []);
+
+  const fetchMinisterios = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministries')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      setMinisterios(data as Ministry[]);
+    } catch (error) {
+      console.error('Erro ao buscar ministérios:', error);
+      toast.error('Erro ao carregar ministérios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateMinistry = async () => {
+    if (!newMinistry.name) {
+      toast.error('Nome do ministério é obrigatório');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('ministries')
+        .insert([
+          {
+            name: newMinistry.name,
+            leader: newMinistry.leader,
+            description: newMinistry.description
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast.success('Ministério criado com sucesso!');
+      setNewMinistry({ name: '', leader: '', description: '' });
+      setIsDialogOpen(false);
+      fetchMinisterios();
+    } catch (error) {
+      console.error('Erro ao criar ministério:', error);
+      toast.error('Erro ao criar ministério');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filteredMinisterios = ministerios.filter((m) =>
+    m.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <DashboardLayout title="Ministérios">
@@ -67,17 +122,33 @@ export default function Ministerios() {
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label htmlFor="nome">Nome do Ministério</Label>
-                  <Input id="nome" placeholder="Ex: Louvor e Adoração" />
+                  <Input
+                    id="nome"
+                    placeholder="Ex: Louvor e Adoração"
+                    value={newMinistry.name}
+                    onChange={(e) => setNewMinistry({ ...newMinistry, name: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lider">Líder</Label>
-                  <Input id="lider" placeholder="Nome do líder" />
+                  <Input
+                    id="lider"
+                    placeholder="Nome do líder"
+                    value={newMinistry.leader}
+                    onChange={(e) => setNewMinistry({ ...newMinistry, leader: e.target.value })}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="descricao">Descrição</Label>
-                  <Input id="descricao" placeholder="Descrição do ministério" />
+                  <Input
+                    id="descricao"
+                    placeholder="Descrição do ministério"
+                    value={newMinistry.description}
+                    onChange={(e) => setNewMinistry({ ...newMinistry, description: e.target.value })}
+                  />
                 </div>
-                <Button className="w-full" onClick={() => setIsDialogOpen(false)}>
+                <Button className="w-full" onClick={handleCreateMinistry} disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   Criar Ministério
                 </Button>
               </div>
@@ -89,61 +160,63 @@ export default function Ministerios() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{mockMinisterios.length}</div>
+              <div className="text-2xl font-bold">{loading ? '-' : ministerios.length}</div>
               <p className="text-xs text-muted-foreground">Total de Ministérios</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{mockMinisterios.filter(m => m.ativo).length}</div>
+              <div className="text-2xl font-bold">{loading ? '-' : ministerios.filter(m => m.active).length}</div>
               <p className="text-xs text-muted-foreground">Ativos</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{totalMembrosServindo}</div>
-              <p className="text-xs text-muted-foreground">Pessoas Servindo</p>
-            </CardContent>
-          </Card>
+          {/* Note: Members count per ministry logic would need a relation table or array column which we don't have yet in simple schema. 
+              Ideally 'people' table would have a ministry_id or similar, or a pivot table. 
+              For now removing the "Pessoas Servindo" card or making it static/placeholder until schema supports relation.
+          */}
         </div>
 
         {/* Ministry Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredMinisterios.map((ministerio) => (
-            <Card key={ministerio.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-base font-semibold">{ministerio.nome}</CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
-                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                    <DropdownMenuItem>Gerenciar Membros</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Desativar</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{ministerio.membros} membros</span>
+          {loading ? (
+            <div className="col-span-full flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            filteredMinisterios.map((ministerio) => (
+              <Card key={ministerio.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-base font-semibold">{ministerio.name}</CardTitle>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Ver Detalhes</DropdownMenuItem>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">Desativar</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Líder:</span>{' '}
+                      <span className="font-medium">{ministerio.leader || '-'}</span>
+                    </div>
+                    {ministerio.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{ministerio.description}</p>
+                    )}
+                    <Badge variant={ministerio.active ? 'default' : 'secondary'}>
+                      {ministerio.active ? 'Ativo' : 'Inativo'}
+                    </Badge>
                   </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">Líder:</span>{' '}
-                    <span className="font-medium">{ministerio.lider}</span>
-                  </div>
-                  <Badge variant={ministerio.ativo ? 'default' : 'secondary'}>
-                    {ministerio.ativo ? 'Ativo' : 'Inativo'}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </DashboardLayout>

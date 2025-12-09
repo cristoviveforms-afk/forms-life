@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Download, MoreHorizontal, Heart } from 'lucide-react';
+import { Search, Plus, Filter, Download, MoreHorizontal, Heart, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -12,33 +12,51 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-const mockConvertidos = [
-  { id: 1, nome: 'Lucas Martins', telefone: '(11) 99888-1111', dataConversao: '2024-01-10', acompanhamento: 'em_andamento' },
-  { id: 2, nome: 'Juliana Rocha', telefone: '(11) 98777-2222', dataConversao: '2024-01-08', acompanhamento: 'pendente' },
-  { id: 3, nome: 'Rafael Mendes', telefone: '(11) 97666-3333', dataConversao: '2024-01-05', acompanhamento: 'concluido' },
-  { id: 4, nome: 'Camila Santos', telefone: '(11) 96555-4444', dataConversao: '2024-01-03', acompanhamento: 'em_andamento' },
-];
-
-const statusLabels: Record<string, string> = {
-  pendente: 'Pendente',
-  em_andamento: 'Em Andamento',
-  concluido: 'Concluído',
-};
-
-const statusVariants: Record<string, 'default' | 'secondary' | 'outline'> = {
-  pendente: 'outline',
-  em_andamento: 'secondary',
-  concluido: 'default',
-};
+import { supabase } from '@/integrations/supabase/client';
+import { Person } from '@/types/database';
 
 export default function Convertidos() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [convertidos, setConvertidos] = useState<Person[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const filteredConvertidos = mockConvertidos.filter((c) =>
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    fetchConvertidos();
+  }, []);
+
+  const fetchConvertidos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('people')
+        .select('*')
+        .eq('type', 'convertido');
+
+      if (error) throw error;
+      setConvertidos(data as Person[]);
+    } catch (error) {
+      console.error('Erro ao buscar convertidos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredConvertidos = convertidos.filter((c) =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Calculate stats
+  const stats = {
+    total: convertidos.length,
+    esteMes: convertidos.filter(c => {
+      if (!c.conversion_date) return false;
+      const date = new Date(c.conversion_date);
+      const now = new Date();
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    }).length,
+    acompanhamento: convertidos.filter(c => c.convert_wants_accompaniment).length,
+    integrados: 0,
+  };
 
   return (
     <DashboardLayout title="Novos Convertidos">
@@ -72,25 +90,25 @@ export default function Convertidos() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">23</div>
+              <div className="text-2xl font-bold">{loading ? '-' : stats.total}</div>
               <p className="text-xs text-muted-foreground">Total de Convertidos</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">5</div>
+              <div className="text-2xl font-bold">{loading ? '-' : stats.esteMes}</div>
               <p className="text-xs text-muted-foreground">Este Mês</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">8</div>
-              <p className="text-xs text-muted-foreground">Em Acompanhamento</p>
+              <div className="text-2xl font-bold">{loading ? '-' : stats.acompanhamento}</div>
+              <p className="text-xs text-muted-foreground">Querem Acompanhamento</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{loading ? '-' : stats.integrados}</div>
               <p className="text-xs text-muted-foreground">Integrados</p>
             </CardContent>
           </Card>
@@ -102,44 +120,54 @@ export default function Convertidos() {
             <CardTitle className="text-lg">Lista de Novos Convertidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {filteredConvertidos.map((convertido) => (
-                <div
-                  key={convertido.id}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                      <Heart className="h-5 w-5" />
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredConvertidos.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Nenhum convertido encontrado.</p>
+                ) : (
+                  filteredConvertidos.map((convertido) => (
+                    <div
+                      key={convertido.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                          <Heart className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{convertido.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Conversão: {convertido.conversion_date ? new Date(convertido.conversion_date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={convertido.convert_wants_accompaniment ? 'default' : 'outline'}>
+                          {convertido.convert_wants_accompaniment ? 'Com Acompanhamento' : 'Sem Acompanhamento'}
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>Ver Perfil</DropdownMenuItem>
+                            <DropdownMenuItem>Iniciar Acompanhamento</DropdownMenuItem>
+                            <DropdownMenuItem>Converter para Membro</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive">Remover</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">{convertido.nome}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Conversão: {new Date(convertido.dataConversao).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={statusVariants[convertido.acompanhamento]}>
-                      {statusLabels[convertido.acompanhamento]}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Ver Perfil</DropdownMenuItem>
-                        <DropdownMenuItem>Iniciar Acompanhamento</DropdownMenuItem>
-                        <DropdownMenuItem>Converter para Membro</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Remover</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  ))
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
