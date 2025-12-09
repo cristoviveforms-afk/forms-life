@@ -21,7 +21,7 @@ export default function Login() {
     setIsLoading(true);
 
     const success = await login(email, password);
-    
+
     if (success) {
       toast({
         title: 'Bem-vindo!',
@@ -35,7 +35,7 @@ export default function Login() {
         variant: 'destructive',
       });
     }
-    
+
     setIsLoading(false);
   };
 
@@ -44,14 +44,14 @@ export default function Login() {
       <header className="absolute top-4 right-4">
         <ThemeToggle />
       </header>
-      
+
       <main className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md animate-fade-in border-border/50 shadow-lg">
           <CardHeader className="text-center space-y-4 pb-2">
             <div className="mx-auto">
-              <img 
-                src={logo} 
-                alt="Forms Cristo Vive" 
+              <img
+                src={logo}
+                alt="Forms Cristo Vive"
                 className="h-24 w-auto object-contain mx-auto"
               />
             </div>
@@ -62,7 +62,7 @@ export default function Login() {
               </p>
             </div>
           </CardHeader>
-          
+
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -77,7 +77,7 @@ export default function Login() {
                   className="h-11"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
                 <Input
@@ -91,16 +91,16 @@ export default function Login() {
                 />
               </div>
             </CardContent>
-            
+
             <CardFooter className="flex flex-col gap-4">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-11 font-medium"
                 disabled={isLoading}
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
-              
+
               <button
                 type="button"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -112,9 +112,7 @@ export default function Login() {
         </Card>
       </main>
 
-      <footer className="py-4 text-center text-xs text-muted-foreground">
-        <p>Demo: admin@cristovive.com / admin123</p>
-      </footer>
+
     </div>
   );
 }
