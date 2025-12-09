@@ -28,12 +28,12 @@ export default function Visitantes() {
   const fetchVisitantes = async () => {
     try {
       const { data, error } = await supabase
-        .from('people')
+        .from('people' as any)
         .select('*')
         .eq('type', 'visitante');
 
       if (error) throw error;
-      setVisitantes(data as Person[]);
+      setVisitantes(data as unknown as Person[]);
     } catch (error) {
       console.error('Erro ao buscar visitantes:', error);
     } finally {

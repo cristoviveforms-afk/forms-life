@@ -67,7 +67,7 @@ export default function Acompanhamento() {
   const fetchAcompanhamentos = async () => {
     try {
       const { data, error } = await supabase
-        .from('accompaniments')
+        .from('accompaniments' as any)
         .select(`
           *,
           people (*)
@@ -75,7 +75,7 @@ export default function Acompanhamento() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAcompanhamentos(data as Accompaniment[]);
+      setAcompanhamentos(data as unknown as Accompaniment[]);
     } catch (error) {
       console.error('Erro ao buscar acompanhamentos:', error);
       toast.error('Erro ao carregar acompanhamentos');
@@ -87,10 +87,10 @@ export default function Acompanhamento() {
   const fetchPeople = async () => {
     try {
       const { data } = await supabase
-        .from('people')
+        .from('people' as any)
         .select('*')
-        .order('name');
-      if (data) setPeople(data as Person[]);
+        .order('full_name');
+      if (data) setPeople(data as unknown as Person[]);
     } catch (error) {
       console.error('Erro ao buscar pessoas:', error);
     }
@@ -105,14 +105,14 @@ export default function Acompanhamento() {
     setIsSubmitting(true);
     try {
       const { error } = await supabase
-        .from('accompaniments')
+        .from('accompaniments' as any)
         .insert([{
           person_id: newAccomp.person_id,
           type: newAccomp.type,
           observacoes: newAccomp.observacoes,
           status: newAccomp.status,
-          last_contact_date: new Date().toISOString()
-        }]);
+          last_contact_date: new Date().toISOString().split('T')[0]
+        }] as any);
 
       if (error) throw error;
 
@@ -129,7 +129,7 @@ export default function Acompanhamento() {
   };
 
   const filteredAcompanhamentos = acompanhamentos.filter((a) =>
-    a.people?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    a.people?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendentes = acompanhamentos.filter((a) => a.status === 'pendente').length;
@@ -172,7 +172,7 @@ export default function Acompanhamento() {
                     </SelectTrigger>
                     <SelectContent>
                       {people.map(p => (
-                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                        <SelectItem key={p.id} value={p.id}>{p.full_name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -259,10 +259,10 @@ export default function Acompanhamento() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                        {acomp.people?.name.charAt(0)}
+                        {acomp.people?.full_name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <p className="font-medium">{acomp.people?.name}</p>
+                        <p className="font-medium">{acomp.people?.full_name || 'Pessoa não encontrada'}</p>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                           <span>{acomp.type}</span>
                           <span className="flex items-center gap-1">
