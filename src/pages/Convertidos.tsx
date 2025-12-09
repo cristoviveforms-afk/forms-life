@@ -28,12 +28,12 @@ export default function Convertidos() {
   const fetchConvertidos = async () => {
     try {
       const { data, error } = await supabase
-        .from('people')
+        .from('people' as any)
         .select('*')
         .eq('type', 'convertido');
 
       if (error) throw error;
-      setConvertidos(data as Person[]);
+      setConvertidos(data as unknown as Person[]);
     } catch (error) {
       console.error('Erro ao buscar convertidos:', error);
     } finally {

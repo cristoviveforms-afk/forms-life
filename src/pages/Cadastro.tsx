@@ -24,6 +24,19 @@ interface Filho {
   idade: string;
 }
 
+const MINISTERIOS_LIST = [
+  'Cordão de 3 Dobras',
+  'Coc Teens',
+  'Coc Jovens',
+  'Voluntário',
+  'Dança',
+  'Louvor',
+  'Diácono',
+  'Pastor',
+  'Mestre CFB',
+  'Missão',
+];
+
 export default function Cadastro() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -49,8 +62,8 @@ export default function Cadastro() {
   const [batizadoAguas, setBatizadoAguas] = useState(false);
   const [dataBatismo, setDataBatismo] = useState('');
   const [batizadoEspirito, setBatizadoEspirito] = useState(false);
-  const [participaCelula, setParticipaCelula] = useState(false);
-  const [celula, setCelula] = useState('');
+  const [participaMinisterio, setParticipaMinisterio] = useState(false);
+  const [ministeriosSelecionados, setMinisteriosSelecionados] = useState<string[]>([]);
   const [donsNaturais, setDonsNaturais] = useState('');
   const [donsEspirituais, setDonsEspirituais] = useState('');
 
@@ -75,6 +88,14 @@ export default function Cadastro() {
     setFilhos(filhos.filter((_, i) => i !== index));
   };
 
+  const toggleMinisterio = (ministerio: string) => {
+    setMinisteriosSelecionados(prev =>
+      prev.includes(ministerio)
+        ? prev.filter(m => m !== ministerio)
+        : [...prev, ministerio]
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -82,7 +103,7 @@ export default function Cadastro() {
     try {
       // 1. Insert Person
       const { data: person, error: personError } = await supabase
-        .from('people')
+        .from('people' as any)
         .insert({
           type: tipoPessoa,
           full_name: nome,
@@ -99,8 +120,8 @@ export default function Cadastro() {
           baptized_water: batizadoAguas,
           baptism_date: dataBatismo || null,
           baptized_spirit: batizadoEspirito,
-          has_cell: participaCelula,
-          cell_name: participaCelula ? celula : null,
+          has_ministry: participaMinisterio,
+          ministries: participaMinisterio ? ministeriosSelecionados : [],
           natural_skills: donsNaturais || null,
           spiritual_gifts: donsEspirituais || null,
 
@@ -126,15 +147,15 @@ export default function Cadastro() {
         const childrenToInsert = filhos
           .filter(f => f.nome.trim() !== '')
           .map(f => ({
-            parent_id: person.id,
+            parent_id: (person as any).id,
             name: f.nome,
             age: f.idade ? f.idade : null
           }));
 
         if (childrenToInsert.length > 0) {
           const { error: childrenError } = await supabase
-            .from('children')
-            .insert(childrenToInsert);
+            .from('children' as any)
+            .insert(childrenToInsert as any);
 
           if (childrenError) throw childrenError;
         }
@@ -420,29 +441,36 @@ export default function Cadastro() {
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="participa_celula"
-                    checked={participaCelula}
-                    onCheckedChange={c => setParticipaCelula(!!c)}
+                    id="participa_ministerio"
+                    checked={participaMinisterio}
+                    onCheckedChange={c => {
+                      setParticipaMinisterio(!!c);
+                      if (!c) setMinisteriosSelecionados([]);
+                    }}
                   />
-                  <Label htmlFor="participa_celula">Participa de célula?</Label>
+                  <Label htmlFor="participa_ministerio">Participa de algum Ministério?</Label>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="celula">Qual célula?</Label>
-                <Select value={celula} onValueChange={setCelula}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma célula" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="centro">Célula Centro</SelectItem>
-                    <SelectItem value="norte">Célula Norte</SelectItem>
-                    <SelectItem value="sul">Célula Sul</SelectItem>
-                    <SelectItem value="leste">Célula Leste</SelectItem>
-                    <SelectItem value="oeste">Célula Oeste</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {participaMinisterio && (
+                <div className="space-y-3 pt-4 border-t">
+                  <Label>Selecione os Ministérios:</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {MINISTERIOS_LIST.map((ministerio) => (
+                      <div key={ministerio} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`ministerio-${ministerio}`}
+                          checked={ministeriosSelecionados.includes(ministerio)}
+                          onCheckedChange={() => toggleMinisterio(ministerio)}
+                        />
+                        <Label htmlFor={`ministerio-${ministerio}`} className="text-sm font-normal cursor-pointer">
+                          {ministerio}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="dons_naturais">Dons e Habilidades Naturais</Label>

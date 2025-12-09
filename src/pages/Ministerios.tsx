@@ -44,12 +44,12 @@ export default function Ministerios() {
   const fetchMinisterios = async () => {
     try {
       const { data, error } = await supabase
-        .from('ministries')
+        .from('ministries' as any)
         .select('*')
         .order('name');
 
       if (error) throw error;
-      setMinisterios(data as Ministry[]);
+      setMinisterios(data as unknown as Ministry[]);
     } catch (error) {
       console.error('Erro ao buscar ministérios:', error);
       toast.error('Erro ao carregar ministérios');
@@ -67,14 +67,14 @@ export default function Ministerios() {
     setIsSubmitting(true);
     try {
       const { error } = await supabase
-        .from('ministries')
+        .from('ministries' as any)
         .insert([
           {
             name: newMinistry.name,
             leader: newMinistry.leader,
             description: newMinistry.description
           }
-        ]);
+        ] as any);
 
       if (error) throw error;
 
@@ -170,10 +170,6 @@ export default function Ministerios() {
               <p className="text-xs text-muted-foreground">Ativos</p>
             </CardContent>
           </Card>
-          {/* Note: Members count per ministry logic would need a relation table or array column which we don't have yet in simple schema. 
-              Ideally 'people' table would have a ministry_id or similar, or a pivot table. 
-              For now removing the "Pessoas Servindo" card or making it static/placeholder until schema supports relation.
-          */}
         </div>
 
         {/* Ministry Grid */}

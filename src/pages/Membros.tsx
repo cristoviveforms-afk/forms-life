@@ -28,12 +28,12 @@ export default function Membros() {
   const fetchMembros = async () => {
     try {
       const { data, error } = await supabase
-        .from('people')
+        .from('people' as any)
         .select('*')
         .eq('type', 'membro');
 
       if (error) throw error;
-      setMembros(data as Person[]);
+      setMembros(data as unknown as Person[]);
     } catch (error) {
       console.error('Erro ao buscar membros:', error);
     } finally {
@@ -50,7 +50,7 @@ export default function Membros() {
     total: membros.length,
     batizados: membros.filter(m => m.baptized_water).length,
     servindo: membros.filter(m => m.member_has_served).length,
-    celulas: membros.filter(m => m.has_cell).length,
+    ministerios: membros.filter(m => m.has_ministry).length,
   };
 
   return (
@@ -103,8 +103,8 @@ export default function Membros() {
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.celulas}</div>
-              <p className="text-xs text-muted-foreground">Em Células</p>
+              <div className="text-2xl font-bold">{loading ? '-' : stats.ministerios}</div>
+              <p className="text-xs text-muted-foreground">Em Ministérios</p>
             </CardContent>
           </Card>
         </div>
@@ -145,8 +145,8 @@ export default function Membros() {
                         {membro.member_has_served && (
                           <Badge variant="secondary">Servindo</Badge>
                         )}
-                        {membro.has_cell && (
-                          <Badge variant="outline">{membro.cell_name || 'Célula'}</Badge>
+                        {membro.has_ministry && membro.ministries && membro.ministries.length > 0 && (
+                          <Badge variant="outline">{membro.ministries.length} ministério(s)</Badge>
                         )}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
