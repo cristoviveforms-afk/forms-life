@@ -15,22 +15,27 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
 
+import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
+
 export default function Convertidos() {
   const [searchTerm, setSearchTerm] = useState('');
   const [convertidos, setConvertidos] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchConvertidos();
-  }, []);
+  const handleDateChange = (start: string, end: string) => {
+    fetchConvertidos(start, end);
+  };
 
-  const fetchConvertidos = async () => {
+  const fetchConvertidos = async (start: string, end: string) => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('people' as any)
         .select('*')
-        .eq('type', 'convertido');
+        .not('conversion_date', 'is', null)
+        .gte('conversion_date', start)
+        .lte('conversion_date', end);
 
       if (error) throw error;
       setConvertidos(data as unknown as Person[]);
@@ -61,6 +66,10 @@ export default function Convertidos() {
   return (
     <DashboardLayout title="Novos Convertidos">
       <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-end">
+          <MonthYearPicker onDateChange={handleDateChange} />
+        </div>
+
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
@@ -79,10 +88,7 @@ export default function Convertidos() {
             <Button variant="outline" size="icon">
               <Download className="h-4 w-4" />
             </Button>
-            <Button onClick={() => navigate('/cadastro?tipo=convertido')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Convertido
-            </Button>
+
           </div>
         </div>
 

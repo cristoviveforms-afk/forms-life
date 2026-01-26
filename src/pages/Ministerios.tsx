@@ -59,6 +59,16 @@ export default function Ministerios() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Edit Ministry Form State
+  const [recentPeople, setRecentPeople] = useState<any[]>([]);
+  const [loadingRecent, setLoadingRecent] = useState(true);
+  const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState<Person | null>(null);
+  const [isFollowUpDialogOpen, setIsFollowUpDialogOpen] = useState(false);
+  const [followUpData, setFollowUpData] = useState({
+    feedback: '',
+    type: 'Ligação',
+    status: 'concluido' // Default to done when logging
+  });
+
   const [editMinistry, setEditMinistry] = useState({
     name: '',
     leader: '',
@@ -67,7 +77,81 @@ export default function Ministerios() {
 
   useEffect(() => {
     fetchMinisterios();
+    fetchRecentPeople();
   }, []);
+
+  const fetchRecentPeople = async () => {
+    setLoadingRecent(true);
+    try {
+      // Get date 30 days ago
+      const date30DaysAgo = new Date();
+      date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+      const dateStr = date30DaysAgo.toISOString();
+
+      // Fetch people created recently OR converted recently OR integrated recently
+      const { data: peopleData, error: peopleError } = await supabase
+        .from('people' as any)
+        .select('*')
+        .or(`created_at.gte.${dateStr},integration_date.gte.${dateStr},conversion_date.gte.${dateStr}`)
+        .order('created_at', { ascending: false });
+
+      if (peopleError) throw peopleError;
+
+      // Fetch existing accompaniments for these people to check status
+      const { data: accData, error: accError } = await supabase
+        .from('accompaniments' as any)
+        .select('*');
+
+      if (accError && accError.code !== '42P01') { // Ignore table not found if it happens
+        console.error(accError);
+      }
+
+      const peopleWithStatus = (peopleData || []).map(p => {
+        const acc = (accData || []).find((a: any) => a.person_id === p.id);
+        return {
+          ...p,
+          accompaniment_status: acc ? 'Contatado' : 'Pendente',
+          last_feedback: acc?.feedback
+        };
+      });
+
+      setRecentPeople(peopleWithStatus);
+
+    } catch (error) {
+      console.error('Error fetching recent people:', error);
+    } finally {
+      setLoadingRecent(false);
+    }
+  };
+
+  const handleSaveFollowUp = async () => {
+    if (!selectedPersonForFollowUp) return;
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('accompaniments' as any)
+        .insert([{
+          person_id: selectedPersonForFollowUp.id,
+          leader_name: 'Líder', // Could come from auth user in real app
+          contact_date: new Date().toISOString().split('T')[0],
+          feedback: followUpData.feedback,
+          type: followUpData.type,
+          status: followUpData.status
+        }] as any);
+
+      if (error) throw error;
+
+      toast.success('Contato registrado com sucesso!');
+      setIsFollowUpDialogOpen(false);
+      setFollowUpData({ feedback: '', type: 'Ligação', status: 'concluido' });
+      fetchRecentPeople(); // Refresh list
+    } catch (error) {
+      console.error('Error saving follow up:', error);
+      toast.error('Erro ao registrar contato');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fetchMinisterios = async () => {
     try {
@@ -279,6 +363,95 @@ export default function Ministerios() {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Integration Panel */}
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-500" />
+              Painel de Integração (Novos nos últimos 30 dias)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingRecent ? (
+              <div className="flex justify-center p-4"><Loader2 className="animate-spin" /></div>
+            ) : recentPeople.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">Nenhuma nova pessoa para integrar no momento.</p>
+            ) : (
+              <div className="space-y-3">
+                {recentPeople.map(p => (
+                  <div key={p.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-secondary/20 rounded-lg border gap-3">
+                    <div>
+                      <p className="font-semibold text-lg">{p.full_name}</p>
+                      <div className="flex gap-2 text-sm text-muted-foreground">
+                        <span>{p.type === 'membro' ? 'Novo Membro' : 'Novo Convertido'}</span>
+                        <span>•</span>
+                        <span>{p.phone}</span>
+                      </div>
+                      {p.last_feedback && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">" {p.last_feedback} "</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      <Badge variant={p.accompaniment_status === 'Contatado' ? 'default' : 'destructive'}>
+                        {p.accompaniment_status}
+                      </Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedPersonForFollowUp(p);
+                          setIsFollowUpDialogOpen(true);
+                        }}
+                      >
+                        <Phone className="h-3 w-3 mr-2" />
+                        Registrar Contato
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Follow Up Dialog */}
+        <Dialog open={isFollowUpDialogOpen} onOpenChange={setIsFollowUpDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Registrar Contato com {selectedPersonForFollowUp?.full_name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Tipo de Contato</Label>
+                <div className="flex gap-2">
+                  {['Ligação', 'WhatsApp', 'Visita', 'Conversa'].map(t => (
+                    <Badge
+                      key={t}
+                      variant={followUpData.type === t ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => setFollowUpData({ ...followUpData, type: t })}
+                    >
+                      {t}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Feedback / Observações</Label>
+                <Textarea
+                  placeholder="Como foi a conversa? A pessoa demonstrou interesse?"
+                  value={followUpData.feedback}
+                  onChange={e => setFollowUpData({ ...followUpData, feedback: e.target.value })}
+                />
+              </div>
+              <Button className="w-full" onClick={handleSaveFollowUp} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="animate-spin mr-2" /> : null}
+                Salvar Feedback
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

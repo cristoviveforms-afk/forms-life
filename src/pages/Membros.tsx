@@ -15,22 +15,31 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
 
+import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
+
 export default function Membros() {
   const [searchTerm, setSearchTerm] = useState('');
   const [membros, setMembros] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchMembros();
-  }, []);
+  // No useEffect initial fetch needed if the picker triggers on mount (it does via its useEffect)
+  // or we can keep it empty and let the picker drive.
+  // The picker has a useEffect that calls onDateChange on mount? Yes.
 
-  const fetchMembros = async () => {
+  const handleDateChange = (start: string, end: string) => {
+    fetchMembros(start, end);
+  };
+
+  const fetchMembros = async (start: string, end: string) => {
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('people' as any)
         .select('*')
-        .eq('type', 'membro');
+        .eq('type', 'membro')
+        .gte('integration_date', start)
+        .lte('integration_date', end);
 
       if (error) throw error;
       setMembros(data as unknown as Person[]);
@@ -56,6 +65,10 @@ export default function Membros() {
   return (
     <DashboardLayout title="Membros">
       <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-end">
+          <MonthYearPicker onDateChange={handleDateChange} />
+        </div>
+
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
@@ -139,6 +152,11 @@ export default function Membros() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {membro.conversion_date && (
+                          <Badge className="bg-emerald-600 hover:bg-emerald-700 border-0 text-white">
+                            Novo Convertido
+                          </Badge>
+                        )}
                         <Badge variant={membro.baptized_water ? 'default' : 'outline'}>
                           {membro.baptized_water ? 'Batizado' : 'Não Batizado'}
                         </Badge>

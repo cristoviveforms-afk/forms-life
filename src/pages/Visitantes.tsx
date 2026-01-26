@@ -15,22 +15,31 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
 
+import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
+
 export default function Visitantes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [visitantes, setVisitantes] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchVisitantes();
-  }, []);
+  const handleDateChange = (start: string, end: string) => {
+    fetchVisitantes(start, end);
+  };
 
-  const fetchVisitantes = async () => {
+  const fetchVisitantes = async (start: string, end: string) => {
+    setLoading(true);
     try {
+      // Helper for timestamp comparison (created_at is timestamptz)
+      const startDay = `${start}T00:00:00`;
+      const endDay = `${end}T23:59:59`;
+
       const { data, error } = await supabase
         .from('people' as any)
         .select('*')
-        .eq('type', 'visitante');
+        .eq('type', 'visitante')
+        .gte('created_at', startDay)
+        .lte('created_at', endDay);
 
       if (error) throw error;
       setVisitantes(data as unknown as Person[]);
@@ -60,6 +69,10 @@ export default function Visitantes() {
   return (
     <DashboardLayout title="Visitantes">
       <div className="space-y-6 animate-fade-in">
+        <div className="flex justify-end">
+          <MonthYearPicker onDateChange={handleDateChange} />
+        </div>
+
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row gap-4 justify-between">
           <div className="relative flex-1 max-w-md">
