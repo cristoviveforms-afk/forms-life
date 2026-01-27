@@ -140,3 +140,32 @@
     transform: translateX(0);
   }
 }
+
+/* 1. Imagens Flexíveis: Impede que as imagens "saiam" do ecrã */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* 2. Contentores Flexíveis: Se tiveres uma "div" principal, usa isto */
+.container {
+    width: 90%;       /* Ocupa 90% da largura em ecrãs pequenos */
+    max-width: 1200px; /* Mas não passa de 1200px em ecrãs gigantes */
+    margin: 0 auto;    /* Centra o conteúdo */
+}
+
+/* 3. MEDIA QUERY: Regras específicas para telemóveis (até 768px) */
+@media screen and (max-width: 768px) {
+    /* Aqui dentro, mudamos o que quisermos para o telemóvel */
+    
+    body {
+        font-size: 16px; /* Ajusta o tamanho da letra para leitura fácil */
+    }
+
+    /* Exemplo: Se tiveres colunas lado a lado, isto coloca-as uma por cima da outra */
+    .coluna {
+        width: 100%;
+        float: none;
+    }
+}
