@@ -12,6 +12,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -49,6 +59,8 @@ export default function Ministerios() {
   const [selectedMinistry, setSelectedMinistry] = useState<Ministry | null>(null);
   const [ministryMembers, setMinistryMembers] = useState<Person[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const [ministryToDelete, setMinistryToDelete] = useState<Ministry | null>(null);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
   // New Ministry Form State
   const [newMinistry, setNewMinistry] = useState({
@@ -285,6 +297,28 @@ export default function Ministerios() {
     }
   };
 
+  const handleDeleteMinistry = async () => {
+    if (!ministryToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('ministries')
+        .delete()
+        .eq('id', ministryToDelete.id);
+
+      if (error) throw error;
+
+      toast.success('Ministério excluído com sucesso');
+      fetchMinisterios();
+    } catch (error) {
+      console.error('Erro ao excluir ministério:', error);
+      toast.error('Erro ao excluir ministério');
+    } finally {
+      setIsDeleteAlertOpen(false);
+      setMinistryToDelete(null);
+    }
+  };
+
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'membro':
@@ -518,6 +552,16 @@ export default function Ministerios() {
                       >
                         {ministerio.active ? 'Desativar' : 'Ativar'}
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMinistryToDelete(ministerio);
+                          setIsDeleteAlertOpen(true);
+                        }}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        Excluir
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </CardHeader>
@@ -581,6 +625,27 @@ export default function Ministerios() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Isso excluirá permanentemente o ministério
+                "{ministryToDelete?.name}" e removerá seus dados dos nossos servidores.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteMinistry}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Details Sheet */}
         <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>

@@ -4,6 +4,7 @@ export interface Person {
     id: string;
     created_at: string;
     type: PersonType;
+    family_id?: string;
 
     // Personal
     full_name: string;

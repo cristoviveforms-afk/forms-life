@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +37,15 @@ const MINISTERIOS_LIST = [
   'Missão',
 ];
 
+const FOLLOWUP_MINISTRIES = [
+  'Ministério de Casais',
+  'Ministério de Homens',
+  'Ministério de Mulheres',
+  'Ministério de Jovens',
+  'Ministério de Teens',
+  'Ministério Infantil (Kids)',
+];
+
 export default function Cadastro() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -68,9 +77,11 @@ export default function Cadastro() {
 
   const [batizadoAguas, setBatizadoAguas] = useState(false);
   const [dataBatismo, setDataBatismo] = useState('');
+  // Removed duplicate lines
   const [batizadoEspirito, setBatizadoEspirito] = useState(false);
   const [participaMinisterio, setParticipaMinisterio] = useState(false);
-  const [ministeriosSelecionados, setMinisteriosSelecionados] = useState<string[]>([]);
+  const [ministeriosServindo, setMinisteriosServindo] = useState<string[]>([]);
+  const [ministeriosAcompanhamento, setMinisteriosAcompanhamento] = useState<string[]>([]);
   const [donsNaturais, setDonsNaturais] = useState('');
   const [donsEspirituais, setDonsEspirituais] = useState('');
 
@@ -98,8 +109,27 @@ export default function Cadastro() {
     setFilhos(filhos.filter((_, i) => i !== index));
   };
 
-  const toggleMinisterio = (ministerio: string) => {
-    setMinisteriosSelecionados(prev =>
+  // Auto-suggest ministries (Effect)
+  useEffect(() => {
+    setMinisteriosAcompanhamento(prev => {
+      const next = new Set(prev);
+      if (estadoCivil === 'casado') next.add('Ministério de Casais');
+      if (sexo === 'masculino') next.add('Ministério de Homens');
+      if (sexo === 'feminino') next.add('Ministério de Mulheres');
+      return Array.from(next);
+    });
+  }, [estadoCivil, sexo, possuiFilhos]);
+
+  const toggleMinisterioServindo = (ministerio: string) => {
+    setMinisteriosServindo(prev =>
+      prev.includes(ministerio)
+        ? prev.filter(m => m !== ministerio)
+        : [...prev, ministerio]
+    );
+  };
+
+  const toggleMinisterioAcompanhamento = (ministerio: string) => {
+    setMinisteriosAcompanhamento(prev =>
       prev.includes(ministerio)
         ? prev.filter(m => m !== ministerio)
         : [...prev, ministerio]
@@ -118,20 +148,30 @@ export default function Cadastro() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('people' as any)
         .select(`
           *,
           children (*)
         `)
-        .eq('phone', searchPhone)
-        .eq('type', 'visitante') // Only search for visitors? Or anyone? Assumption: Returning Visitors.
-        .single();
+        .eq('type', 'visitante'); // Only search for visitors
+
+      // Check if searching by last 4 digits or full number
+      const cleanPhone = searchPhone.replace(/\D/g, ''); // Remove non-digits
+      if (cleanPhone.length <= 4) {
+        // Search by suffix
+        query = query.ilike('phone', `%${cleanPhone}`).order('created_at', { ascending: false }).limit(1);
+      } else {
+        // Exact match
+        query = query.eq('phone', searchPhone);
+      }
+
+      const { data, error } = await query.maybeSingle();
 
       if (error || !data) {
         toast({
           title: 'Não encontrado',
-          description: 'Nenhum cadastro de visitante encontrado com este telefone.',
+          description: 'Nenhum cadastro de visitante encontrado com este telefone/final.',
           variant: 'destructive',
         });
         return;
@@ -153,7 +193,10 @@ export default function Cadastro() {
       setDataBatismo(data.baptism_date || '');
       setBatizadoEspirito(data.baptized_spirit);
       setParticipaMinisterio(data.has_ministry);
-      setMinisteriosSelecionados(data.ministries || []);
+
+      const allMinistries = data.ministries || [];
+      setMinisteriosServindo(allMinistries.filter((m: string) => MINISTERIOS_LIST.includes(m)));
+      setMinisteriosAcompanhamento(allMinistries.filter((m: string) => FOLLOWUP_MINISTRIES.includes(m)));
       setDonsNaturais(data.natural_skills || '');
       setDonsEspirituais(data.spiritual_gifts || '');
 
@@ -200,6 +243,13 @@ export default function Cadastro() {
       // 1. Insert or Update Person
       let personResponse;
 
+      let familyId = (personResponse as any)?.data?.family_id;
+
+      if (!personId && !familyId) {
+        // If new person, generate a family ID
+        familyId = crypto.randomUUID();
+      }
+
       const payload = {
         type: tipoPessoa,
         full_name: nome,
@@ -207,6 +257,7 @@ export default function Cadastro() {
         gender: sexo || null,
         civil_status: estadoCivil || null,
         spouse_name: estadoCivil === 'casado' ? conjuge : null,
+        family_id: familyId,
 
         phone: telefone,
         email: email || null,
@@ -217,7 +268,10 @@ export default function Cadastro() {
         baptism_date: dataBatismo || null,
         baptized_spirit: batizadoEspirito,
         has_ministry: participaMinisterio,
-        ministries: participaMinisterio ? ministeriosSelecionados : [],
+        baptized_spirit: batizadoEspirito,
+        has_ministry: participaMinisterio,
+        ministries: [...ministeriosServindo, ...ministeriosAcompanhamento],
+        natural_skills: donsNaturais || null,
         natural_skills: donsNaturais || null,
         spiritual_gifts: donsEspirituais || null,
 
@@ -257,38 +311,86 @@ export default function Cadastro() {
 
       if (personError) throw personError;
 
-      // 2. Manage Children
+      // 2. Manage Family Members (Spouse & Children)
+      if (person && !personId) { // Only on creation to avoid duplicates/confusion on edit for now
+
+        // Spouse
+        if (estadoCivil === 'casado' && conjuge) {
+          const spousePayload = {
+            ...payload,
+            full_name: conjuge,
+            gender: sexo === 'masculino' ? 'feminino' : 'masculino', // Infer opposite gender
+            spouse_name: nome, // Link back
+            civil_status: 'casado',
+            // Remove main person specifics if needed, but keeping address/phone is good
+            ministries: [], // Reset ministries for spouse unless we ask?
+            visitor_first_time: false, // Maybe true? Assume same as main
+          };
+
+          // Auto-assign ministry
+          // If inferred gender is male, assign Men's Ministry, etc.
+          const spouseMinistries = [];
+          if (spousePayload.gender === 'masculino') spouseMinistries.push('Ministério de Homens');
+          if (spousePayload.gender === 'feminino') spouseMinistries.push('Ministério de Mulheres');
+          spouseMinistries.push('Ministério de Casais');
+
+          spousePayload.ministries = spouseMinistries;
+
+          await supabase.from('people' as any).insert(spousePayload);
+        }
+
+        // Children - Create separate Profiles
+        if (possuiFilhos && filhos.length > 0) {
+          for (const filho of filhos) {
+            if (!filho.nome.trim()) continue;
+
+            // Calculate birth date from age approx
+            let birthDate = null;
+            if (filho.idade) {
+              const year = new Date().getFullYear() - parseInt(filho.idade);
+              birthDate = `${year}-01-01`;
+            }
+
+            const childPayload = {
+              ...payload,
+              full_name: filho.nome,
+              birth_date: birthDate,
+              gender: null, // We don't ask child gender
+              civil_status: 'solteiro',
+              spouse_name: null,
+              ministries: ['Ministério Infantil (Kids)'],
+              type: 'visitante', // Or 'crianca' if we had it
+              family_id: familyId
+            };
+
+            await supabase.from('people' as any).insert(childPayload);
+          }
+        }
+      }
+
+      // Fallback: Still insert into children table for old compatibility?
+      // No, user requested "create cadastro do secundarios". We are doing that above.
+      // We can skip inserting into 'children' table if we are using 'people' table for them.
+      // But for safety/backward compat, let's keep the old table populated too IF needed.
+      // For now, I will Comment out the old table insertion to avoid confusion, 
+      // or keep it if 'children' table is used for something else.
+      // Implementation Plan said: "We will STOP using the separate children table".
+
+      /* 
       if (person) {
-        // If updating, delete invalid or all existing children first to replace? 
-        // Simple approach: Delete all and re-insert for simplicity in this form
         if (personId) {
           await supabase.from('children' as any).delete().eq('parent_id', personId);
         }
+        ...
+      } 
+      */
 
-        if (possuiFilhos && filhos.length > 0) {
-          const childrenToInsert = filhos
-            .filter(f => f.nome.trim() !== '')
-            .map(f => ({
-              parent_id: (person as any).id,
-              name: f.nome,
-              age: f.idade ? f.idade : null
-            }));
+      toast({
+        title: personId ? 'Cadastro atualizado!' : 'Cadastro realizado!',
+        description: 'Os dados foram salvos com sucesso.',
+      });
+      navigate(-1);
 
-          if (childrenToInsert.length > 0) {
-            const { error: childrenError } = await supabase
-              .from('children' as any)
-              .insert(childrenToInsert as any);
-
-            if (childrenError) throw childrenError;
-          }
-        }
-
-        toast({
-          title: personId ? 'Cadastro atualizado!' : 'Cadastro realizado!',
-          description: 'Os dados foram salvos com sucesso.',
-        });
-        navigate(-1);
-      }
     } catch (error: any) {
       console.error('Erro ao salvar:', error);
       toast({
@@ -388,7 +490,7 @@ export default function Cadastro() {
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Digite o Telefone ou WhatsApp"
+                    placeholder="Digite o Telefone ou últimos 4 dígitos"
                     value={searchPhone}
                     onChange={e => setSearchPhone(e.target.value)}
                   />
@@ -657,7 +759,7 @@ export default function Cadastro() {
                           checked={participaMinisterio}
                           onCheckedChange={c => {
                             setParticipaMinisterio(!!c);
-                            if (!c) setMinisteriosSelecionados([]);
+                            if (!c) setMinisteriosServindo([]);
                           }}
                         />
                         <Label htmlFor="participa_ministerio">Participa de algum Ministério?</Label>
@@ -672,8 +774,8 @@ export default function Cadastro() {
                             <div key={ministerio} className="flex items-center space-x-2">
                               <Checkbox
                                 id={`ministerio-${ministerio}`}
-                                checked={ministeriosSelecionados.includes(ministerio)}
-                                onCheckedChange={() => toggleMinisterio(ministerio)}
+                                checked={ministeriosServindo.includes(ministerio)}
+                                onCheckedChange={() => toggleMinisterioServindo(ministerio)}
                               />
                               <Label htmlFor={`ministerio-${ministerio}`} className="text-sm font-normal cursor-pointer">
                                 {ministerio}
@@ -794,6 +896,32 @@ export default function Cadastro() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Ministries for Follow-Up (All Types) */}
+              <Card className="mb-6 border-blue-200 bg-blue-50/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Ministérios para Acompanhamento
+                    <span className="text-xs font-normal text-muted-foreground ml-2">(Sugeridos pelo perfil - Disponível para Liderança)</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {FOLLOWUP_MINISTRIES.map((ministry) => (
+                      <div key={ministry} className="flex items-center space-x-2 p-2 rounded hover:bg-white/50">
+                        <Checkbox
+                          id={`followup-${ministry}`}
+                          checked={ministeriosAcompanhamento.includes(ministry)}
+                          onCheckedChange={() => toggleMinisterioAcompanhamento(ministry)}
+                        />
+                        <Label htmlFor={`followup-${ministry}`} className="cursor-pointer flex-1">
+                          {ministry}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
               {tipoPessoa === 'convertido' && (
                 <Card className="mb-6">

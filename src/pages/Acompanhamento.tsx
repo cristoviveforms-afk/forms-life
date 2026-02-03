@@ -19,6 +19,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -58,6 +71,24 @@ export default function Acompanhamento() {
     status: 'pendente'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // New features state
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [ministryFilter, setMinistryFilter] = useState<string>('todos');
+  const [personHistory, setPersonHistory] = useState<Accompaniment[]>([]);
+  const [familyMembers, setFamilyMembers] = useState<Person[]>([]);
+  const [anniversaryFilter, setAnniversaryFilter] = useState<string>('none');
+
+  const MINISTRY_OPTIONS = [
+    'Todos',
+    'Ministério de Casais',
+    'Ministério de Homens',
+    'Ministério de Mulheres',
+    'Ministério de Jovens',
+    'Ministério de Teens',
+    'Ministério Infantil (Kids)',
+  ];
 
   useEffect(() => {
     fetchAcompanhamentos();
@@ -120,6 +151,11 @@ export default function Acompanhamento() {
       setIsDialogOpen(false);
       setNewAccomp({ person_id: '', type: '', observacoes: '', status: 'pendente' });
       fetchAcompanhamentos();
+
+      // Refresh details if open
+      if (selectedPerson && newAccomp.person_id === selectedPerson.id) {
+        handleViewDetails(selectedPerson);
+      }
     } catch (error) {
       console.error('Erro ao criar acompanhamento:', error);
       toast.error('Erro ao salvar');
@@ -128,9 +164,75 @@ export default function Acompanhamento() {
     }
   };
 
-  const filteredAcompanhamentos = acompanhamentos.filter((a) =>
-    a.people?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleViewDetails = async (person: Person) => {
+    setSelectedPerson(person);
+    setIsDetailsOpen(true);
+    // Fetch specific history
+    try {
+      const { data: historyData } = await supabase
+        .from('accompaniments' as any)
+        .select('*')
+        .eq('person_id', person.id)
+        .order('created_at', { ascending: false });
+
+      if (historyData) setPersonHistory(historyData as unknown as Accompaniment[]);
+
+      // Fetch Family (if has family_id)
+      if (person.family_id) {
+        const { data: familyData } = await supabase
+          .from('people' as any)
+          .select('*')
+          .eq('family_id', person.family_id)
+          .neq('id', person.id); // Exclude self
+
+        if (familyData) setFamilyMembers(familyData as unknown as Person[]);
+      } else {
+        setFamilyMembers([]);
+      }
+
+    } catch (e) {
+      console.error("Erro ao buscar histórico/família", e);
+    }
+  };
+
+  const filteredAcompanhamentos = acompanhamentos.filter((a) => {
+    const matchesSearch = a.people?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Filter logic: Check if person's ministries overlap with selected filter
+    // If filter is 'todos', show all that match search.
+    // If filter is specific, show only if person has that ministry assigned in their 'ministries' array.
+    if (ministryFilter === 'todos' || ministryFilter === 'Todos') return matchesSearch;
+
+    const personMinistries = a.people?.ministries || [];
+    return matchesSearch && personMinistries.includes(ministryFilter);
+  });
+
+  // Anniversary Filtering Logic
+  const filteredPeople = people.filter((p) => {
+    if (anniversaryFilter === 'none') return false;
+
+    const currentMonth = new Date().getMonth(); // 0-11
+    let dateToCheck = null;
+
+    if (anniversaryFilter === 'birth' && p.birth_date) dateToCheck = new Date(p.birth_date);
+    if (anniversaryFilter === 'baptism' && p.baptism_date) dateToCheck = new Date(p.baptism_date);
+    if (anniversaryFilter === 'ministry' && p.integration_date) dateToCheck = new Date(p.integration_date); // Using integration date as ministry anniversary
+
+    if (!dateToCheck) return false;
+
+    // Fix timezone offset issues by using UTC methods if needed, simpler to just check month index matches
+    // But allow simple check:
+    // Note: new Date('2023-05-15') is usually UTC. getMonth() uses local time. 
+    // Safe approach: Split string
+    // p.birth_date is YYYY-MM-DD
+
+    let month = -1;
+    if (anniversaryFilter === 'birth' && p.birth_date) month = parseInt(p.birth_date.split('-')[1]) - 1;
+    if (anniversaryFilter === 'baptism' && p.baptism_date) month = parseInt(p.baptism_date.split('-')[1]) - 1;
+    if (anniversaryFilter === 'ministry' && p.integration_date) month = parseInt(p.integration_date.split('-')[1]) - 1;
+
+    return month === currentMonth;
+  });
 
   const pendentes = acompanhamentos.filter((a) => a.status === 'pendente').length;
   const emAndamento = acompanhamentos.filter((a) => a.status === 'em_andamento').length;
@@ -148,6 +250,31 @@ export default function Acompanhamento() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9"
             />
+          </div>
+
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Select value={anniversaryFilter} onValueChange={(val) => { setAnniversaryFilter(val); setMinistryFilter('todos'); }}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Aniversariantes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Histórico (Padrão)</SelectItem>
+                <SelectItem value="birth">Aniv. de Vida</SelectItem>
+                <SelectItem value="baptism">Aniv. de Batismo</SelectItem>
+                <SelectItem value="ministry">Aniv. de Ministério</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={ministryFilter} onValueChange={(val) => { setMinistryFilter(val); setAnniversaryFilter('none'); }}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Filtrar por Ministério" />
+              </SelectTrigger>
+              <SelectContent>
+                {MINISTRY_OPTIONS.map(opt => (
+                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -251,58 +378,210 @@ export default function Acompanhamento() {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
+
               <div className="space-y-2">
-                {filteredAcompanhamentos.map((acomp) => (
-                  <div
-                    key={acomp.id}
-                    className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
-                        {acomp.people?.full_name?.charAt(0) || '?'}
-                      </div>
-                      <div>
-                        <p className="font-medium">{acomp.people?.full_name || 'Pessoa não encontrada'}</p>
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                          <span>{acomp.type}</span>
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {acomp.last_contact_date ? new Date(acomp.last_contact_date).toLocaleDateString('pt-BR') : '-'}
-                          </span>
+                {!loading && anniversaryFilter === 'none' && (
+                  filteredAcompanhamentos.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">Nenhum registro encontrado {ministryFilter !== 'todos' ? 'neste ministério' : ''}</p>
+                  ) : (
+                    filteredAcompanhamentos.map((acomp) => (
+                      <div
+                        key={acomp.id}
+                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
+                        onClick={() => acomp.people && handleViewDetails(acomp.people)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
+                            {acomp.people?.full_name?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <p className="font-medium">{acomp.people?.full_name || 'Pessoa não encontrada'}</p>
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span>{acomp.type}</span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {acomp.last_contact_date ? new Date(acomp.last_contact_date).toLocaleDateString('pt-BR') : '-'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={statusColors[acomp.status] as any}>
+                            {statusLabels[acomp.status]}
+                          </Badge>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Phone className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
+                    ))
+                  ))}
+              </div>
+            )}
+
+            {/* Anniversary List Rendering */}
+            {!loading && anniversaryFilter !== 'none' && (
+              <div className="space-y-2">
+                {filteredPeople.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Nenhum aniversariante encontrado neste mês.</p>
+                ) : (
+                  filteredPeople.map((p) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => handleViewDetails(p)}
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar>
+                          <AvatarFallback>{p.full_name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{p.full_name}</p>
+                          <p className="text-sm text-muted-foreground capitalize">{p.type}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {anniversaryFilter === 'birth' && p.birth_date && new Date(p.birth_date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
+                          {anniversaryFilter === 'baptism' && p.baptism_date && new Date(p.baptism_date).toLocaleDateString('pt-BR')}
+                          {anniversaryFilter === 'ministry' && p.integration_date && new Date(p.integration_date).toLocaleDateString('pt-BR')}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={statusColors[acomp.status] as any}>
-                        {statusLabels[acomp.status]}
-                      </Badge>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Ver Histórico</DropdownMenuItem>
-                          <DropdownMenuItem>Registrar Contato</DropdownMenuItem>
-                          <DropdownMenuItem>Marcar como Concluído</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">Encerrar</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
+
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* Individual Dashboard Sheet */}
+        <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPerson?.full_name}`} />
+                  <AvatarFallback>{selectedPerson?.full_name?.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span>{selectedPerson?.full_name}</span>
+                  <span className="text-xs font-normal text-muted-foreground">{selectedPerson?.type?.toUpperCase()}</span>
+                </div>
+              </SheetTitle>
+            </SheetHeader>
+
+            {selectedPerson && (
+              <div className="space-y-8">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                    <span className="block text-2xl font-bold">{personHistory.length}</span>
+                    <span className="text-xs text-muted-foreground">Contatos</span>
+                  </div>
+                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                    <span className="block text-2xl font-bold">{personHistory.filter(h => h.status === 'concluido').length}</span>
+                    <span className="text-xs text-muted-foreground">Concluídos</span>
+                  </div>
+                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                    <span className="block text-2xl font-bold">{personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString() : '-'}</span>
+                    <span className="text-xs text-muted-foreground">Último</span>
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span>{selectedPerson.phone}</span>
+                  </div>
+                  {selectedPerson.ministries && selectedPerson.ministries.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-muted-foreground text-xs">ACOMPANHAMENTO SUGERIDO</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPerson.ministries.map(m => (
+                          <Badge key={m} variant="secondary">{m}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      setNewAccomp({ ...newAccomp, person_id: selectedPerson.id });
+                      setIsDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Novo Registro
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    Ver Cadastro Completo
+                  </Button>
+                </div>
+
+                {/* Family Members */}
+                {familyMembers.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <span role="img" aria-label="family">👨‍👩‍👧‍👦</span> Família ({familyMembers.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {familyMembers.map((member) => (
+                        <div
+                          key={member.id}
+                          className="border rounded-lg p-3 flex items-center gap-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                          onClick={() => handleViewDetails(member)}
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>{member.full_name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="overflow-hidden">
+                            <p className="font-medium text-sm truncate">{member.full_name}</p>
+                            <p className="text-xs text-muted-foreground capitalize">
+                              {member.type} • {member.birth_date ? new Date().getFullYear() - new Date(member.birth_date).getFullYear() : '?'} anos
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* History Timeline */}
+                <div>
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" /> Histórico
+                  </h3>
+                  <div className="relative border-l ml-2 space-y-6 pl-6">
+                    {personHistory.map((history) => (
+                      <div key={history.id} className="relative">
+                        <div className="absolute -left-[29px] h-3 w-3 rounded-full bg-primary" />
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-sm">{history.type}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(history.created_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md mt-1">
+                            {history.observacoes || 'Sem observações'}
+                          </p>
+                          <Badge className="w-fit mt-1" variant={statusColors[history.status] as any}>{statusLabels[history.status]}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
       </div>
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }
