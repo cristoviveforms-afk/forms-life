@@ -389,7 +389,8 @@ export default function Cadastro() {
         title: personId ? 'Cadastro atualizado!' : 'Cadastro realizado!',
         description: 'Os dados foram salvos com sucesso.',
       });
-      navigate(-1);
+      // Navigate explicitly to avoid history issues on mobile
+      navigate('/dashboard');
 
     } catch (error: any) {
       console.error('Erro ao salvar:', error);
@@ -409,10 +410,10 @@ export default function Cadastro() {
         <Button
           variant="ghost"
           className="mb-4"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/dashboard')}
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Voltar
+          Voltar para Dashboard
         </Button>
 
         <form onSubmit={handleSubmit}>
