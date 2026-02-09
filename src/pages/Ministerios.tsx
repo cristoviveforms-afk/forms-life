@@ -163,10 +163,17 @@ export default function Ministerios() {
     if (!ministry) return;
 
     try {
-      const { data, error } = await supabase
-        .from('people')
-        .select('*')
-        .contains('ministries', [ministry.name]);
+      let query = supabase.from('people').select('*');
+
+      if (ministry.name.toLowerCase().includes('mulheres')) {
+        query = query.or(`ministries.cs.{${ministry.name}},gender.eq.feminino`);
+      } else if (ministry.name.toLowerCase().includes('homens')) {
+        query = query.or(`ministries.cs.{${ministry.name}},gender.eq.masculino`);
+      } else {
+        query = query.contains('ministries', [ministry.name]);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -260,10 +267,19 @@ export default function Ministerios() {
   const fetchMembersOfMinistry = async (ministryName: string) => {
     setLoadingMembers(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('people')
-        .select('id, full_name, phone, email, type, ministries')
-        .contains('ministries', [ministryName]);
+        .select('id, full_name, phone, email, type, ministries');
+
+      if (ministryName.toLowerCase().includes('mulheres')) {
+        query = query.or(`ministries.cs.{${ministryName}},gender.eq.feminino`);
+      } else if (ministryName.toLowerCase().includes('homens')) {
+        query = query.or(`ministries.cs.{${ministryName}},gender.eq.masculino`);
+      } else {
+        query = query.contains('ministries', [ministryName]);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setMinistryMembers(data || []);

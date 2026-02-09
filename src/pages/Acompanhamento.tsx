@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { Accompaniment, Person, Ministry } from '@/types/database';
 import { toast } from 'sonner';
@@ -52,6 +53,7 @@ export default function Acompanhamento() {
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [noteContent, setNoteContent] = useState('');
+  const [contactType, setContactType] = useState('Acompanhamento');
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [personHistory, setPersonHistory] = useState<Accompaniment[]>([]);
   const [familyMembers, setFamilyMembers] = useState<Person[]>([]);
@@ -121,7 +123,7 @@ export default function Acompanhamento() {
         .from('accompaniments' as any)
         .insert([{
           person_id: selectedPerson.id,
-          type: 'Acompanhamento',
+          type: contactType,
           observacoes: noteContent,
           status: 'concluido',
           last_contact_date: new Date().toISOString().split('T')[0]
@@ -282,7 +284,7 @@ export default function Acompanhamento() {
             <p className="font-semibold text-sm truncate">{person.full_name}</p>
             <p className="text-xs text-muted-foreground">{person.phone || 'Sem telefone'}</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setSelectedPerson(person); setIsNoteDialogOpen(true); }}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setSelectedPerson(person); setContactType('Acompanhamento'); setIsNoteDialogOpen(true); }}>
             <MessageSquare className="h-3 w-3" />
           </Button>
         </div>
@@ -373,6 +375,24 @@ export default function Acompanhamento() {
               <p className="text-sm text-muted-foreground">
                 Registrando acompanhamento para <strong>{selectedPerson?.full_name}</strong>
               </p>
+
+              <div className="space-y-2">
+                <Label>Tipo de Contato</Label>
+                <Select value={contactType} onValueChange={setContactType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Acompanhamento">Acompanhamento Genérico</SelectItem>
+                    <SelectItem value="Telefone">Ligação Telefônica</SelectItem>
+                    <SelectItem value="WhatsApp">Mensagem WhatsApp</SelectItem>
+                    <SelectItem value="Visita">Visita Presencial</SelectItem>
+                    <SelectItem value="Feedback">Feedback de Culto</SelectItem>
+                    <SelectItem value="Reuniao">Reunião Ministerial</SelectItem>
+                    <SelectItem value="Outro">Outro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Textarea
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
@@ -401,40 +421,106 @@ export default function Acompanhamento() {
             </SheetHeader>
 
             {selectedPerson && (
-              <div className="space-y-8">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                    <span className="block text-2xl font-bold">{personHistory.length}</span>
-                    <span className="text-xs text-muted-foreground">Contatos</span>
-                  </div>
-                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                    <span className="block text-2xl font-bold">{personHistory.filter(h => h.status === 'concluido').length}</span>
-                    <span className="text-xs text-muted-foreground">Concluídos</span>
-                  </div>
-                  <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                    <span className="block text-2xl font-bold">{personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}</span>
-                    <span className="text-xs text-muted-foreground">Último</span>
-                  </div>
-                </div>
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+                  <TabsTrigger value="history">Histórico</TabsTrigger>
+                  <TabsTrigger value="ministries">Ministérios</TabsTrigger>
+                  <TabsTrigger value="family">Família</TabsTrigger>
+                </TabsList>
 
-                {/* Contact Info */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{selectedPerson.phone}</span>
+                <TabsContent value="overview" className="space-y-6 mt-4">
+                  {/* Quick Stats */}
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                      <span className="block text-2xl font-bold">{personHistory.length}</span>
+                      <span className="text-xs text-muted-foreground">Contatos</span>
+                    </div>
+                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                      <span className="block text-2xl font-bold">{personHistory.filter(h => h.status === 'concluido').length}</span>
+                      <span className="text-xs text-muted-foreground">Concluídos</span>
+                    </div>
+                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
+                      <span className="block text-2xl font-bold">{personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}</span>
+                      <span className="text-xs text-muted-foreground">Último</span>
+                    </div>
                   </div>
 
-                  {/* Ministerios / Encaminhamento */}
-                  <div className="space-y-2 p-3 bg-secondary/10 rounded-lg border">
-                    <div className="flex justify-between items-center">
+                  {/* Contact Info */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-lg">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{selectedPerson.phone}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setNoteContent('');
+                      setContactType('Acompanhamento');
+                      setIsNoteDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
+                  </Button>
+                </TabsContent>
+
+                <TabsContent value="history" className="space-y-4 mt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4" /> Histórico de Contatos
+                    </h3>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setNoteContent('');
+                        setContactType('Acompanhamento');
+                        setIsNoteDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Novo
+                    </Button>
+                  </div>
+
+                  {personHistory.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground italic">
+                      Nenhum histórico registrado.
+                    </div>
+                  ) : (
+                    <div className="relative border-l ml-2 space-y-6 pl-6">
+                      {personHistory.map((history) => (
+                        <div key={history.id} className="relative">
+                          <div className="absolute -left-[29px] h-3 w-3 rounded-full bg-primary" />
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-sm">{history.type}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(history.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md mt-1">
+                              {history.observacoes || 'Sem observações'}
+                            </p>
+                            <Badge className="w-fit mt-1" variant={statusColors[history.status] || 'secondary'}>{statusLabels[history.status] || history.status}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="ministries" className="space-y-4 mt-4">
+                  <div className="space-y-2 p-4 bg-secondary/10 rounded-lg border">
+                    <div className="flex justify-between items-center mb-2">
                       <Label className="text-muted-foreground text-xs font-semibold">ENCAMINHAR PARA MINISTÉRIO</Label>
-
                     </div>
 
-                    <div className="flex gap-2 mb-2">
+                    <div className="flex gap-2 mb-4">
                       <Select onValueChange={(value) => handleAddMinistry(value)}>
-                        <SelectTrigger className="h-8 w-full">
+                        <SelectTrigger className="h-10 w-full">
                           <SelectValue placeholder="Selecionar Ministério..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -447,93 +533,67 @@ export default function Acompanhamento() {
                       </Select>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 min-h-[2rem]">
-                      {selectedPerson.ministries && selectedPerson.ministries.length > 0 ? (
-                        selectedPerson.ministries.map(m => (
-                          <Badge key={m} variant="secondary" className="pl-2 pr-1 py-1 flex items-center gap-1">
-                            {m}
-                            <button
-                              onClick={() => handleRemoveMinistry(m)}
-                              className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic">Nenhum ministério vinculado.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    onClick={() => {
-                      setNoteContent('');
-                      setIsNoteDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Registrar Contato
-                  </Button>
-                </div>
-
-                {/* Family Members */}
-                {familyMembers.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold mb-4 flex items-center gap-2">
-                      <span role="img" aria-label="family">👨‍👩‍👧‍👦</span> Família ({familyMembers.length})
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {familyMembers.map((member) => (
-                        <div
-                          key={member.id}
-                          className="border rounded-lg p-3 flex items-center gap-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => handleViewDetails(member)}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{member.full_name?.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div className="overflow-hidden">
-                            <p className="font-medium text-sm truncate">{member.full_name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">
-                              {member.type} • {member.birth_date ? new Date().getFullYear() - new Date(member.birth_date).getFullYear() : '?'} anos
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* History Timeline */}
-                <div>
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" /> Histórico
-                  </h3>
-                  <div className="relative border-l ml-2 space-y-6 pl-6">
-                    {personHistory.map((history) => (
-                      <div key={history.id} className="relative">
-                        <div className="absolute -left-[29px] h-3 w-3 rounded-full bg-primary" />
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">{history.type}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(history.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md mt-1">
-                            {history.observacoes || 'Sem observações'}
-                          </p>
-                          <Badge className="w-fit mt-1" variant={statusColors[history.status] || 'secondary'}>{statusLabels[history.status] || history.status}</Badge>
-                        </div>
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">Ministérios Vinculados:</Label>
+                      <div className="flex flex-wrap gap-2 min-h-[2rem]">
+                        {selectedPerson.ministries && selectedPerson.ministries.length > 0 ? (
+                          selectedPerson.ministries.map(m => (
+                            <Badge key={m} variant="secondary" className="pl-3 pr-2 py-1.5 flex items-center gap-2 text-sm">
+                              {m}
+                              <button
+                                onClick={() => handleRemoveMinistry(m)}
+                                className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
+                                title="Remover"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">Nenhum ministério vinculado.</p>
+                        )}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                <TabsContent value="family" className="space-y-4 mt-4">
+                  {familyMembers.length > 0 ? (
+                    <div>
+                      <h3 className="font-semibold mb-4 flex items-center gap-2">
+                        <span role="img" aria-label="family">👨‍👩‍👧‍👦</span> Membros da Família ({familyMembers.length})
+                      </h3>
+                      <div className="grid grid-cols-1 gap-3">
+                        {familyMembers.map((member) => (
+                          <div
+                            key={member.id}
+                            className="border rounded-lg p-3 flex items-center gap-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                            onClick={() => handleViewDetails(member)}
+                          >
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback>{member.full_name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="overflow-hidden">
+                              <p className="font-medium text-sm truncate">{member.full_name}</p>
+                              <p className="text-xs text-muted-foreground capitalize">
+                                {member.type} • {member.birth_date ? new Date().getFullYear() - new Date(member.birth_date).getFullYear() : '?'} anos
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="icon" className="ml-auto">
+                              <ArrowRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-10 text-muted-foreground">
+                      <p>Nenhum membro da família encontrado.</p>
+                      <Button variant="link" size="sm">Adicionar Familiar (Em breve)</Button>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             )}
           </SheetContent>
         </Sheet>
