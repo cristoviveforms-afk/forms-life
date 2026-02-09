@@ -422,12 +422,13 @@ export default function Cadastro() {
               <CardTitle>Tipo de Cadastro</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 flex-wrap">
+              <div className="flex flex-wrap gap-2 md:gap-4 justify-center md:justify-start">
                 {(['membro', 'visitante'] as PersonType[]).map((tipo) => (
                   <Button
                     key={tipo}
                     type="button"
                     variant={tipoPessoa === tipo ? 'default' : 'outline'}
+                    className="flex-1 md:flex-none min-w-[120px]"
                     onClick={() => {
                       setTipoPessoa(tipo);
                       setVisitorQuestionAnswered(false);
@@ -452,11 +453,11 @@ export default function Cadastro() {
                 <CardTitle className="text-center text-xl">É sua primeira vez ou está retornando?</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-center gap-6">
+                <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-6">
                   <Button
                     type="button"
                     size="lg"
-                    className="w-40"
+                    className="w-full md:w-40"
                     onClick={() => {
                       setVisitantePrimeiraVez(true);
                       setVisitorQuestionAnswered(true);
@@ -468,7 +469,7 @@ export default function Cadastro() {
                     type="button"
                     variant="outline"
                     size="lg"
-                    className="w-40"
+                    className="w-full md:w-40"
                     onClick={() => {
                       setIsReturningVisitor(true);
                       // Don't set visitorQuestionAnswered yet, we need to search first
@@ -997,11 +998,21 @@ export default function Cadastro() {
               )}
 
               {/* Submit */}
-              <div className="flex gap-4 justify-end">
-                <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={loading}>
+              <div className="flex flex-col-reverse md:flex-row gap-4 justify-end pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                  disabled={loading}
+                  className="w-full md:w-auto"
+                >
                   Cancelar
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full md:w-auto"
+                >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
                 </Button>
