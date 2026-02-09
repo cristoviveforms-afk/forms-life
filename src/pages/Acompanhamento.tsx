@@ -310,7 +310,7 @@ export default function Acompanhamento() {
             <SheetHeader className="mb-6">
               <SheetTitle className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPerson?.full_name}`} />
+                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${selectedPerson?.full_name ?? ''}`} />
                   <AvatarFallback>{selectedPerson?.full_name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
