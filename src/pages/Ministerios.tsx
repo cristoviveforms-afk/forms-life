@@ -144,9 +144,9 @@ export default function Ministerios() {
         .from('accompaniments' as any)
         .insert([{
           person_id: selectedPersonForFollowUp.id,
-          leader_name: 'Líder', // Could come from auth user in real app
-          contact_date: new Date().toISOString().split('T')[0],
-          feedback: followUpData.feedback,
+          // leader_name: 'Líder', // Removed as it likely doesn't exist in schema
+          last_contact_date: new Date().toISOString().split('T')[0],
+          observacoes: followUpData.feedback, // Map feedback to observacoes
           type: followUpData.type,
           status: followUpData.status
         }] as any);

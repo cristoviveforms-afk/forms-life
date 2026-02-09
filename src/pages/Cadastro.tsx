@@ -74,6 +74,7 @@ export default function Cadastro() {
   const [email, setEmail] = useState('');
   const [endereco, setEndereco] = useState('');
   const [comoConheceu, setComoConheceu] = useState('');
+  const [acceptedJesus, setAcceptedJesus] = useState(false);
 
   const [batizadoAguas, setBatizadoAguas] = useState(false);
   const [dataBatismo, setDataBatismo] = useState('');
@@ -250,7 +251,7 @@ export default function Cadastro() {
         familyId = crypto.randomUUID();
       }
 
-      const payload = {
+      const payload: any = {
         type: tipoPessoa,
         full_name: nome,
         birth_date: nascimento || null,
@@ -268,10 +269,7 @@ export default function Cadastro() {
         baptism_date: dataBatismo || null,
         baptized_spirit: batizadoEspirito,
         has_ministry: participaMinisterio,
-        baptized_spirit: batizadoEspirito,
-        has_ministry: participaMinisterio,
         ministries: [...ministeriosServindo, ...ministeriosAcompanhamento],
-        natural_skills: donsNaturais || null,
         natural_skills: donsNaturais || null,
         spiritual_gifts: donsEspirituais || null,
 
@@ -611,6 +609,17 @@ export default function Cadastro() {
                             />
                           </div>
                         )}
+
+                        <div className="flex items-center space-x-2 md:col-span-2 pt-2">
+                          <Checkbox
+                            id="accepted_jesus"
+                            checked={acceptedJesus}
+                            onCheckedChange={(checked) => setAcceptedJesus(!!checked)}
+                          />
+                          <Label htmlFor="accepted_jesus" className="font-semibold text-primary">
+                            Aceitou Jesus hoje? (Novo Convertido)
+                          </Label>
+                        </div>
                       </div>
 
                       {/* Filhos (Reused Logic) */}
