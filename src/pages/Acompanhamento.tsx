@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MessageSquare, ArrowRight, UserCheck, Phone, Calendar, Coffee, Plus } from 'lucide-react';
+import { Search, MessageSquare, ArrowRight, Phone, Plus, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,8 +20,15 @@ import {
 } from '@/components/ui/sheet';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from '@/integrations/supabase/client';
-import { Accompaniment, Person } from '@/types/database';
+import { Accompaniment, Person, Ministry } from '@/types/database';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -39,6 +46,7 @@ export default function Acompanhamento() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [people, setPeople] = useState<Person[]>([]);
+  const [availableMinistries, setAvailableMinistries] = useState<Ministry[]>([]);
 
   // Dialog/Sheet states
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -50,6 +58,7 @@ export default function Acompanhamento() {
 
   useEffect(() => {
     fetchData();
+    fetchMinistries();
   }, []);
 
   const fetchData = async () => {
@@ -68,6 +77,21 @@ export default function Acompanhamento() {
       toast.error('Erro ao carregar a jornada.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMinistries = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ministries')
+        .select('*')
+        .eq('active', true)
+        .order('name');
+
+      if (error) throw error;
+      setAvailableMinistries(data as unknown as Ministry[]);
+    } catch (error) {
+      console.error('Erro ao buscar ministérios:', error);
     }
   };
 
@@ -115,6 +139,62 @@ export default function Acompanhamento() {
     } catch (error) {
       console.error(error);
       toast.error('Erro ao salvar observação');
+    }
+  };
+
+  const handleAddMinistry = async (ministryName: string) => {
+    if (!selectedPerson) return;
+
+    // Check if already has this ministry
+    if (selectedPerson.ministries?.includes(ministryName)) {
+      toast.error('Pessoa já está neste ministério');
+      return;
+    }
+
+    const updatedMinistries = [...(selectedPerson.ministries || []), ministryName];
+
+    try {
+      const { error } = await supabase
+        .from('people' as any)
+        .update({ ministries: updatedMinistries } as any)
+        .eq('id', selectedPerson.id);
+
+      if (error) throw error;
+
+      toast.success('Ministério adicionado!');
+
+      const updatedPerson = { ...selectedPerson, ministries: updatedMinistries };
+      setSelectedPerson(updatedPerson);
+      setPeople(people.map(p => p.id === selectedPerson.id ? updatedPerson : p));
+
+    } catch (error) {
+      console.error('Erro ao adicionar ministério:', error);
+      toast.error('Erro ao adicionar ministério');
+    }
+  };
+
+  const handleRemoveMinistry = async (ministryName: string) => {
+    if (!selectedPerson) return;
+
+    const updatedMinistries = (selectedPerson.ministries || []).filter(m => m !== ministryName);
+
+    try {
+      const { error } = await supabase
+        .from('people' as any)
+        .update({ ministries: updatedMinistries } as any)
+        .eq('id', selectedPerson.id);
+
+      if (error) throw error;
+
+      toast.success('Ministério removido!');
+
+      const updatedPerson = { ...selectedPerson, ministries: updatedMinistries };
+      setSelectedPerson(updatedPerson);
+      setPeople(people.map(p => p.id === selectedPerson.id ? updatedPerson : p));
+
+    } catch (error) {
+      console.error('Erro ao remover ministério:', error);
+      toast.error('Erro ao remover ministério');
     }
   };
 
@@ -344,16 +424,47 @@ export default function Acompanhamento() {
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <span>{selectedPerson.phone}</span>
                   </div>
-                  {selectedPerson.ministries && selectedPerson.ministries.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="text-muted-foreground text-xs">ACOMPANHAMENTO SUGERIDO</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPerson.ministries.map(m => (
-                          <Badge key={m} variant="secondary">{m}</Badge>
-                        ))}
-                      </div>
+
+                  {/* Ministerios / Encaminhamento */}
+                  <div className="space-y-2 p-3 bg-secondary/10 rounded-lg border">
+                    <div className="flex justify-between items-center">
+                      <Label className="text-muted-foreground text-xs font-semibold">ENCAMINHAR PARA MINISTÉRIO</Label>
+
                     </div>
-                  )}
+
+                    <div className="flex gap-2 mb-2">
+                      <Select onValueChange={(value) => handleAddMinistry(value)}>
+                        <SelectTrigger className="h-8 w-full">
+                          <SelectValue placeholder="Selecionar Ministério..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableMinistries.map((m) => (
+                            <SelectItem key={m.id} value={m.name}>
+                              {m.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 min-h-[2rem]">
+                      {selectedPerson.ministries && selectedPerson.ministries.length > 0 ? (
+                        selectedPerson.ministries.map(m => (
+                          <Badge key={m} variant="secondary" className="pl-2 pr-1 py-1 flex items-center gap-1">
+                            {m}
+                            <button
+                              onClick={() => handleRemoveMinistry(m)}
+                              className="hover:bg-destructive/20 rounded-full p-0.5 transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">Nenhum ministério vinculado.</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Actions */}

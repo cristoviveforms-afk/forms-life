@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, MoreHorizontal, Users, Loader2, Phone, Mail } from 'lucide-react';
+import { Search, Plus, MoreHorizontal, Users, Loader2, Phone, Mail, MessageSquare, ArrowRight, CheckCircle2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,13 +34,30 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
-import { Ministry, Person } from '@/types/database';
+import { Ministry, Person, Accompaniment } from '@/types/database';
 import { toast } from 'sonner';
 
+interface MinistryPerson extends Person {
+  pipeline_status?: string;
+  last_contact?: string;
+}
 
+interface RecentPerson extends Person {
+  accompaniment_status?: string;
+  last_feedback?: string;
+}
 
 export default function Ministerios() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,6 +72,11 @@ export default function Ministerios() {
   const [ministryToDelete, setMinistryToDelete] = useState<Ministry | null>(null);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
 
+  // View Mode: 'overview' or ministry_id
+  const [viewMode, setViewMode] = useState<string>('overview');
+  const [pipelinePeople, setPipelinePeople] = useState<MinistryPerson[]>([]);
+  const [loadingPipeline, setLoadingPipeline] = useState(false);
+
   // New Ministry Form State
   const [newMinistry, setNewMinistry] = useState({
     name: '',
@@ -64,7 +86,7 @@ export default function Ministerios() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Edit Ministry Form State
-  const [recentPeople, setRecentPeople] = useState<any[]>([]);
+  const [recentPeople, setRecentPeople] = useState<RecentPerson[]>([]);
   const [loadingRecent, setLoadingRecent] = useState(true);
   const [selectedPersonForFollowUp, setSelectedPersonForFollowUp] = useState<Person | null>(null);
   const [isFollowUpDialogOpen, setIsFollowUpDialogOpen] = useState(false);
@@ -84,6 +106,12 @@ export default function Ministerios() {
     fetchMinisterios();
     fetchRecentPeople();
   }, []);
+
+  useEffect(() => {
+    if (viewMode !== 'overview') {
+      fetchMinistryPipeline(viewMode);
+    }
+  }, [viewMode]);
 
   const fetchRecentPeople = async () => {
     setLoadingRecent(true);
@@ -120,7 +148,7 @@ export default function Ministerios() {
         };
       });
 
-      setRecentPeople(peopleWithStatus);
+      setRecentPeople(peopleWithStatus as unknown as RecentPerson[]);
 
     } catch (error) {
       console.error('Error fetching recent people:', error);
@@ -128,6 +156,53 @@ export default function Ministerios() {
       setLoadingRecent(false);
     }
   };
+
+  const fetchMinistryPipeline = async (ministryId: string) => {
+    setLoadingPipeline(true);
+    const ministry = ministerios.find(m => m.id === ministryId);
+    if (!ministry) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('people')
+        .select('*')
+        .contains('ministries', [ministry.name]);
+
+      if (error) throw error;
+
+      // Fetch accompaniments to determine status
+      const { data: accData } = await supabase
+        .from('accompaniments' as any)
+        .select('*');
+
+      const peopleWithStatus = (data || []).map((p: any) => {
+        // Filter accompaniments for this person
+        const personAccs = (accData || []).filter((a: any) => a.person_id === p.id);
+        // Check if there is any accompaniment that is recent? Or just any?
+        // For now, if there is ANY accompaniment, we consider "Em Acompanhamento".
+        // If there is a "concluido" specifically for this ministry... 
+        // Since we don't have ministry_id in accompaniments, we'll use a simple heuristic for now.
+
+        let status = 'aguardando';
+        if (personAccs.length > 0) {
+          status = 'em_andamento';
+          // Check if latest is 'concluido' - this logic might need refinement based on exact requirements
+          // For now, let's keep it simple: if they have accompaniments, they are being followed up.
+        }
+
+        return { ...p, pipeline_status: status, last_contact: personAccs[0]?.created_at };
+      });
+
+      setPipelinePeople(peopleWithStatus as unknown as MinistryPerson[]);
+
+    } catch (error) {
+      console.error('Erro ao buscar pipeline:', error);
+      toast.error('Erro ao carregar pipeline');
+    } finally {
+      setLoadingPipeline(false);
+    }
+  };
+
 
   const handleSaveFollowUp = async () => {
     if (!selectedPersonForFollowUp) return;
@@ -149,7 +224,14 @@ export default function Ministerios() {
       toast.success('Contato registrado com sucesso!');
       setIsFollowUpDialogOpen(false);
       setFollowUpData({ feedback: '', type: 'Ligação', status: 'concluido' });
-      fetchRecentPeople(); // Refresh list
+
+      // Refresh based on current view
+      if (viewMode === 'overview') {
+        fetchRecentPeople();
+      } else {
+        fetchMinistryPipeline(viewMode);
+      }
+
     } catch (error) {
       console.error('Error saving follow up:', error);
       toast.error('Erro ao registrar contato');
@@ -331,116 +413,315 @@ export default function Ministerios() {
 
   return (
     <DashboardLayout title="Ministérios">
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in flex flex-col h-[calc(100vh-8rem)]">
         {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar ministérios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+
+          <div className="flex items-center gap-2">
+            <Select value={viewMode} onValueChange={setViewMode}>
+              <SelectTrigger className="w-[200px] font-medium">
+                <SelectValue placeholder="Selecione a visualização" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="overview">Visão Geral (Admin)</SelectItem>
+                {ministerios.map(m => (
+                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Ministério
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar Novo Ministério</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome do Ministério *</Label>
-                  <Input
-                    id="nome"
-                    placeholder="Ex: Louvor e Adoração"
-                    value={newMinistry.name}
-                    onChange={(e) => setNewMinistry({ ...newMinistry, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lider">Líder</Label>
-                  <Input
-                    id="lider"
-                    placeholder="Nome do líder"
-                    value={newMinistry.leader}
-                    onChange={(e) => setNewMinistry({ ...newMinistry, leader: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="descricao">Descrição</Label>
-                  <Textarea
-                    id="descricao"
-                    placeholder="Descrição do ministério"
-                    value={newMinistry.description}
-                    onChange={(e) => setNewMinistry({ ...newMinistry, description: e.target.value })}
-                  />
-                </div>
-                <Button className="w-full" onClick={handleCreateMinistry} disabled={isSubmitting}>
-                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Criar Ministério
-                </Button>
+
+          {viewMode === 'overview' && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar ministérios..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
               </div>
-            </DialogContent>
-          </Dialog>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Ministério
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Criar Novo Ministério</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="nome">Nome do Ministério *</Label>
+                      <Input
+                        id="nome"
+                        placeholder="Ex: Louvor e Adoração"
+                        value={newMinistry.name}
+                        onChange={(e) => setNewMinistry({ ...newMinistry, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lider">Líder</Label>
+                      <Input
+                        id="lider"
+                        placeholder="Nome do líder"
+                        value={newMinistry.leader}
+                        onChange={(e) => setNewMinistry({ ...newMinistry, leader: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="descricao">Descrição</Label>
+                      <Textarea
+                        id="descricao"
+                        placeholder="Descrição do ministério"
+                        value={newMinistry.description}
+                        onChange={(e) => setNewMinistry({ ...newMinistry, description: e.target.value })}
+                      />
+                    </div>
+                    <Button className="w-full" onClick={handleCreateMinistry} disabled={isSubmitting}>
+                      {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Criar Ministério
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </div>
 
-        {/* Integration Panel */}
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader>
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
-              Painel de Integração (Novos nos últimos 30 dias)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loadingRecent ? (
-              <div className="flex justify-center p-4"><Loader2 className="animate-spin" /></div>
-            ) : recentPeople.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">Nenhuma nova pessoa para integrar no momento.</p>
-            ) : (
-              <div className="space-y-3">
-                {recentPeople.map(p => (
-                  <div key={p.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-secondary/20 rounded-lg border gap-3">
-                    <div>
-                      <p className="font-semibold text-lg">{p.full_name}</p>
-                      <div className="flex gap-2 text-sm text-muted-foreground">
-                        <span>{p.type === 'membro' ? 'Novo Membro' : 'Novo Convertido'}</span>
-                        <span>•</span>
-                        <span>{p.phone}</span>
-                      </div>
-                      {p.last_feedback && (
-                        <p className="text-xs text-muted-foreground mt-1 italic">" {p.last_feedback} "</p>
-                      )}
+        {viewMode === 'overview' ? (
+          <ScrollArea className="flex-1">
+            <div className="space-y-6 pb-6">
+              {/* Integration Panel */}
+              <Card className="border-l-4 border-l-blue-500">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    Painel de Integração (Novos nos últimos 30 dias)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingRecent ? (
+                    <div className="flex justify-center p-4"><Loader2 className="animate-spin" /></div>
+                  ) : recentPeople.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-4">Nenhuma nova pessoa para integrar no momento.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {recentPeople.map(p => (
+                        <div key={p.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 bg-secondary/20 rounded-lg border gap-3">
+                          <div>
+                            <p className="font-semibold text-lg">{p.full_name}</p>
+                            <div className="flex gap-2 text-sm text-muted-foreground">
+                              <span>{p.type === 'membro' ? 'Novo Membro' : 'Novo Convertido'}</span>
+                              <span>•</span>
+                              <span>{p.phone}</span>
+                            </div>
+                            {p.last_feedback && (
+                              <p className="text-xs text-muted-foreground mt-1 italic">" {p.last_feedback} "</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 w-full sm:w-auto">
+                            <Badge variant={p.accompaniment_status === 'Contatado' ? 'default' : 'destructive'}>
+                              {p.accompaniment_status}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedPersonForFollowUp(p);
+                                setIsFollowUpDialogOpen(true);
+                              }}
+                            >
+                              <Phone className="h-3 w-3 mr-2" />
+                              Registrar Contato
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                      <Badge variant={p.accompaniment_status === 'Contatado' ? 'default' : 'destructive'}>
-                        {p.accompaniment_status}
-                      </Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedPersonForFollowUp(p);
-                          setIsFollowUpDialogOpen(true);
-                        }}
-                      >
-                        <Phone className="h-3 w-3 mr-2" />
-                        Registrar Contato
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="text-2xl font-bold">{loading ? '-' : ministerios.length}</div>
+                    <p className="text-xs text-muted-foreground">Total de Ministérios</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="text-2xl font-bold">{loading ? '-' : ministerios.filter(m => m.active).length}</div>
+                    <p className="text-xs text-muted-foreground">Ativos</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="text-2xl font-bold">{loading ? '-' : ministerios.filter(m => !m.active).length}</div>
+                    <p className="text-xs text-muted-foreground">Inativos</p>
+                  </CardContent>
+                </Card>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {/* Ministry Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {loading ? (
+                  <div className="col-span-full flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : (
+                  filteredMinisterios.map((ministerio) => (
+                    <Card
+                      key={ministerio.id}
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => handleViewDetails(ministerio)}
+                    >
+                      <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle className="text-base font-semibold">{ministerio.name}</CardTitle>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(ministerio);
+                            }}>
+                              Ver Detalhes
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEdit(ministerio);
+                            }}>
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleActive(ministerio);
+                              }}
+                              className={ministerio.active ? 'text-destructive' : 'text-green-600'}
+                            >
+                              {ministerio.active ? 'Desativar' : 'Ativar'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMinistryToDelete(ministerio);
+                                setIsDeleteAlertOpen(true);
+                              }}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="text-sm">
+                            <span className="text-muted-foreground">Líder:</span>{' '}
+                            <span className="font-medium">{ministerio.leader || 'Não definido'}</span>
+                          </div>
+                          {ministerio.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-2">{ministerio.description}</p>
+                          )}
+                          <Badge variant={ministerio.active ? 'default' : 'secondary'}>
+                            {ministerio.active ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          </ScrollArea>
+        ) : (
+          /* Ministry Pipeline View */
+          <div className="flex-1 overflow-auto bg-muted/10 rounded-lg border p-4">
+            <div className="flex gap-4 min-w-full h-full">
+              {/* Column 1: Aguardando Contato */}
+              <div className="flex-1 min-w-[300px] flex flex-col gap-3">
+                <div className="flex items-center justify-between p-2 bg-yellow-50 text-yellow-800 rounded-md border border-yellow-200">
+                  <span className="font-semibold">Aguardando Contato</span>
+                  <Badge variant="secondary" className="bg-white">{pipelinePeople.filter((p) => p.pipeline_status === 'aguardando').length}</Badge>
+                </div>
+                <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+                  {pipelinePeople.filter((p) => p.pipeline_status === 'aguardando').map((person) => (
+                    <Card key={person.id} className="border-l-4 border-l-yellow-400 cursor-pointer hover:shadow-md transition-shadow">
+                      <CardContent className="p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold">{person.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{person.phone || 'Sem telefone'}</p>
+                            <Badge variant="outline" className="mt-2 text-[10px]">{person.type}</Badge>
+                          </div>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
+                            setSelectedPersonForFollowUp(person);
+                            setIsFollowUpDialogOpen(true);
+                          }}>
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2: Em Acompanhamento */}
+              <div className="flex-1 min-w-[300px] flex flex-col gap-3">
+                <div className="flex items-center justify-between p-2 bg-blue-50 text-blue-800 rounded-md border border-blue-200">
+                  <span className="font-semibold">Em Acompanhamento</span>
+                  <Badge variant="secondary" className="bg-white">{pipelinePeople.filter((p) => p.pipeline_status === 'em_andamento').length}</Badge>
+                </div>
+                <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+                  {pipelinePeople.filter((p) => p.pipeline_status === 'em_andamento').map((person) => (
+                    <Card key={person.id} className="border-l-4 border-l-blue-400 cursor-pointer hover:shadow-md transition-shadow">
+                      <CardContent className="p-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold">{person.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Último: {new Date(person.last_contact).toLocaleDateString()}</p>
+
+                          </div>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => {
+                            setSelectedPersonForFollowUp(person);
+                            setIsFollowUpDialogOpen(true);
+                          }}>
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3: Concluídos */}
+              <div className="flex-1 min-w-[300px] flex flex-col gap-3">
+                <div className="flex items-center justify-between p-2 bg-green-50 text-green-800 rounded-md border border-green-200">
+                  <span className="font-semibold">Integrados/Concluído</span>
+                  <Badge variant="secondary" className="bg-white">{pipelinePeople.filter((p) => p.pipeline_status === 'concluido').length}</Badge>
+                </div>
+                <div className="flex-1 space-y-3 overflow-y-auto pr-1">
+                  {/* Empty for now as logic implies filtering, add mock or real logic later */}
+                  <div className="text-center text-xs text-muted-foreground p-4">
+                    Concluídos aparecerão aqui
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Follow Up Dialog */}
         <Dialog open={isFollowUpDialogOpen} onOpenChange={setIsFollowUpDialogOpen}>
@@ -480,106 +761,10 @@ export default function Ministerios() {
           </DialogContent>
         </Dialog>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : ministerios.length}</div>
-              <p className="text-xs text-muted-foreground">Total de Ministérios</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : ministerios.filter(m => m.active).length}</div>
-              <p className="text-xs text-muted-foreground">Ativos</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : ministerios.filter(m => !m.active).length}</div>
-              <p className="text-xs text-muted-foreground">Inativos</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Ministry Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loading ? (
-            <div className="col-span-full flex justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            filteredMinisterios.map((ministerio) => (
-              <Card
-                key={ministerio.id}
-                className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleViewDetails(ministerio)}
-              >
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-base font-semibold">{ministerio.name}</CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewDetails(ministerio);
-                      }}>
-                        Ver Detalhes
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenEdit(ministerio);
-                      }}>
-                        Editar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleActive(ministerio);
-                        }}
-                        className={ministerio.active ? 'text-destructive' : 'text-green-600'}
-                      >
-                        {ministerio.active ? 'Desativar' : 'Ativar'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMinistryToDelete(ministerio);
-                          setIsDeleteAlertOpen(true);
-                        }}
-                        className="text-destructive focus:text-destructive"
-                      >
-                        Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Líder:</span>{' '}
-                      <span className="font-medium">{ministerio.leader || 'Não definido'}</span>
-                    </div>
-                    {ministerio.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">{ministerio.description}</p>
-                    )}
-                    <Badge variant={ministerio.active ? 'default' : 'secondary'}>
-                      {ministerio.active ? 'Ativo' : 'Inativo'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-
         {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent>
+            {/* ... existing edit content ... */}
             <DialogHeader>
               <DialogTitle>Editar Ministério</DialogTitle>
             </DialogHeader>
