@@ -42,6 +42,13 @@ export interface Person {
     integration_date?: string;
     member_has_served: boolean;
     member_prev_ministry?: string;
+
+    // Journey / Acompanhamento
+    journey_stage?: 'fase1_porta' | 'fase1_conexao' | 'fase2_impacto' | 'fase3_retorno' | 'fase4_membresia' | 'concluido';
+    accepted_jesus?: boolean;
+    feedback_first_contact?: string;
+    attendance_count?: number;
+    last_visit_date?: string;
 }
 
 export interface Child {
