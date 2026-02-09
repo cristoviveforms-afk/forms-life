@@ -79,7 +79,7 @@ export default function Acompanhamento() {
 
       if (error) throw error;
 
-      toast.success(`Fase atualizada!`);
+      toast.success('Fase atualizada!');
       // Update local state to avoid full refetch flicker
       setPeople(people.map(p => p.id === personId ? { ...p, journey_stage: newStage } : p));
     } catch (error) {
