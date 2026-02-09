@@ -519,195 +519,395 @@ export default function Cadastro() {
           {(tipoPessoa !== 'visitante' || visitorQuestionAnswered) && (
             <>
 
-              {/* Dados Pessoais */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Dados Pessoais</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="nome">Nome Completo *</Label>
-                      <Input
-                        id="nome"
-                        placeholder="Nome completo"
-                        required
-                        value={nome}
-                        onChange={e => setNome(e.target.value)}
-                      />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="nascimento">Data de Nascimento</Label>
-                      <Input
-                        id="nascimento"
-                        type="date"
-                        value={nascimento}
-                        onChange={e => setNascimento(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="sexo">Sexo</Label>
-                      <Select value={sexo} onValueChange={setSexo}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="masculino">Masculino</SelectItem>
-                          <SelectItem value="feminino">Feminino</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="estado_civil">Estado Civil</Label>
-                      <Select value={estadoCivil} onValueChange={setEstadoCivil}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="solteiro">Solteiro(a)</SelectItem>
-                          <SelectItem value="casado">Casado(a)</SelectItem>
-                          <SelectItem value="divorciado">Divorciado(a)</SelectItem>
-                          <SelectItem value="viuvo">Viúvo(a)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {estadoCivil === 'casado' && (
+              {/* LAYOUT PARA VISITANTES */}
+              {tipoPessoa === 'visitante' ? (
+                <>
+                  {/* Bloco 1: Boas Vindas */}
+                  <Card className="mb-6 border-l-4 border-l-primary/50">
+                    <CardHeader>
+                      <CardTitle>Boas Vindas</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="conjuge">Nome do Cônjuge</Label>
+                        <Label htmlFor="nome">Nome Completo *</Label>
                         <Input
-                          id="conjuge"
-                          placeholder="Nome do cônjuge"
-                          value={conjuge}
-                          onChange={e => setConjuge(e.target.value)}
+                          id="nome"
+                          placeholder="Nome completo"
+                          required
+                          value={nome}
+                          onChange={e => setNome(e.target.value)}
                         />
                       </div>
-                    )}
-                  </div>
 
-                  {/* Filhos */}
-                  <div className="space-y-4 pt-4 border-t">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="possui_filhos"
-                        checked={possuiFilhos}
-                        onCheckedChange={(checked) => {
-                          setPossuiFilhos(!!checked);
-                          if (!checked) setFilhos([]);
-                        }}
-                      />
-                      <Label htmlFor="possui_filhos">Possui filhos?</Label>
-                    </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="telefone">WhatsApp / Telefone *</Label>
+                          <Input
+                            id="telefone"
+                            placeholder="(00) 00000-0000"
+                            required
+                            value={telefone}
+                            onChange={e => setTelefone(e.target.value)}
+                          />
+                        </div>
 
-                    {possuiFilhos && (
-                      <div className="space-y-3">
-                        {filhos.map((filho, index) => (
-                          <div key={index} className="flex gap-2 items-end">
-                            <div className="flex-1 space-y-1">
-                              <Label>Nome do Filho</Label>
-                              <Input
-                                value={filho.nome}
-                                onChange={(e) => {
-                                  const newFilhos = [...filhos];
-                                  newFilhos[index].nome = e.target.value;
-                                  setFilhos(newFilhos);
-                                }}
-                                placeholder="Nome"
-                              />
-                            </div>
-                            <div className="w-24 space-y-1">
-                              <Label>Idade</Label>
-                              <Input
-                                value={filho.idade}
-                                onChange={(e) => {
-                                  const newFilhos = [...filhos];
-                                  newFilhos[index].idade = e.target.value;
-                                  setFilhos(newFilhos);
-                                }}
-                                placeholder="Idade"
-                                type="number"
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeFilho(index)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                        <div className="space-y-2">
+                          <Label htmlFor="sexo">Sexo</Label>
+                          <Select value={sexo} onValueChange={setSexo}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="masculino">Masculino</SelectItem>
+                              <SelectItem value="feminino">Feminino</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Bloco 2: Conexão */}
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle>Conexão</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="nascimento">Data de Nascimento</Label>
+                          <Input
+                            id="nascimento"
+                            type="date"
+                            value={nascimento}
+                            onChange={e => setNascimento(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="estado_civil">Estado Civil</Label>
+                          <Select value={estadoCivil} onValueChange={setEstadoCivil}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                              <SelectItem value="casado">Casado(a)</SelectItem>
+                              <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                              <SelectItem value="viuvo">Viúvo(a)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {estadoCivil === 'casado' && (
+                          <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="conjuge">Nome do Cônjuge</Label>
+                            <Input
+                              id="conjuge"
+                              placeholder="Nome do cônjuge"
+                              value={conjuge}
+                              onChange={e => setConjuge(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Filhos (Reused Logic) */}
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="possui_filhos"
+                            checked={possuiFilhos}
+                            onCheckedChange={(checked) => {
+                              setPossuiFilhos(!!checked);
+                              if (!checked) setFilhos([]);
+                            }}
+                          />
+                          <Label htmlFor="possui_filhos">Possui filhos?</Label>
+                        </div>
+
+                        {possuiFilhos && (
+                          <div className="space-y-3">
+                            {filhos.map((filho, index) => (
+                              <div key={index} className="flex gap-2 items-end">
+                                <div className="flex-1 space-y-1">
+                                  <Label>Nome do Filho</Label>
+                                  <Input
+                                    value={filho.nome}
+                                    onChange={(e) => {
+                                      const newFilhos = [...filhos];
+                                      newFilhos[index].nome = e.target.value;
+                                      setFilhos(newFilhos);
+                                    }}
+                                    placeholder="Nome"
+                                  />
+                                </div>
+                                <div className="w-24 space-y-1">
+                                  <Label>Idade</Label>
+                                  <Input
+                                    value={filho.idade}
+                                    onChange={(e) => {
+                                      const newFilhos = [...filhos];
+                                      newFilhos[index].idade = e.target.value;
+                                      setFilhos(newFilhos);
+                                    }}
+                                    placeholder="Idade"
+                                    type="number"
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeFilho(index)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button type="button" variant="outline" size="sm" onClick={addFilho}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Adicionar Filho
                             </Button>
                           </div>
-                        ))}
-                        <Button type="button" variant="outline" size="sm" onClick={addFilho}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Adicionar Filho
-                        </Button>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
 
-              {/* Contato */}
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle>Contato</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="telefone">Telefone / WhatsApp *</Label>
-                      <Input
-                        id="telefone"
-                        placeholder="(00) 00000-0000"
-                        required
-                        value={telefone}
-                        onChange={e => setTelefone(e.target.value)}
-                      />
-                    </div>
+                      {/* Endereço e Outros (from Contato) */}
+                      <div className="space-y-2 pt-4 border-t">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="email@exemplo.com"
+                          value={email}
+                          onChange={e => setEmail(e.target.value)}
+                        />
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="email@exemplo.com"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="endereco">Endereço Completo</Label>
+                        <Textarea
+                          id="endereco"
+                          placeholder="Rua, número, bairro, cidade - UF"
+                          value={endereco}
+                          onChange={e => setEndereco(e.target.value)}
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="endereco">Endereço Completo</Label>
-                    <Textarea
-                      id="endereco"
-                      placeholder="Rua, número, bairro, cidade - UF"
-                      value={endereco}
-                      onChange={e => setEndereco(e.target.value)}
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="como_conheceu">Como conheceu a igreja?</Label>
+                        <Select value={comoConheceu} onValueChange={setComoConheceu}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="amigos">Amigos/Família</SelectItem>
+                            <SelectItem value="redes">Redes Sociais</SelectItem>
+                            <SelectItem value="evento">Evento</SelectItem>
+                            <SelectItem value="passando">Passando pela região</SelectItem>
+                            <SelectItem value="outro">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                /* LAYOUT PADRÃO (MEMBROS E OUTROS) */
+                <>
+                  {/* Dados Pessoais */}
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle>Dados Pessoais</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="nome">Nome Completo *</Label>
+                          <Input
+                            id="nome"
+                            placeholder="Nome completo"
+                            required
+                            value={nome}
+                            onChange={e => setNome(e.target.value)}
+                          />
+                        </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="como_conheceu">Como conheceu a igreja?</Label>
-                    <Select value={comoConheceu} onValueChange={setComoConheceu}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="amigos">Amigos/Família</SelectItem>
-                        <SelectItem value="redes">Redes Sociais</SelectItem>
-                        <SelectItem value="evento">Evento</SelectItem>
-                        <SelectItem value="passando">Passando pela região</SelectItem>
-                        <SelectItem value="outro">Outro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
+                        <div className="space-y-2">
+                          <Label htmlFor="nascimento">Data de Nascimento</Label>
+                          <Input
+                            id="nascimento"
+                            type="date"
+                            value={nascimento}
+                            onChange={e => setNascimento(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="sexo">Sexo</Label>
+                          <Select value={sexo} onValueChange={setSexo}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="masculino">Masculino</SelectItem>
+                              <SelectItem value="feminino">Feminino</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="estado_civil">Estado Civil</Label>
+                          <Select value={estadoCivil} onValueChange={setEstadoCivil}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+                              <SelectItem value="casado">Casado(a)</SelectItem>
+                              <SelectItem value="divorciado">Divorciado(a)</SelectItem>
+                              <SelectItem value="viuvo">Viúvo(a)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {estadoCivil === 'casado' && (
+                          <div className="space-y-2">
+                            <Label htmlFor="conjuge">Nome do Cônjuge</Label>
+                            <Input
+                              id="conjuge"
+                              placeholder="Nome do cônjuge"
+                              value={conjuge}
+                              onChange={e => setConjuge(e.target.value)}
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Filhos */}
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id="possui_filhos"
+                            checked={possuiFilhos}
+                            onCheckedChange={(checked) => {
+                              setPossuiFilhos(!!checked);
+                              if (!checked) setFilhos([]);
+                            }}
+                          />
+                          <Label htmlFor="possui_filhos">Possui filhos?</Label>
+                        </div>
+
+                        {possuiFilhos && (
+                          <div className="space-y-3">
+                            {filhos.map((filho, index) => (
+                              <div key={index} className="flex gap-2 items-end">
+                                <div className="flex-1 space-y-1">
+                                  <Label>Nome do Filho</Label>
+                                  <Input
+                                    value={filho.nome}
+                                    onChange={(e) => {
+                                      const newFilhos = [...filhos];
+                                      newFilhos[index].nome = e.target.value;
+                                      setFilhos(newFilhos);
+                                    }}
+                                    placeholder="Nome"
+                                  />
+                                </div>
+                                <div className="w-24 space-y-1">
+                                  <Label>Idade</Label>
+                                  <Input
+                                    value={filho.idade}
+                                    onChange={(e) => {
+                                      const newFilhos = [...filhos];
+                                      newFilhos[index].idade = e.target.value;
+                                      setFilhos(newFilhos);
+                                    }}
+                                    placeholder="Idade"
+                                    type="number"
+                                  />
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeFilho(index)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button type="button" variant="outline" size="sm" onClick={addFilho}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Adicionar Filho
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Contato (Padrão) */}
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle>Contato</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="telefone">Telefone / WhatsApp *</Label>
+                          <Input
+                            id="telefone"
+                            placeholder="(00) 00000-0000"
+                            required
+                            value={telefone}
+                            onChange={e => setTelefone(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            placeholder="email@exemplo.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="endereco">Endereço Completo</Label>
+                        <Textarea
+                          id="endereco"
+                          placeholder="Rua, número, bairro, cidade - UF"
+                          value={endereco}
+                          onChange={e => setEndereco(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="como_conheceu">Como conheceu a igreja?</Label>
+                        <Select value={comoConheceu} onValueChange={setComoConheceu}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="amigos">Amigos/Família</SelectItem>
+                            <SelectItem value="redes">Redes Sociais</SelectItem>
+                            <SelectItem value="evento">Evento</SelectItem>
+                            <SelectItem value="passando">Passando pela região</SelectItem>
+                            <SelectItem value="outro">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              )}
 
               {/* Campos Espirituais - Apenas para Membros */}
               {tipoPessoa === 'membro' && (
