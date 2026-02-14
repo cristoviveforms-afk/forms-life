@@ -99,6 +99,19 @@ export default function Dashboard() {
   const formatStartOfDay = (date: string) => `${date}T00:00:00`;
   const formatEndOfDay = (date: string) => `${date}T23:59:59`;
 
+  // Load current month's data on mount
+  useEffect(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const firstDay = `${year}-${month}-01`;
+    const lastDay = new Date(year, now.getMonth() + 1, 0).getDate();
+    const lastDayFormatted = `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+
+    setDateRange({ start: firstDay, end: lastDayFormatted });
+    fetchStats(firstDay, lastDayFormatted);
+  }, []);
+
   const statsCards = [
     { title: 'Total de Membros', value: stats.membros, icon: Users, description: 'Novos este mês', color: 'text-blue-500' },
     { title: 'Visitantes', value: stats.visitantes, icon: UserPlus, description: 'Novos este mês', color: 'text-green-500' },
