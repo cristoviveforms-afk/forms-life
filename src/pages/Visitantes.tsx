@@ -12,6 +12,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
 
@@ -21,6 +31,8 @@ export default function Visitantes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [visitantes, setVisitantes] = useState<Person[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [visitanteToDelete, setVisitanteToDelete] = useState<Person | null>(null);
   const navigate = useNavigate();
 
   const handleDateChange = (start: string, end: string) => {
@@ -47,6 +59,27 @@ export default function Visitantes() {
       console.error('Erro ao buscar visitantes:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!visitanteToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('people' as any)
+        .delete()
+        .eq('id', visitanteToDelete.id);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setVisitantes(visitantes.filter(v => v.id !== visitanteToDelete.id));
+      setDeleteDialogOpen(false);
+      setVisitanteToDelete(null);
+    } catch (error) {
+      console.error('Erro ao remover visitante:', error);
+      alert('Erro ao remover visitante. Tente novamente.');
     }
   };
 
@@ -195,7 +228,16 @@ export default function Visitantes() {
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Registrar Contato</DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Converter para Membro</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>Remover</DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setVisitanteToDelete(visitante);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              Remover
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -206,6 +248,30 @@ export default function Visitantes() {
             )}
           </CardContent>
         </Card>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover <strong>{visitanteToDelete?.full_name}</strong>?
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setVisitanteToDelete(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Remover
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );
