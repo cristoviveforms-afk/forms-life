@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col">
       <header className="absolute top-4 right-4">
         <ThemeToggle />
       </header>
@@ -107,6 +107,13 @@ export default function Login() {
               >
                 Esqueci minha senha
               </button>
+
+              <div className="text-center text-sm text-muted-foreground mt-2 border-t pt-4 w-full">
+                Novo por aqui?{' '}
+                <Link to="/signup" className="text-primary hover:underline font-medium">
+                  Criar nova conta
+                </Link>
+              </div>
             </CardFooter>
           </form>
         </Card>

@@ -144,14 +144,18 @@ export default function Visitantes() {
                   filteredVisitantes.map((visitante) => (
                     <div
                       key={visitante.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group"
+                      onClick={() => navigate(`/acompanhamento?personId=${visitante.id}`)}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
                           {visitante.full_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium">{visitante.full_name}</p>
+                          <p className="font-medium flex items-center gap-2">
+                            {visitante.full_name}
+                            <MoreHorizontal className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity rotate-90" />
+                          </p>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Phone className="h-3 w-3" />
                             {visitante.phone}
@@ -165,20 +169,33 @@ export default function Visitantes() {
                         <Badge variant={!visitante.visitor_wants_contact ? 'secondary' : 'outline'}>
                           {visitante.visitor_wants_contact ? 'Quer Contato' : 'Não quer contato'}
                         </Badge>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Logic to open message/whatsapp?
+                          }}
+                        >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Ver Perfil</DropdownMenuItem>
-                            <DropdownMenuItem>Registrar Contato</DropdownMenuItem>
-                            <DropdownMenuItem>Converter para Membro</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Remover</DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/acompanhamento?personId=${visitante.id}`);
+                            }}>
+                              Ver Perfil
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Registrar Contato</DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Converter para Membro</DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>Remover</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

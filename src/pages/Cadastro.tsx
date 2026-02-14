@@ -286,6 +286,9 @@ export default function Cadastro() {
         integration_date: tipoPessoa === 'membro' ? dataIntegracao || null : null,
         member_has_served: tipoPessoa === 'membro' ? jaServiu : false,
         member_prev_ministry: tipoPessoa === 'membro' && jaServiu ? ministerioAnterior : null,
+
+        // Always update visit date when saving/updating a visitor
+        last_visit_date: new Date().toISOString(),
       };
 
       if (personId) {

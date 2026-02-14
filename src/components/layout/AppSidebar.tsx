@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Settings,
   LogOut,
+  Shield,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -34,10 +35,11 @@ const menuItems = [
 ];
 
 const bottomItems = [
+  { title: 'Área Pastoral', url: '/pastoral', icon: Shield },
   { title: 'Configurações', url: '/configuracoes', icon: Settings },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ className }: { className?: string }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -50,7 +52,7 @@ export function AppSidebar() {
   const isActive = (url: string) => location.pathname === url;
 
   return (
-    <Sidebar className="border-r border-sidebar-border">
+    <Sidebar className={`border-r border-sidebar-border ${className}`}>
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
           <img src={logo} alt="Logo" className="h-10 w-auto" />

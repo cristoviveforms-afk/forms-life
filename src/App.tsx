@@ -9,12 +9,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import Membros from "./pages/Membros";
 import Visitantes from "./pages/Visitantes";
 import Convertidos from "./pages/Convertidos";
 import Ministerios from "./pages/Ministerios";
 import Acompanhamento from "./pages/Acompanhamento";
+import Pastoral from "./pages/Pastoral";
 import Cadastro from "./pages/Cadastro";
 import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
@@ -34,7 +36,9 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/pastoral" element={<ProtectedRoute><Pastoral /></ProtectedRoute>} />
               <Route path="/membros" element={<ProtectedRoute><Membros /></ProtectedRoute>} />
               <Route path="/visitantes" element={<ProtectedRoute><Visitantes /></ProtectedRoute>} />
               <Route path="/convertidos" element={<ProtectedRoute><Convertidos /></ProtectedRoute>} />

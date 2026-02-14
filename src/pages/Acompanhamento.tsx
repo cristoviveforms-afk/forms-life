@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, MouseEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,16 +33,53 @@ import { supabase } from '@/integrations/supabase/client';
 import { Accompaniment, Person, Ministry } from '@/types/database';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 
 // Define the Journey Stages
+// Define the Journey Stages with Modern Styling
 const JOURNEY_STAGES = {
-  'fase1_porta': { label: 'Fase 1: Porta / Dados Iniciais', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-  'fase1_conexao': { label: 'Fase 1: Sala de Conexão', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-  'fase2_impacto': { label: 'Fase 2: Primeiro Impacto (Semana 1)', color: 'bg-orange-100 text-orange-800 border-orange-200' },
-  'fase3_retorno': { label: 'Fase 3: Ciclo de Retorno', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-  'fase4_membresia': { label: 'Fase 4: Rumo à Membresia', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  'concluido': { label: 'Concluído / Membro', color: 'bg-green-100 text-green-800 border-green-200' }
+  'fase1_porta': {
+    label: 'Fase 1: Porta / Dados Iniciais',
+    color: 'blue',
+    headerClass: 'border-l-4 border-blue-500 bg-blue-50/50 dark:bg-blue-900/20',
+    badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+  },
+  'fase1_conexao': {
+    label: 'Fase 1: Sala de Conexão',
+    color: 'indigo',
+    headerClass: 'border-l-4 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20',
+    badgeClass: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+  },
+  'fase2_impacto': {
+    label: 'Fase 2: Primeiro Impacto (Semana 1)',
+    color: 'orange',
+    headerClass: 'border-l-4 border-orange-500 bg-orange-50/50 dark:bg-orange-900/20',
+    badgeClass: 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300'
+  },
+  'fase3_retorno': {
+    label: 'Fase 3: Ciclo de Retorno',
+    color: 'purple',
+    headerClass: 'border-l-4 border-purple-500 bg-purple-50/50 dark:bg-purple-900/20',
+    badgeClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300'
+  },
+  'fase4_membresia': {
+    label: 'Fase 4: Rumo à Membresia',
+    color: 'yellow',
+    headerClass: 'border-l-4 border-yellow-500 bg-yellow-50/50 dark:bg-yellow-900/20',
+    badgeClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
+  },
+  'concluido': {
+    label: 'Concluído / Membro',
+    color: 'green',
+    headerClass: 'border-l-4 border-green-500 bg-green-50/50 dark:bg-green-900/20',
+    badgeClass: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+  }
 };
+
+// ... (inside component) ...
+
+
+
 
 export default function Acompanhamento() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,19 +96,96 @@ export default function Acompanhamento() {
   const [personHistory, setPersonHistory] = useState<Accompaniment[]>([]);
   const [familyMembers, setFamilyMembers] = useState<Person[]>([]);
 
+
+  const [currentDateRange, setCurrentDateRange] = useState({ start: '', end: '' });
+
+  // Drag to scroll state
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const [searchParams] = useSearchParams();
+
+  // Drag to scroll handlers
+  const handleMouseDown = (e: MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll-fast
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   useEffect(() => {
-    fetchData();
+    // Initial fetch handled by MonthYearPicker onDateChange or we fetch default?
+    // MonthYearPicker likely fires on mount or default selection.
+    // If not, we fetch default. Ensuring fetchMinistries runs.
     fetchMinistries();
   }, []);
 
-  const fetchData = async () => {
+  const handleDateChange = (start: string, end: string) => {
+    setCurrentDateRange({ start, end });
+    fetchData(start, end);
+  };
+
+  useEffect(() => {
+    const personId = searchParams.get('personId');
+    if (personId && people.length > 0) {
+      const person = people.find(p => p.id === personId);
+      if (person) {
+        handleViewDetails(person);
+      } else {
+        // If not in current list (maybe concluded or different status), try fetching specific person
+        // This is a safety fallback if the person isn't in the initial filtered fetch
+        const fetchSpecificPerson = async () => {
+          const { data, error } = await supabase
+            .from('people')
+            .select('*')
+            .eq('id', personId)
+            .single();
+
+          if (data && !error) {
+            handleViewDetails(data as unknown as Person);
+          }
+        };
+        fetchSpecificPerson();
+      }
+    }
+  }, [searchParams, people]);
+
+  const fetchData = async (start?: string, end?: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('people' as any)
         .select('*')
         .or('type.eq.visitante,journey_stage.neq.concluido')
         .order('created_at', { ascending: false });
+
+      if (start && end) {
+        const startDay = `${start}T00:00:00`;
+        const endDay = `${end}T23:59:59`;
+        // Filtering by created_at as requested "like in visitors"
+        // Or should we filter by active date? Usually creation date is standard for "arrivals".
+        query = query.gte('created_at', startDay).lte('created_at', endDay);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setPeople(data as unknown as Person[]);
@@ -319,6 +434,10 @@ export default function Acompanhamento() {
     <DashboardLayout title="Jornada do Visitante">
       <div className="flex flex-col h-[calc(100vh-8rem)] space-y-4">
 
+        <div className="flex justify-end px-1">
+          <MonthYearPicker onDateChange={handleDateChange} />
+        </div>
+
         <div className="flex justify-between items-center px-1">
           <div className="relative w-64">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -330,33 +449,56 @@ export default function Acompanhamento() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={fetchData}>
+            <Button variant="outline" size="sm" onClick={() => fetchData(currentDateRange.start, currentDateRange.end)}>
               Atualizar
             </Button>
           </div>
         </div>
 
         {/* Pipeline / Kanban View */}
-        <ScrollArea className="flex-1 pb-4">
-          <div className="flex gap-4 pb-4 px-1 min-w-full overflow-x-auto">
+        <ScrollArea
+          className="flex-1 pb-4 cursor-grab active:cursor-grabbing"
+          viewportRef={scrollContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+        >
+          <div className="flex gap-6 pb-4 px-2 min-w-full">
             {Object.entries(JOURNEY_STAGES).map(([stageKey, stageInfo]) => {
               const stagePeople = filterPeople(stageKey);
 
               return (
-                <div key={stageKey} className="min-w-[280px] w-72 flex-shrink-0 flex flex-col">
-                  <div className={`p-2 rounded-t-lg border-b-2 font-medium text-sm flex justify-between items-center ${stageInfo.color}`}>
-                    {stageInfo.label}
-                    <Badge variant="secondary" className="bg-white/50">{stagePeople.length}</Badge>
+                <div key={stageKey} className="min-w-[320px] max-w-[320px] flex-shrink-0 flex flex-col h-full">
+                  {/* Modern Header */}
+                  <div className={`p-4 mb-3 rounded-xl shadow-sm bg-card border flex justify-between items-center group hover:shadow-md transition-all relative overflow-hidden min-h-[5.5rem]`}>
+                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${stageInfo.headerClass.split(' ')[1]}`} /> {/* Extract border color */}
+                    <div className="flex flex-col pr-2">
+                      <span className="font-bold text-sm text-foreground/90 leading-snug line-clamp-2">{stageInfo.label}</span>
+                      <span className="text-[10px] text-muted-foreground font-semibold mt-1 uppercase tracking-wider flex items-center gap-1">
+                        {stagePeople.length === 1 ? '1 Pessoa' : `${stagePeople.length} Pessoas`}
+                      </span>
+                    </div>
+                    <div className={`h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center font-bold text-sm shadow-sm ${stageInfo.badgeClass}`}>
+                      {stagePeople.length}
+                    </div>
                   </div>
-                  <div className="bg-secondary/10 p-2 rounded-b-lg flex-1 min-h-[500px]">
+
+                  {/* Column Body */}
+                  <div className="bg-muted/30 p-2 rounded-xl border-dashed border-2 border-muted flex-1 min-h-[500px]">
                     {stagePeople.length === 0 ? (
-                      <div className="text-center text-xs text-muted-foreground py-8 border-2 border-dashed rounded-lg">
-                        Vazio
+                      <div className="flex flex-col items-center justify-center h-full py-10 text-muted-foreground opacity-50">
+                        <div className="bg-muted rounded-full p-3 mb-2">
+                          <span className="text-xl">✨</span>
+                        </div>
+                        <span className="text-xs font-medium">Ninguém nesta fase</span>
                       </div>
                     ) : (
-                      stagePeople.map(person => (
-                        <PipelineCard key={person.id} person={person} />
-                      ))
+                      <div className="space-y-3">
+                        {stagePeople.map(person => (
+                          <PipelineCard key={person.id} person={person} />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>

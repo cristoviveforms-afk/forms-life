@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Download, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Search, Plus, Filter, Download, MoreHorizontal, Loader2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -140,14 +140,18 @@ export default function Membros() {
                   filteredMembros.map((membro) => (
                     <div
                       key={membro.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group"
+                      onClick={() => navigate(`/acompanhamento?personId=${membro.id}`)}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium">
+                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
                           {membro.full_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium">{membro.full_name}</p>
+                          <p className="font-medium flex items-center gap-2">
+                            {membro.full_name}
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                          </p>
                           <p className="text-sm text-muted-foreground">{membro.phone}</p>
                         </div>
                       </div>
@@ -167,16 +171,26 @@ export default function Membros() {
                           <Badge variant="outline">{membro.ministries.length} ministério(s)</Badge>
                         )}
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Ver Perfil</DropdownMenuItem>
-                            <DropdownMenuItem>Editar</DropdownMenuItem>
-                            <DropdownMenuItem>Acompanhamento</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Remover</DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/acompanhamento?personId=${membro.id}`);
+                            }}>
+                              Ver Perfil
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/acompanhamento?personId=${membro.id}`);
+                            }}>
+                              Acompanhamento
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>Remover</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

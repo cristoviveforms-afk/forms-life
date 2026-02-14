@@ -6,11 +6,15 @@ interface User {
   id: string;
   email: string;
   name: string;
+  role: string;
+  ministry?: string;
+  leader?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, name: string, ministry: string, leader: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
 }
@@ -50,6 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
       name: supabaseUser.user_metadata?.name || supabaseUser.email?.split('@')[0] || 'Usuário',
+      role: supabaseUser.user_metadata?.role || 'user',
+      ministry: supabaseUser.user_metadata?.ministry || '',
+      leader: supabaseUser.user_metadata?.leader || '',
     });
   };
 
@@ -76,13 +83,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signUp = async (email: string, password: string, name: string, ministry: string, leader: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role: 'user', // Default role
+            ministry,
+            leader,
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: 'Erro inesperado ao criar conta.' };
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, signUp, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
