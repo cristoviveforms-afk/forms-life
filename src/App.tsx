@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { KeywordProtected } from "@/components/KeywordProtected";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
@@ -38,7 +39,13 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-              <Route path="/pastoral" element={<ProtectedRoute><Pastoral /></ProtectedRoute>} />
+              <Route path="/pastoral" element={
+                <ProtectedRoute>
+                  <KeywordProtected>
+                    <Pastoral />
+                  </KeywordProtected>
+                </ProtectedRoute>
+              } />
               <Route path="/membros" element={<ProtectedRoute><Membros /></ProtectedRoute>} />
               <Route path="/visitantes" element={<ProtectedRoute><Visitantes /></ProtectedRoute>} />
               <Route path="/convertidos" element={<ProtectedRoute><Convertidos /></ProtectedRoute>} />
