@@ -31,13 +31,13 @@ export function DashboardLayout({ children, title }: { children: React.ReactNode
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background/50">
         <AppSidebar className="glass-sidebar" />
-        <main className="flex-1 overflow-x-hidden">
-          <div className="glass sticky top-0 z-10 p-4 border-b border-border/40 flex justify-between items-center backdrop-blur-md">
-            <div className="flex items-center gap-4">
+        <main className="flex-1 overflow-x-hidden min-w-0">
+          <div className="glass sticky top-0 z-10 p-4 md:p-6 border-b border-border/40 flex justify-between items-center backdrop-blur-md">
+            <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
               <SidebarTrigger />
-              <h1 className="text-xl font-semibold tracking-tight text-foreground/90">{title}</h1>
+              <h1 className="text-lg md:text-xl font-semibold tracking-tight text-foreground/90 truncate">{title}</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 shrink-0">
               <ThemeToggle />
               <AlertDialog>
                 <AlertDialogTrigger asChild>

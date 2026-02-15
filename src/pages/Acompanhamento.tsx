@@ -433,14 +433,9 @@ export default function Acompanhamento() {
 
   return (
     <DashboardLayout title="Jornada do Visitante">
-      <div className="flex flex-col h-[calc(100vh-8rem)] space-y-4">
-
-        <div className="flex justify-end px-1">
-          <MonthYearPicker onDateChange={handleDateChange} />
-        </div>
-
-        <div className="flex justify-between items-center px-1">
-          <div className="relative w-64">
+      <div className="flex flex-col space-y-6 animate-fade-in">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-1">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar visitante..."
@@ -449,28 +444,29 @@ export default function Acompanhamento() {
               className="pl-8"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => fetchData(currentDateRange.start, currentDateRange.end)}>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <Button variant="outline" size="sm" onClick={() => fetchData(currentDateRange.start, currentDateRange.end)} className="shrink-0">
               Atualizar
             </Button>
+            <MonthYearPicker onDateChange={handleDateChange} />
           </div>
         </div>
 
         {/* Pipeline / Kanban View */}
         <ScrollArea
-          className="flex-1 pb-4 cursor-grab active:cursor-grabbing"
+          className="flex-1 pb-4 cursor-grab active:cursor-grabbing md:cursor-default"
           viewportRef={scrollContainerRef}
           onMouseDown={handleMouseDown}
           onMouseLeave={handleMouseLeave}
           onMouseUp={handleMouseUp}
           onMouseMove={handleMouseMove}
         >
-          <div className="flex gap-6 pb-4 px-2 min-w-full">
+          <div className="flex flex-col md:flex-row gap-6 pb-4 px-2 min-w-full">
             {Object.entries(JOURNEY_STAGES).map(([stageKey, stageInfo]) => {
               const stagePeople = filterPeople(stageKey);
 
               return (
-                <div key={stageKey} className="min-w-[320px] max-w-[320px] flex-shrink-0 flex flex-col h-full">
+                <div key={stageKey} className="w-full md:min-w-[320px] md:max-w-[320px] flex-shrink-0 flex flex-col h-full">
                   {/* Modern Header */}
                   <div className={`p-4 mb-3 rounded-xl shadow-sm bg-card border flex justify-between items-center group hover:shadow-md transition-all relative overflow-hidden min-h-[5.5rem]`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${stageInfo.headerClass.split(' ')[1]}`} /> {/* Extract border color */}
@@ -486,7 +482,7 @@ export default function Acompanhamento() {
                   </div>
 
                   {/* Column Body */}
-                  <div className="bg-muted/30 p-2 rounded-xl border-dashed border-2 border-muted flex-1 min-h-[500px]">
+                  <div className="bg-muted/30 p-2 rounded-xl border-dashed border-2 border-muted flex-1 min-h-[200px] md:min-h-[500px]">
                     {stagePeople.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full py-10 text-muted-foreground opacity-50">
                         <div className="bg-muted rounded-full p-3 mb-2">
@@ -759,6 +755,6 @@ export default function Acompanhamento() {
           </SheetContent>
         </Sheet>
       </div>
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }

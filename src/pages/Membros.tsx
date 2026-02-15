@@ -70,8 +70,8 @@ export default function Membros() {
         </div>
 
         {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+          <div className="relative flex-1 max-w-full sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar membros..."
@@ -80,44 +80,44 @@ export default function Membros() {
               className="pl-9"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon">
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" size="icon" className="shrink-0">
               <Filter className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="shrink-0">
               <Download className="h-4 w-4" />
             </Button>
-            <Button onClick={() => navigate('/cadastro?tipo=membro')}>
+            <Button onClick={() => navigate('/cadastro?tipo=membro')} className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4 mr-2" />
-              Novo Membro
+              <span className="whitespace-nowrap">Novo Membro</span>
             </Button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-primary/5 border-primary/10">
+            <CardContent className="pt-4 p-4">
               <div className="text-2xl font-bold">{loading ? '-' : stats.total}</div>
-              <p className="text-xs text-muted-foreground">Total de Membros</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 p-4">
               <div className="text-2xl font-bold">{loading ? '-' : stats.batizados}</div>
-              <p className="text-xs text-muted-foreground">Batizados</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Batizados</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 p-4">
               <div className="text-2xl font-bold">{loading ? '-' : stats.servindo}</div>
-              <p className="text-xs text-muted-foreground">Servindo</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Servindo</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-4 p-4">
               <div className="text-2xl font-bold">{loading ? '-' : stats.ministerios}</div>
-              <p className="text-xs text-muted-foreground">Em Ministérios</p>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Ministérios</p>
             </CardContent>
           </Card>
         </div>
@@ -140,59 +140,62 @@ export default function Membros() {
                   filteredMembros.map((membro) => (
                     <div
                       key={membro.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group"
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group gap-4"
                       onClick={() => navigate(`/acompanhamento?personId=${membro.id}`)}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
+                      <div className="flex items-center gap-4 w-full sm:w-auto">
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
                           {membro.full_name.charAt(0)}
                         </div>
-                        <div>
-                          <p className="font-medium flex items-center gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium flex items-center gap-2 truncate">
                             {membro.full_name}
-                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
                           </p>
-                          <p className="text-sm text-muted-foreground">{membro.phone}</p>
+                          <p className="text-sm text-muted-foreground truncate">{membro.phone}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
                         {membro.conversion_date && (
-                          <Badge className="bg-emerald-600 hover:bg-emerald-700 border-0 text-white">
+                          <Badge className="bg-emerald-600 hover:bg-emerald-700 border-0 text-white whitespace-nowrap">
                             Novo Convertido
                           </Badge>
                         )}
-                        <Badge variant={membro.baptized_water ? 'default' : 'outline'}>
+                        <Badge variant={membro.baptized_water ? 'default' : 'outline'} className="whitespace-nowrap">
                           {membro.baptized_water ? 'Batizado' : 'Não Batizado'}
                         </Badge>
                         {membro.member_has_served && (
-                          <Badge variant="secondary">Servindo</Badge>
+                          <Badge variant="secondary" className="whitespace-nowrap">Servindo</Badge>
                         )}
                         {membro.has_ministry && membro.ministries && membro.ministries.length > 0 && (
-                          <Badge variant="outline">{membro.ministries.length} ministério(s)</Badge>
+                          <Badge variant="outline" className="whitespace-nowrap">{membro.ministries.length} ministério(s)</Badge>
                         )}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/acompanhamento?personId=${membro.id}`);
-                            }}>
-                              Ver Perfil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Editar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/acompanhamento?personId=${membro.id}`);
-                            }}>
-                              Acompanhamento
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>Remover</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <div className="ml-auto sm:ml-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/acompanhamento?personId=${membro.id}`);
+                              }}>
+                                Ver Perfil
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Editar</DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/acompanhamento?personId=${membro.id}`);
+                              }}>
+                                Acompanhamento
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>Remover</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     </div>
                   ))

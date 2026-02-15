@@ -132,18 +132,18 @@ export default function Dashboard() {
       <div className="space-y-8 animate-fade-in p-1">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-6 rounded-xl border shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 md:p-6 rounded-xl border shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Visão Geral</h2>
-            <p className="text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
+            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Visão Geral</h2>
+            <p className="text-sm text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
           </div>
-          <div className="flex items-center bg-background rounded-lg border p-1">
+          <div className="flex items-center bg-background rounded-lg border p-1 self-end md:self-auto">
             <MonthYearPicker onDateChange={handleDateChange} />
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {statsCards.map((stat, i) => (
             <Card key={i} className="hover:shadow-lg transition-all duration-200 border-l-4" style={{ borderLeftColor: stat.color ? `var(--${stat.color.split('-')[1]})` : '' }}>
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
@@ -175,12 +175,12 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Quick Actions */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1">
             <Card className="h-full border-none shadow-md bg-gradient-to-br from-card to-secondary/10">
               <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
+                <CardTitle className="text-lg">Ações Rápidas</CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-3">
+              <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                 <Button onClick={() => navigate('/cadastro')} className="w-full justify-start text-left" size="lg">
                   <UserPlus className="h-5 w-5 mr-3 text-primary-foreground/80" />
                   Novo Cadastro
@@ -189,7 +189,7 @@ export default function Dashboard() {
                   <ClipboardList className="h-5 w-5 mr-3" />
                   Novo Acompanhamento
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/ministerios')} className="w-full justify-start text-left" size="lg">
+                <Button variant="outline" onClick={() => navigate('/ministerios')} className="w-full justify-start text-left sm:col-span-2 lg:col-span-1" size="lg">
                   <Building2 className="h-5 w-5 mr-3" />
                   Gerenciar Ministérios
                 </Button>
@@ -201,20 +201,20 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <Card className="h-full">
               <CardHeader>
-                <CardTitle>Distribuição no Período</CardTitle>
+                <CardTitle className="text-lg">Distribuição no Período</CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="h-[300px] w-full bg-secondary/30 animate-pulse rounded-lg flex items-center justify-center text-muted-foreground">
+                  <div className="h-[250px] md:h-[300px] w-full bg-secondary/30 animate-pulse rounded-lg flex items-center justify-center text-muted-foreground">
                     Carregando dados...
                   </div>
                 ) : categoryData.length > 0 ? (
-                  <div className="h-[300px] w-full">
+                  <div className="h-[250px] md:h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
                         <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" width={100} tick={{ fontSize: 12 }} />
+                        <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
                         <Tooltip
                           contentStyle={{
                             backgroundColor: 'hsl(var(--card))',
@@ -224,7 +224,7 @@ export default function Dashboard() {
                           }}
                           cursor={{ fill: 'transparent' }}
                         />
-                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={40}>
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={30}>
                           {categoryData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
@@ -233,7 +233,7 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+                  <div className="h-[250px] md:h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
                     Nenhum dado neste período
                   </div>
                 )}

@@ -149,35 +149,37 @@ const MinistryDashboard = ({
   return (
     <div className="space-y-6 h-full flex flex-col">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={onBack}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 shrink-0">
+        <div className="flex items-center gap-2 md:gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              {ministry.name}
-              <Badge variant={ministry.active ? 'default' : 'secondary'} className="text-xs">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center flex-wrap gap-2">
+              <h2 className="text-xl md:text-2xl font-bold truncate">
+                {ministry.name}
+              </h2>
+              <Badge variant={ministry.active ? 'default' : 'secondary'} className="text-[10px] h-5">
                 {ministry.active ? 'Ativo' : 'Inativo'}
               </Badge>
-            </h2>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {members.length} Membros</span>
-              <span className="flex items-center gap-1"><UserPlus className="h-3 w-3" /> {ministry.leader || 'Sem líder'}</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-0.5">
+              <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {members.length}</span>
+              <span className="flex items-center gap-1 truncate"><UserPlus className="h-3 w-3" /> {ministry.leader || 'Sem líder'}</span>
             </div>
           </div>
         </div>
-        <Button onClick={() => setIsEventDialogOpen(true)}>
+        <Button onClick={() => setIsEventDialogOpen(true)} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Nova Escala / Evento
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-6 shrink-0">
-          <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Visão Geral</TabsTrigger>
-          <TabsTrigger value="people" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Pessoas & Pipeline</TabsTrigger>
-          <TabsTrigger value="scales" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Escalas</TabsTrigger>
+        <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-4 md:gap-6 shrink-0 overflow-x-auto overflow-y-hidden">
+          <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 md:px-2 py-3 text-sm">Visão Geral</TabsTrigger>
+          <TabsTrigger value="people" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 md:px-2 py-3 text-sm">Pessoas & Pipeline</TabsTrigger>
+          <TabsTrigger value="scales" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 md:px-2 py-3 text-sm">Escalas</TabsTrigger>
         </TabsList>
 
         <div className="flex-1 mt-6 overflow-hidden flex flex-col min-h-0">
@@ -280,7 +282,7 @@ const MinistryDashboard = ({
 
           {/* PEOPLE TAB */}
           <TabsContent value="people" className="flex-1 overflow-hidden flex flex-col h-full m-0 p-0">
-            <div className="flex flex-col md:flex-row gap-6 h-full overflow-hidden pb-4">
+            <div className="flex flex-col lg:flex-row gap-6 h-full overflow-y-auto lg:overflow-hidden pb-4">
               {/* Pipeline Column */}
               <div className="flex-1 flex flex-col bg-muted/20 border rounded-lg overflow-hidden min-h-0">
                 <div className="p-3 bg-yellow-500/10 border-b border-yellow-500/20 text-yellow-700 dark:text-yellow-400 font-semibold flex justify-between shrink-0">
@@ -333,17 +335,17 @@ const MinistryDashboard = ({
               </div>
 
               {/* Member List */}
-              <div className="flex-1 flex flex-col bg-muted/20 border rounded-lg overflow-hidden min-h-0">
+              <div className="flex-1 flex flex-col bg-muted/20 border rounded-lg overflow-hidden min-h-[300px] lg:min-h-0">
                 <div className="p-3 bg-card border-b font-semibold flex justify-between shrink-0">
-                  <span>Todos os Membros</span>
+                  <span>Membros</span>
                   <Badge variant="secondary">{members.length}</Badge>
                 </div>
                 <ScrollArea className="flex-1 p-2">
                   <div className="space-y-1">
                     {members.map(p => (
                       <div key={p.id} onClick={() => navigate(`/acompanhamento?personId=${p.id}`)} className="p-2 hover:bg-muted rounded-md cursor-pointer flex justify-between items-center text-sm">
-                        <span>{p.full_name}</span>
-                        <ChevronLeft className="h-3 w-3 rotate-180 opacity-50" />
+                        <span className="truncate mr-2">{p.full_name}</span>
+                        <ChevronLeft className="h-3 w-3 rotate-180 opacity-50 shrink-0" />
                       </div>
                     ))}
                   </div>
@@ -697,7 +699,7 @@ export default function Ministerios() {
         {/* VIEW MODE: OVERVIEW (List of Ministries) */}
         {viewMode === 'overview' && (
           <div className="space-y-6 flex-col flex h-full">
-            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
               <div className="relative flex-1 w-full sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -709,7 +711,7 @@ export default function Ministerios() {
               </div>
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button><Plus className="h-4 w-4 mr-2" /> Novo Ministério</Button>
+                  <Button className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" /> Novo Ministério</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>Criar Ministério</DialogTitle></DialogHeader>
