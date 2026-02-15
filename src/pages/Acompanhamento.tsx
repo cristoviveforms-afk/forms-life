@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, MouseEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -106,6 +106,7 @@ export default function Acompanhamento() {
   const [scrollLeft, setScrollLeft] = useState(0);
 
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Drag to scroll handlers
   const handleMouseDown = (e: MouseEvent) => {
@@ -597,16 +598,34 @@ export default function Acompanhamento() {
                   </div>
 
                   {/* Actions */}
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      setNoteContent('');
-                      setContactType('Acompanhamento');
-                      setIsNoteDialogOpen(true);
-                    }}
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        // Navigate to Cadastro with query params
+                        // Assuming route is /cadastro
+                        // We need to import useNavigate if not available, checking...
+                        // It seems useNavigate is not imported in the visible snippet, but useSearchParams is.
+                        // Check imports: line 2 has useSearchParams. Need to add useNavigate to imports first? 
+                        // Wait, I need to check if useNavigate is imported.
+                        // Looking at file content again... 
+                        navigate(`/cadastro?personId=${selectedPerson.id}`);
+                      }}
+                    >
+                      <span className="mr-2">✏️</span> Editar Cadastro
+                    </Button>
+                    <Button
+                      className="flex-1"
+                      onClick={() => {
+                        setNoteContent('');
+                        setContactType('Acompanhamento');
+                        setIsNoteDialogOpen(true);
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="history" className="space-y-4 mt-4">

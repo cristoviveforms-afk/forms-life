@@ -60,6 +60,116 @@ export default function Cadastro() {
   const [isReturningVisitor, setIsReturningVisitor] = useState(false);
   const [searchPhone, setSearchPhone] = useState('');
 
+  // Fetch data if personId is provided in URL
+  useEffect(() => {
+    const editPersonId = searchParams.get('personId');
+    if (editPersonId) {
+      loadPersonData(editPersonId);
+    }
+  }, [searchParams]);
+
+  const loadPersonData = async (id: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('people' as any)
+        .select(`
+          *,
+          children (*)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error || !data) {
+        toast({
+          title: 'Erro ao carregar',
+          description: 'Cadastro não encontrado.',
+          variant: 'destructive',
+        });
+        navigate('/dashboard'); // Redirect back on error
+        return;
+      }
+
+      // Populate fields
+      setPersonId(data.id);
+
+      // Determine type if not set correctly or override
+      if (data.type) {
+        setTipoPessoa(data.type as PersonType);
+      }
+
+      setNome(data.full_name || '');
+      setNascimento(data.birth_date || '');
+      setSexo(data.gender || '');
+      setEstadoCivil(data.civil_status || '');
+      setConjuge(data.spouse_name || '');
+      setTelefone(data.phone || '');
+      setEmail(data.email || '');
+      setEndereco(data.address || '');
+      setComoConheceu(data.how_met || '');
+
+      // Check conversion today based on date? or just trust flag if we had one?
+      // For now, we don't have a specific "accepted_jesus" flag in DB different from conversion_date logic
+      // But we can check if conversion_date is Today
+      if (data.conversion_date === new Date().toISOString().split('T')[0]) {
+        setAcceptedJesus(true);
+      } else {
+        setAcceptedJesus(false);
+      }
+
+      setBatizadoAguas(data.baptized_water);
+      setDataBatismo(data.baptism_date || '');
+      setBatizadoEspirito(data.baptized_spirit);
+      setParticipaMinisterio(data.has_ministry);
+
+      const allMinistries = data.ministries || [];
+      setMinisteriosServindo(allMinistries.filter((m: string) => MINISTERIOS_LIST.includes(m)));
+      setMinisteriosAcompanhamento(allMinistries.filter((m: string) => FOLLOWUP_MINISTRIES.includes(m)));
+      setDonsNaturais(data.natural_skills || '');
+      setDonsEspirituais(data.spiritual_gifts || '');
+
+      setVisitantePrimeiraVez(data.visitor_first_time);
+      setVisitanteQuerContato(data.visitor_wants_contact);
+      setVisitanteQuerDiscipulado(data.visitor_wants_discipleship);
+      setOutraReligiao(data.visitor_religion || '');
+      setPedidoOracao(data.visitor_prayer_request || '');
+
+      if (data.type === 'convertido') {
+        setDataConversao(data.conversion_date || '');
+        setConvertidoQuerAcompanhamento(data.convert_wants_accompaniment);
+        setNecessidades(data.convert_needs || '');
+      }
+
+      if (data.type === 'membro') {
+        setDataIntegracao(data.integration_date || '');
+        setJaServiu(data.member_has_served);
+        setMinisterioAnterior(data.member_prev_ministry || '');
+      }
+
+      // Children
+      if (data.children && data.children.length > 0) {
+        setPossuiFilhos(true);
+        setFilhos(data.children.map((c: any) => ({ nome: c.name, idade: c.age || '' })));
+      } else {
+        setPossuiFilhos(false);
+        setFilhos([]);
+      }
+
+      // Hide initial questions and show form
+      setVisitorQuestionAnswered(true);
+
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast({
+        title: 'Erro',
+        description: 'Ocorreu um erro ao carregar o cadastro.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [possuiFilhos, setPossuiFilhos] = useState(false);
   const [filhos, setFilhos] = useState<Filho[]>([]);
 
