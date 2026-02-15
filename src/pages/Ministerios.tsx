@@ -111,7 +111,6 @@ const MinistryDashboard = ({
       title: newEvent.title,
       date: newEvent.date,
       time: newEvent.time,
-      time: newEvent.time,
       // description will be set below with members appended
       leader_in_charge: newEvent.leader,
       description: `${newEvent.description || ''}\n\nEscalados: ${members.filter(m => newEvent.selectedMembers.includes(m.id)).map(m => m.full_name).join(', ')}`.trim()

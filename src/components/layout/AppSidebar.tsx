@@ -46,6 +46,7 @@ const menuItems = [
 ];
 
 const bottomItems = [
+  { title: 'Avaliação', url: '/public/avaliacao', icon: Heart, external: true, badge: 'Novo' },
   { title: 'Área Pastoral', url: '/pastoral', icon: Shield },
   { title: 'Configurações', url: '/configuracoes', icon: Settings },
 ];
@@ -114,11 +115,25 @@ export function AppSidebar({ className }: { className?: string }) {
                     className="cursor-pointer"
                   >
                     <a
-                      onClick={() => navigate(item.url)}
-                      className="flex items-center gap-3"
+                      href={item.url}
+                      target={(item as any).external ? "_blank" : "_self"}
+                      rel={(item as any).external ? "noopener noreferrer" : ""}
+                      onClick={(e) => {
+                        if ((item as any).external) return;
+                        e.preventDefault();
+                        navigate(item.url);
+                      }}
+                      className="flex items-center justify-between w-full"
                     >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </div>
+                      {(item as any).badge && (
+                        <span className="bg-primary/20 text-primary text-[10px] px-1.5 py-0.5 rounded-full font-bold animate-pulse">
+                          {(item as any).badge}
+                        </span>
+                      )}
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

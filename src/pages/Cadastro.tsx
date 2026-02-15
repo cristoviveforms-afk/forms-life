@@ -146,6 +146,8 @@ export default function Cadastro() {
         setMinisterioAnterior(data.member_prev_ministry || '');
       }
 
+      setQuemConvidou(data.invited_by || '');
+
       // Children
       if (data.children && data.children.length > 0) {
         setPossuiFilhos(true);
@@ -211,6 +213,7 @@ export default function Cadastro() {
   const [dataIntegracao, setDataIntegracao] = useState('');
   const [jaServiu, setJaServiu] = useState(false);
   const [ministerioAnterior, setMinisterioAnterior] = useState('');
+  const [quemConvidou, setQuemConvidou] = useState('');
 
   const addFilho = () => {
     setFilhos([...filhos, { nome: '', idade: '' }]);
@@ -396,6 +399,8 @@ export default function Cadastro() {
         integration_date: tipoPessoa === 'membro' ? dataIntegracao || null : null,
         member_has_served: tipoPessoa === 'membro' ? jaServiu : false,
         member_prev_ministry: tipoPessoa === 'membro' && jaServiu ? ministerioAnterior : null,
+
+        invited_by: quemConvidou || null,
 
         // Always update visit date when saving/updating a visitor
         last_visit_date: new Date().toISOString(),
@@ -675,6 +680,16 @@ export default function Cadastro() {
                             </SelectContent>
                           </Select>
                         </div>
+
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="quem_convidou">Quem convidou</Label>
+                          <Input
+                            id="quem_convidou"
+                            placeholder="Nome de quem o convidou"
+                            value={quemConvidou}
+                            onChange={e => setQuemConvidou(e.target.value)}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -906,6 +921,16 @@ export default function Cadastro() {
                             />
                           </div>
                         )}
+
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="quem_convidou">Quem convidou</Label>
+                          <Input
+                            id="quem_convidou"
+                            placeholder="Nome de quem o convidou"
+                            value={quemConvidou}
+                            onChange={e => setQuemConvidou(e.target.value)}
+                          />
+                        </div>
                       </div>
 
                       {/* Filhos */}

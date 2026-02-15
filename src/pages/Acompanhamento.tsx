@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MessageSquare, ArrowRight, Phone, Plus, X } from 'lucide-react';
+import { Search, MessageSquare, ArrowRight, Phone, Plus, X, Users, UserPlus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -34,9 +34,8 @@ import { Accompaniment, Person, Ministry } from '@/types/database';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
+import { cn } from '@/lib/utils';
 
-// Define the Journey Stages
-// Define the Journey Stages with Modern Styling
 const JOURNEY_STAGES = {
   'fase1_porta': {
     label: 'Fase 1: Porta / Dados Iniciais',
@@ -75,6 +74,107 @@ const JOURNEY_STAGES = {
     badgeClass: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
   }
 };
+
+const getStageColorCode = (stage?: string) => {
+  switch (stage) {
+    case 'fase1_porta': return '#3b82f6';
+    case 'fase1_conexao': return '#6366f1';
+    case 'fase2_impacto': return '#f97316';
+    case 'fase3_retorno': return '#a855f7';
+    case 'fase4_membresia': return '#eab308';
+    default: return '#cbd5e1';
+  }
+};
+
+const getNextStage = (current?: string) => {
+  switch (current) {
+    case 'fase1_porta': return 'fase1_conexao';
+    case 'fase1_conexao': return 'fase2_impacto';
+    case 'fase2_impacto': return 'fase3_retorno';
+    case 'fase3_retorno': return 'fase4_membresia';
+    case 'fase4_membresia': return 'concluido';
+    default: return null;
+  }
+};
+
+interface PipelineCardProps {
+  person: Person;
+  onViewDetails: (p: Person) => void;
+  onAddNote: (p: Person) => void;
+  onUpdateStage: (id: string, stage: string) => void;
+}
+
+const PipelineCard = ({ person, onViewDetails, onAddNote, onUpdateStage }: PipelineCardProps) => (
+  <Card
+    className="mb-3 hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 group relative overflow-hidden"
+    style={{ borderLeftColor: getStageColorCode(person.journey_stage) }}
+    onClick={() => onViewDetails(person)}
+  >
+    <CardContent className="p-3">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex-1">
+          <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">{person.full_name}</p>
+          <p className="text-xs text-muted-foreground">{person.phone || 'Sem telefone'}</p>
+        </div>
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full hover:bg-primary/10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddNote(person);
+            }}
+          >
+            <MessageSquare className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mt-3">
+        <Badge variant="outline" className="text-[10px] px-2 h-5 bg-background/50 backdrop-blur-sm">
+          {new Date(person.created_at || '').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+        </Badge>
+
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          {person.phone && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full hover:bg-green-500/10 text-green-600"
+              title="Conversar no WhatsApp"
+              onClick={(e) => {
+                e.stopPropagation();
+                const cleanPhone = person.phone?.replace(/\D/g, '');
+                const phoneWithCountry = cleanPhone?.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+                window.open(`https://wa.me/${phoneWithCountry}`, '_blank');
+              }}
+            >
+              <Phone className="h-4 w-4" />
+            </Button>
+          )}
+          {getNextStage(person.journey_stage) && (
+            <Button
+              variant="default"
+              size="icon"
+              className="h-8 w-8 rounded-full shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all"
+              title="Avançar Fase"
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdateStage(person.id, getNextStage(person.journey_stage)!);
+              }}
+            >
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+      {person.accepted_jesus && (
+        <Badge className="mt-2 text-[10px] bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white w-full justify-center py-1">Novo Convertido</Badge>
+      )}
+    </CardContent>
+  </Card>
+);
 
 // ... (inside component) ...
 
@@ -126,10 +226,15 @@ export default function Acompanhamento() {
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging || !scrollContainerRef.current) return;
-    e.preventDefault();
+
     const x = e.pageX - scrollContainerRef.current.offsetLeft;
     const walk = (x - startX) * 2; // Scroll-fast
-    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+
+    // Add threshold to prevent swallowing clicks
+    if (Math.abs(x - startX) > 5) {
+      e.preventDefault();
+      scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+    }
   };
 
   useEffect(() => {
@@ -146,13 +251,13 @@ export default function Acompanhamento() {
 
   useEffect(() => {
     const personId = searchParams.get('personId');
-    if (personId && people.length > 0) {
+    // Guard: only call if personId is present AND it's different from the currently selected one
+    if (personId && people.length > 0 && selectedPerson?.id !== personId) {
       const person = people.find(p => p.id === personId);
       if (person) {
         handleViewDetails(person);
       } else {
-        // If not in current list (maybe concluded or different status), try fetching specific person
-        // This is a safety fallback if the person isn't in the initial filtered fetch
+        // Safe fallback for deep-linked person not in current list
         const fetchSpecificPerson = async () => {
           const { data, error } = await supabase
             .from('people')
@@ -167,7 +272,7 @@ export default function Acompanhamento() {
         fetchSpecificPerson();
       }
     }
-  }, [searchParams, people]);
+  }, [searchParams, people, selectedPerson?.id]);
 
   const fetchData = async (start?: string, end?: string) => {
     setLoading(true);
@@ -316,7 +421,46 @@ export default function Acompanhamento() {
     }
   };
 
+  const handleToggleStatus = async () => {
+    if (!selectedPerson) return;
+
+    const newType = selectedPerson.type === 'visitante' ? 'membro' : 'visitante';
+    const confirmMsg = newType === 'membro'
+      ? `Converter ${selectedPerson.full_name} em Membro?`
+      : `Mudar ${selectedPerson.full_name} para Visitante?`;
+
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      const { error } = await supabase
+        .from('people' as any)
+        .update({ type: newType } as any)
+        .eq('id', selectedPerson.id);
+
+      if (error) throw error;
+
+      toast.success(`Status atualizado para ${newType === 'membro' ? 'Membro' : 'Visitante'}!`);
+
+      const updatedPerson = { ...selectedPerson, type: newType as any };
+      setSelectedPerson(updatedPerson);
+
+      // Update local list
+      setPeople(people.map(p => p.id === selectedPerson.id ? updatedPerson : p));
+
+      // If converting to member, maybe close sheet or the list will filter them out automatically on refetch
+      // In this case, we just update local state.
+    } catch (error) {
+      console.error('Erro ao alternar status:', error);
+      toast.error('Não foi possível alterar o status.');
+    }
+  };
+
   const handleViewDetails = async (person: Person) => {
+    // Guard: only navigate if the ID actually changed in the URL
+    if (searchParams.get('personId') !== person.id) {
+      navigate(`/acompanhamento?personId=${person.id}`, { replace: true });
+    }
+
     setSelectedPerson(person);
     setIsDetailsOpen(true);
     try {
@@ -391,45 +535,6 @@ export default function Acompanhamento() {
     concluido: 'Concluído'
   };
 
-  // Component inside to avoid recreation, but could be outside if no closure deps needed (except updateStage etc)
-  const PipelineCard = ({ person }: { person: Person }) => (
-    <Card className="mb-3 hover:shadow-md transition-shadow cursor-pointer border-l-4" style={{ borderLeftColor: getStageColorCode(person.journey_stage) }}>
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start mb-2">
-          <div onClick={() => handleViewDetails(person)} className="flex-1">
-            <p className="font-semibold text-sm truncate">{person.full_name}</p>
-            <p className="text-xs text-muted-foreground">{person.phone || 'Sem telefone'}</p>
-          </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setSelectedPerson(person); setContactType('Acompanhamento'); setIsNoteDialogOpen(true); }}>
-            <MessageSquare className="h-3 w-3" />
-          </Button>
-        </div>
-
-        <div className="flex items-center justify-between mt-2">
-          <Badge variant="outline" className="text-[10px] px-1 h-5">
-            {new Date(person.created_at || '').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-          </Badge>
-
-          <div className="flex gap-1">
-            {getNextStage(person.journey_stage) && (
-              <Button
-                variant="default"
-                size="icon"
-                className="h-6 w-6 rounded-full"
-                title="Avançar Fase"
-                onClick={(e) => { e.stopPropagation(); updateStage(person.id, getNextStage(person.journey_stage)!); }}
-              >
-                <ArrowRight className="h-3 w-3" />
-              </Button>
-            )}
-          </div>
-        </div>
-        {person.accepted_jesus && (
-          <Badge className="mt-2 text-[10px] bg-yellow-500 hover:bg-yellow-600 text-white w-full justify-center">Novo Convertido</Badge>
-        )}
-      </CardContent>
-    </Card>
-  );
 
   return (
     <DashboardLayout title="Jornada do Visitante">
@@ -493,7 +598,17 @@ export default function Acompanhamento() {
                     ) : (
                       <div className="space-y-3">
                         {stagePeople.map(person => (
-                          <PipelineCard key={person.id} person={person} />
+                          <PipelineCard
+                            key={person.id}
+                            person={person}
+                            onViewDetails={handleViewDetails}
+                            onUpdateStage={updateStage}
+                            onAddNote={(p) => {
+                              setSelectedPerson(p);
+                              setContactType('Acompanhamento');
+                              setIsNoteDialogOpen(true);
+                            }}
+                          />
                         ))}
                       </div>
                     )}
@@ -544,7 +659,13 @@ export default function Acompanhamento() {
         </Dialog>
 
         {/* Individual Dashboard Sheet */}
-        <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <Sheet open={isDetailsOpen} onOpenChange={(open) => {
+          setIsDetailsOpen(open);
+          if (!open) {
+            // Clear URL param when closing
+            navigate('/acompanhamento', { replace: true });
+          }
+        }}>
           <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
             <SheetHeader className="mb-6">
               <SheetTitle className="flex items-center gap-3">
@@ -554,7 +675,12 @@ export default function Acompanhamento() {
                 </Avatar>
                 <div className="flex flex-col">
                   <span>{selectedPerson?.full_name}</span>
-                  <span className="text-xs font-normal text-muted-foreground">{selectedPerson?.type?.toUpperCase()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-normal text-muted-foreground">{selectedPerson?.type?.toUpperCase()}</span>
+                    {selectedPerson?.invited_by && (
+                      <span className="text-xs font-normal text-muted-foreground">• Convidado por {selectedPerson.invited_by}</span>
+                    )}
+                  </div>
                 </div>
               </SheetTitle>
             </SheetHeader>
@@ -570,56 +696,77 @@ export default function Acompanhamento() {
 
                 <TabsContent value="overview" className="space-y-6 mt-4">
                   {/* Quick Stats */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                      <span className="block text-2xl font-bold">{personHistory.length}</span>
-                      <span className="text-xs text-muted-foreground">Contatos</span>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-2xl font-black text-primary">{personHistory.length}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Contatos</span>
                     </div>
-                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                      <span className="block text-2xl font-bold">{personHistory.filter(h => h.status === 'concluido').length}</span>
-                      <span className="text-xs text-muted-foreground">Concluídos</span>
+                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-2xl font-black text-primary">{personHistory.filter(h => h.status === 'concluido').length}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Concluídos</span>
                     </div>
-                    <div className="bg-secondary/30 p-3 rounded-lg text-center">
-                      <span className="block text-2xl font-bold">{personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}</span>
-                      <span className="text-xs text-muted-foreground">Último</span>
+                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-2xl font-black text-primary">
+                        {personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Último</span>
                     </div>
                   </div>
 
                   {/* Contact Info */}
                   <div className="space-y-4">
-                    <div className="flex items-center gap-2 p-3 bg-secondary/10 rounded-lg">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{selectedPerson.phone}</span>
+                    <div
+                      className="flex items-center gap-3 p-4 bg-muted/40 backdrop-blur-sm rounded-2xl border cursor-pointer hover:bg-green-500/10 hover:border-green-500/30 transition-all group"
+                      onClick={() => {
+                        const cleanPhone = selectedPerson.phone?.replace(/\D/g, '');
+                        const phoneWithCountry = cleanPhone?.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+                        window.open(`https://wa.me/${phoneWithCountry}`, '_blank');
+                      }}
+                    >
+                      <div className="bg-primary/10 p-2 rounded-xl group-hover:bg-green-500/20 transition-colors">
+                        <Phone className="h-5 w-5 text-primary group-hover:text-green-600" />
+                      </div>
+                      <span className="font-bold text-lg tracking-tight group-hover:text-green-600 transition-colors">{selectedPerson.phone}</span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1 h-12"
+                        onClick={() => navigate(`/cadastro?personId=${selectedPerson.id}`)}
+                      >
+                        <span className="mr-2">✏️</span> Editar Cadastro
+                      </Button>
+                      <Button
+                        className="flex-1 h-12"
+                        onClick={() => {
+                          setNoteContent('');
+                          setContactType('Acompanhamento');
+                          setIsNoteDialogOpen(true);
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
+                      </Button>
+                    </div>
+
                     <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => {
-                        // Navigate to Cadastro with query params
-                        // Assuming route is /cadastro
-                        // We need to import useNavigate if not available, checking...
-                        // It seems useNavigate is not imported in the visible snippet, but useSearchParams is.
-                        // Check imports: line 2 has useSearchParams. Need to add useNavigate to imports first? 
-                        // Wait, I need to check if useNavigate is imported.
-                        // Looking at file content again... 
-                        navigate(`/cadastro?personId=${selectedPerson.id}`);
-                      }}
+                      variant="secondary"
+                      className={cn(
+                        "w-full h-11 font-bold group",
+                        selectedPerson.type === 'visitante'
+                          ? "bg-green-500/10 text-green-600 hover:bg-green-500/20"
+                          : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"
+                      )}
+                      onClick={handleToggleStatus}
                     >
-                      <span className="mr-2">✏️</span> Editar Cadastro
-                    </Button>
-                    <Button
-                      className="flex-1"
-                      onClick={() => {
-                        setNoteContent('');
-                        setContactType('Acompanhamento');
-                        setIsNoteDialogOpen(true);
-                      }}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
+                      {selectedPerson.type === 'visitante' ? (
+                        <><Users className="mr-2 h-4 w-4" /> Converter em Membro</>
+                      ) : (
+                        <><UserPlus className="mr-2 h-4 w-4" /> Tornar Visitante</>
+                      )}
                     </Button>
                   </div>
                 </TabsContent>
@@ -755,6 +902,6 @@ export default function Acompanhamento() {
           </SheetContent>
         </Sheet>
       </div>
-    </DashboardLayout >
+    </DashboardLayout>
   );
 }

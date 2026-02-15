@@ -20,6 +20,8 @@ import Acompanhamento from "./pages/Acompanhamento";
 import Pastoral from "./pages/Pastoral";
 import Cadastro from "./pages/Cadastro";
 import Configuracoes from "./pages/Configuracoes";
+import Avaliacao from "./pages/Avaliacao";
+import ResultadosAvaliacao from "./pages/ResultadosAvaliacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,7 +55,10 @@ const App = () => (
               <Route path="/acompanhamento" element={<ProtectedRoute><Acompanhamento /></ProtectedRoute>} />
               <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
               <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/avaliacao" element={<ProtectedRoute><Avaliacao /></ProtectedRoute>} />
+              <Route path="/public/avaliacao" element={<Avaliacao isPublic={true} />} />
+              <Route path="/pastoral/resultados-avaliacao" element={<ProtectedRoute><ResultadosAvaliacao /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

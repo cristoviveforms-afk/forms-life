@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Users, UserPlus, Heart, Activity, CheckCircle2, AlertCircle, Clock, ChevronRight, TrendingUp, User } from 'lucide-react';
+import { Loader2, Users, UserPlus, Heart, Activity, CheckCircle2, AlertCircle, Clock, ChevronRight, TrendingUp, User, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Person, Accompaniment } from '@/types/database';
@@ -245,6 +245,26 @@ export default function Pastoral() {
                             <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
                                 <Activity className="h-6 w-6 text-green-500" />
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* NEW: Survey Results Access */}
+                    <Card
+                        onClick={() => navigate('/pastoral/resultados-avaliacao')}
+                        className="group hover:shadow-xl transition-all duration-500 cursor-pointer border-l-4 border-l-primary bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden"
+                    >
+                        <CardContent className="pt-6 flex items-center justify-between">
+                            <div className="z-10">
+                                <p className="text-sm font-bold text-primary mb-1 uppercase tracking-wider">Dash de Reação</p>
+                                <div className="text-xl font-black text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                                    Resultados <ChevronRight className="h-4 w-4" />
+                                </div>
+                            </div>
+                            <div className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform z-10">
+                                <Sparkles className="h-7 w-7" />
+                            </div>
+                            {/* Decorative background icon */}
+                            <Heart className="absolute -bottom-4 -right-4 h-24 w-24 text-primary/5 -rotate-12 transition-transform group-hover:scale-110" />
                         </CardContent>
                     </Card>
                 </div>
