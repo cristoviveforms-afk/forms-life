@@ -5,12 +5,16 @@ import {
   UserPlus,
   Heart,
   Building2,
-  ClipboardList,
   Settings,
   LogOut,
-  Shield,
+  Home,
+  Calendar,
   Cake,
-} from 'lucide-react';
+  HeartHandshake,
+  ClipboardList,
+  Shield,
+  Puzzle
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +43,8 @@ import logo from '@/assets/logo_igreja.png';
 
 const menuItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Boas-Vindas', url: '/boas-vindas', icon: HeartHandshake },
+  { title: 'Conexão', url: '/conexao', icon: Puzzle },
   { title: 'Membros', url: '/membros', icon: Users },
   { title: 'Visitantes', url: '/visitantes', icon: UserPlus },
   { title: 'Novos Convertidos', url: '/convertidos', icon: Heart },

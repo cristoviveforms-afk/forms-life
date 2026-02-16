@@ -25,6 +25,9 @@ import Avaliacao from "./pages/Avaliacao";
 import ResultadosAvaliacao from "./pages/ResultadosAvaliacao";
 import NotFound from "./pages/NotFound";
 
+import BoasVindas from './pages/BoasVindas';
+import Conexao from './pages/Conexao';
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -60,6 +63,8 @@ const App = () => (
               <Route path="/avaliacao" element={<ProtectedRoute><Avaliacao /></ProtectedRoute>} />
               <Route path="/public/avaliacao" element={<Avaliacao isPublic={true} />} />
               <Route path="/pastoral/resultados-avaliacao" element={<ProtectedRoute><ResultadosAvaliacao /></ProtectedRoute>} />
+              <Route path="/boas-vindas" element={<ProtectedRoute><BoasVindas /></ProtectedRoute>} />
+              <Route path="/conexao" element={<ProtectedRoute><Conexao /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </BrowserRouter>
