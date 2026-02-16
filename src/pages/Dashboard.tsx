@@ -132,14 +132,15 @@ export default function Dashboard() {
       <div className="space-y-8 animate-fade-in p-1">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-4 md:p-6 rounded-xl border shadow-sm">
-          <div>
-            <h2 className="text-xl md:text-2xl font-bold tracking-tight">Visão Geral</h2>
-            <p className="text-sm text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
           </div>
-          <div className="flex items-center bg-background rounded-lg border p-1 self-end md:self-auto">
-            <MonthYearPicker onDateChange={handleDateChange} />
-          </div>
+        </div>
+
+        <div className="w-full">
+          <MonthYearPicker onDateChange={handleDateChange} />
         </div>
 
         {/* Stats Cards */}

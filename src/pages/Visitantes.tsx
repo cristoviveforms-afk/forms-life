@@ -192,30 +192,39 @@ export default function Visitantes() {
   return (
     <DashboardLayout title="Visitantes">
       <div className="space-y-6 animate-fade-in">
-        <div className="flex justify-end">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">Visitantes</h2>
+            <p className="text-muted-foreground">Gerencie os visitantes e sua jornada na igreja.</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" className="rounded-xl">
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button onClick={() => navigate('/cadastro?tipo=visitante')} className="rounded-xl font-bold shadow-lg shadow-primary/20">
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Visitante
+            </Button>
+          </div>
+        </div>
+
+        <div className="w-full">
           <MonthYearPicker onDateChange={handleDateChange} />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar visitantes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl">
               <Filter className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Download className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => navigate('/cadastro?tipo=visitante')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Visitante
             </Button>
           </div>
         </div>

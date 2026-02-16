@@ -539,22 +539,24 @@ export default function Acompanhamento() {
   return (
     <DashboardLayout title="Jornada do Visitante">
       <div className="flex flex-col space-y-6 animate-fade-in">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-1">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 px-1">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight">Jornada do Visitante</h2>
+            <p className="text-muted-foreground text-sm">Acompanhe o progresso de integração.</p>
+          </div>
+          <div className="relative w-full md:w-72">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar visitante..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-8"
+              className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
             />
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <Button variant="outline" size="sm" onClick={() => fetchData(currentDateRange.start, currentDateRange.end)} className="shrink-0">
-              Atualizar
-            </Button>
-            <MonthYearPicker onDateChange={handleDateChange} />
-          </div>
+        </div>
+
+        <div className="px-1">
+          <MonthYearPicker onDateChange={handleDateChange} />
         </div>
 
         {/* Pipeline / Kanban View */}

@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   Shield,
+  Cake,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -43,6 +44,7 @@ const menuItems = [
   { title: 'Novos Convertidos', url: '/convertidos', icon: Heart },
   { title: 'Ministérios', url: '/ministerios', icon: Building2 },
   { title: 'Acompanhamento', url: '/acompanhamento', icon: ClipboardList },
+  { title: 'Aniversariantes', url: '/aniversariantes', icon: Cake },
 ];
 
 const bottomItems = [

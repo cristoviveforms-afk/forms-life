@@ -19,6 +19,7 @@ import Ministerios from "./pages/Ministerios";
 import Acompanhamento from "./pages/Acompanhamento";
 import Pastoral from "./pages/Pastoral";
 import Cadastro from "./pages/Cadastro";
+import Aniversariantes from "./pages/Aniversariantes";
 import Configuracoes from "./pages/Configuracoes";
 import Avaliacao from "./pages/Avaliacao";
 import ResultadosAvaliacao from "./pages/ResultadosAvaliacao";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/convertidos" element={<ProtectedRoute><Convertidos /></ProtectedRoute>} />
               <Route path="/ministerios" element={<ProtectedRoute><Ministerios /></ProtectedRoute>} />
               <Route path="/acompanhamento" element={<ProtectedRoute><Acompanhamento /></ProtectedRoute>} />
+              <Route path="/aniversariantes" element={<ProtectedRoute><Aniversariantes /></ProtectedRoute>} />
               <Route path="/cadastro" element={<ProtectedRoute><Cadastro /></ProtectedRoute>} />
               <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
               <Route path="/avaliacao" element={<ProtectedRoute><Avaliacao /></ProtectedRoute>} />
