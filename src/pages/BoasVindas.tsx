@@ -20,6 +20,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 import { Person } from '@/types/database';
+import { useNavigate } from 'react-router-dom';
 
 interface VisitorStats {
     total: number;
@@ -30,6 +31,7 @@ interface VisitorStats {
 }
 
 export default function BoasVindas() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [visitors, setVisitors] = useState<any[]>([]);
@@ -231,8 +233,13 @@ export default function BoasVindas() {
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity rounded-xl">
-                                                    Ver Detalhes
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded-xl h-8 font-bold"
+                                                    onClick={() => navigate(`/cadastro?id=${v.id}&mode=boas-vindas&tipo=visitante`)}
+                                                >
+                                                    Ver / Editar
                                                 </Button>
                                             </div>
                                         ))

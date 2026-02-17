@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MessageSquare, ArrowRight, Phone, Plus, X, Users, UserPlus, Baby } from 'lucide-react';
+import { Search, MessageSquare, ArrowRight, Phone, Plus, X, Users, UserPlus, Baby, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,16 @@ import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const JOURNEY_STAGES = {
   'fase1_porta': {
@@ -105,7 +115,7 @@ interface PipelineCardProps {
   onUpdateStage: (id: string, stage: string) => void;
 }
 
-const PipelineCard = ({ person, onViewDetails, onAddNote, onUpdateStage }: PipelineCardProps) => (
+const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUpdateStage }: PipelineCardProps) => (
   <Card
     className="mb-3 hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 group relative overflow-hidden"
     style={{ borderLeftColor: getStageColorCode(person.journey_stage) }}
@@ -134,7 +144,7 @@ const PipelineCard = ({ person, onViewDetails, onAddNote, onUpdateStage }: Pipel
 
       <div className="flex items-center justify-between mt-3">
         <Badge variant="outline" className="text-[10px] px-2 h-5 bg-background/50 backdrop-blur-sm">
-          {new Date(person.created_at || '').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+          {person.created_at ? new Date(person.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
         </Badge>
 
         <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -182,10 +192,6 @@ const PipelineCard = ({ person, onViewDetails, onAddNote, onUpdateStage }: Pipel
   </Card>
 );
 
-// ... (inside component) ...
-
-
-
 
 export default function Acompanhamento() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -202,6 +208,7 @@ export default function Acompanhamento() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [personHistory, setPersonHistory] = useState<Accompaniment[]>([]);
   const [familyMembers, setFamilyMembers] = useState<Person[]>([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
 
   const [currentDateRange, setCurrentDateRange] = useState({ start: '', end: '' });
@@ -312,8 +319,7 @@ export default function Acompanhamento() {
         (activeCheckinsData as any[])?.map(c => c.people?.family_id).filter(Boolean)
       );
       setActiveCheckinFamilies(families);
-
-      setPeople(data as unknown as Person[]);
+      setPeople((data as unknown as Person[]) || []);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
       toast.error('Erro ao carregar a jornada.');
@@ -474,6 +480,31 @@ export default function Acompanhamento() {
     }
   };
 
+  const handleDeletePerson = async () => {
+    if (!selectedPerson) return;
+
+    try {
+      const { error } = await supabase
+        .from('people' as any)
+        .delete()
+        .eq('id', selectedPerson.id);
+
+      if (error) throw error;
+
+      toast.success('Registro excluído com sucesso.');
+      setPeople(people.filter(p => p.id !== selectedPerson.id));
+      setIsDetailsOpen(false);
+      setDeleteDialogOpen(false);
+      setSelectedPerson(null);
+
+      // Clean URL
+      navigate('/acompanhamento', { replace: true });
+    } catch (error) {
+      console.error('Erro ao excluir registro:', error);
+      toast.error('Não foi possível excluir o registro.');
+    }
+  };
+
   const handleViewDetails = async (person: Person) => {
     // Guard: only navigate if the ID actually changed in the URL
     if (searchParams.get('personId') !== person.id) {
@@ -512,6 +543,7 @@ export default function Acompanhamento() {
   };
 
   const filterPeople = (stage: string) => {
+    if (!people) return [];
     return people.filter(p => {
       // Default to fase1_porta if undefined and type is visitante, or check logic
       const pStage = p.journey_stage || (p.type === 'visitante' ? 'fase1_porta' : 'unknown');
@@ -758,7 +790,10 @@ export default function Acompanhamento() {
                       <Button
                         variant="outline"
                         className="flex-1 h-12"
-                        onClick={() => navigate(`/cadastro?personId=${selectedPerson.id}`)}
+                        onClick={() => {
+                          const mode = selectedPerson.journey_stage === 'fase1_porta' ? 'boas-vindas' : 'conexao';
+                          navigate(`/cadastro?id=${selectedPerson.id}&mode=${mode}&tipo=${selectedPerson.type}`);
+                        }}
                       >
                         <span className="mr-2">✏️</span> Editar Cadastro
                       </Button>
@@ -789,6 +824,14 @@ export default function Acompanhamento() {
                       ) : (
                         <><UserPlus className="mr-2 h-4 w-4" /> Tornar Visitante</>
                       )}
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      className="w-full h-11 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 font-bold"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" /> Excluir Registro
                     </Button>
                   </div>
                 </TabsContent>
@@ -824,7 +867,7 @@ export default function Acompanhamento() {
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-sm">{history.type}</span>
                               <span className="text-xs text-muted-foreground">
-                                {new Date(history.created_at).toLocaleDateString()}
+                                {history.created_at ? new Date(history.created_at).toLocaleDateString('pt-BR') : '-'}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md mt-1">
@@ -902,7 +945,7 @@ export default function Acompanhamento() {
                             <div className="overflow-hidden">
                               <p className="font-medium text-sm truncate">{member.full_name}</p>
                               <p className="text-xs text-muted-foreground capitalize">
-                                {member.type} • {member.birth_date ? new Date().getFullYear() - new Date(member.birth_date).getFullYear() : '?'} anos
+                                {member.type} • {member.birth_date && !isNaN(new Date(member.birth_date).getTime()) ? new Date().getFullYear() - new Date(member.birth_date).getFullYear() : '?'} anos
                               </p>
                             </div>
                             <Button variant="ghost" size="icon" className="ml-auto">
@@ -923,6 +966,27 @@ export default function Acompanhamento() {
             )}
           </SheetContent>
         </Sheet>
+
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Tem certeza absoluta?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Isso excluirá permanentemente o cadastro de{" "}
+                <strong>{selectedPerson?.full_name}</strong> e todos os seus dados associados do nosso sistema.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeletePerson}
+                className="bg-rose-500 hover:bg-rose-600 focus:ring-rose-500"
+              >
+                Sim, Excluir Registro
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </DashboardLayout>
   );

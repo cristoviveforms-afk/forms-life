@@ -14,7 +14,13 @@ import {
     Star,
     UserPlus,
     Printer,
-    ClipboardList
+    ClipboardList,
+    Camera,
+    X,
+    Upload,
+    ChevronLeft,
+    ChevronRight,
+    Image as ImageIcon
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -54,9 +60,7 @@ interface CheckinRecord {
     checkin_time: string;
     security_code: string;
     status: string;
-    observations: string;
-    child_id: string;
-    responsible_id: string;
+    photos?: string[];
     children: {
         full_name: string;
         birth_date: string;
@@ -69,6 +73,59 @@ interface CheckinRecord {
     };
 }
 
+// Helper Component for parsing and rendering observations with badges
+const ObservationBadges = ({ text, type }: { text: string; type: 'session' | 'permanent' }) => {
+    if (!text) return null;
+
+    const match = text.match(/^\[(.*?)\] (.*)$/);
+    const categories = match ? match[1].split(',').map(s => s.trim()) : [];
+    const description = match ? match[2] : text;
+
+    const getBadgeStyle = (cat: string) => {
+        const c = cat.toLowerCase();
+        if (c.includes('alergia')) return "bg-rose-500 text-white shadow-rose-200";
+        if (c.includes('medica')) return "bg-blue-600 text-white shadow-blue-200";
+        if (c.includes('alimentar')) return "bg-orange-500 text-white shadow-orange-200";
+        if (c.includes('cuidado')) return "bg-purple-600 text-white shadow-purple-200";
+        return "bg-slate-500 text-white shadow-slate-200";
+    };
+
+    return (
+        <div className={`flex flex-col gap-2 p-3 rounded-2xl border transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/5 cursor-default group/obs ${type === 'session'
+            ? "bg-rose-50/50 dark:bg-rose-950/20 border-rose-100 dark:border-rose-900/30 shadow-sm hover:border-rose-300 dark:hover:border-rose-700"
+            : "bg-amber-50/50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30 shadow-sm hover:border-amber-300 dark:hover:border-amber-700"
+            }`}>
+            <div className="flex items-center gap-2">
+                {type === 'session' ? (
+                    <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+                ) : (
+                    <Baby className="h-4 w-4 text-amber-600 shrink-0" />
+                )}
+                <span className={`text-[10px] font-black uppercase tracking-widest ${type === 'session' ? "text-rose-600" : "text-amber-700"
+                    }`}>
+                    {type === 'session' ? "Cuidado Hoje" : "Permanente"}
+                </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5 mt-1">
+                {categories.map((cat, i) => (
+                    <span
+                        key={i}
+                        className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase shadow-sm ${getBadgeStyle(cat)}`}
+                    >
+                        {cat}
+                    </span>
+                ))}
+            </div>
+
+            <p className={`text-sm font-medium leading-tight mt-1 ${type === 'session' ? "text-rose-900 dark:text-rose-100" : "text-amber-900 dark:text-amber-100"
+                }`}>
+                {description}
+            </p>
+        </div>
+    );
+};
+
 export default function KidsDashboard() {
     const [loading, setLoading] = useState(true);
     const [records, setRecords] = useState<CheckinRecord[]>([]);
@@ -76,6 +133,8 @@ export default function KidsDashboard() {
     const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<CheckinRecord | null>(null);
     const [confirmCode, setConfirmCode] = useState('');
+    const [photoUploadDialogOpen, setPhotoUploadDialogOpen] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const { toast } = useToast();
 
     const fetchActiveCheckins = async () => {
@@ -186,6 +245,102 @@ export default function KidsDashboard() {
             description: `Enviando comando de impressão para ${record.children.full_name}...`,
         });
         // In a real scenario, this would trigger the Thermal Printer SDK/API
+    };
+
+    const handleUploadPhotos = async (files: FileList) => {
+        if (!selectedRecord) return;
+
+        const currentPhotos = selectedRecord.photos || [];
+        if (currentPhotos.length + files.length > 5) {
+            toast({
+                title: "Limite de fotos atingido",
+                description: "Você pode enviar no máximo 5 fotos por check-in.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        setUploading(true);
+        const newPhotoUrls: string[] = [];
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${selectedRecord.id}/${Math.random()}.${fileExt}`;
+                const filePath = `${fileName}`;
+
+                const { error: uploadError, data } = await supabase.storage
+                    .from('kids-photos')
+                    .upload(filePath, file);
+
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabase.storage
+                    .from('kids-photos')
+                    .getPublicUrl(filePath);
+
+                newPhotoUrls.push(publicUrl);
+            }
+
+            const { error: updateError } = await supabase
+                .from('kids_checkins' as any)
+                .update({
+                    photos: [...currentPhotos, ...newPhotoUrls]
+                })
+                .eq('id', selectedRecord.id);
+
+            if (updateError) throw updateError;
+
+            toast({
+                title: "Fotos enviadas",
+                description: `${files.length} foto(s) foram adicionadas ao registro.`,
+            });
+
+            fetchActiveCheckins();
+            // Update local selected record to reflect changes immediately
+            setSelectedRecord(prev => prev ? { ...prev, photos: [...(prev.photos || []), ...newPhotoUrls] } : null);
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast({
+                title: "Erro no envio",
+                description: "Não foi possível carregar as fotos.",
+                variant: "destructive"
+            });
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDeletePhoto = async (photoUrl: string) => {
+        if (!selectedRecord) return;
+
+        try {
+            const updatedPhotos = (selectedRecord.photos || []).filter(p => p !== photoUrl);
+
+            const { error: updateError } = await supabase
+                .from('kids_checkins' as any)
+                .update({ photos: updatedPhotos })
+                .eq('id', selectedRecord.id);
+
+            if (updateError) throw updateError;
+
+            // Optional: Delete from storage as well
+            const path = photoUrl.split('kids-photos/')[1];
+            if (path) {
+                await supabase.storage.from('kids-photos').remove([path]);
+            }
+
+            setSelectedRecord(prev => prev ? { ...prev, photos: updatedPhotos } : null);
+            fetchActiveCheckins();
+
+            toast({
+                title: "Foto removida",
+                description: "A foto foi excluída com sucesso.",
+            });
+        } catch (error) {
+            console.error('Delete photo error:', error);
+        }
     };
 
     const filteredRecords = records.filter(r => {
@@ -369,14 +524,21 @@ export default function KidsDashboard() {
                                                         {format(new Date(record.checkin_time), 'HH:mm')}
                                                     </div>
                                                 </TableCell>
-                                                <TableCell className="hidden md:table-cell">
-                                                    {record.children.observations ? (
-                                                        <div className="flex items-center gap-2 text-rose-500 font-bold text-xs bg-rose-50 dark:bg-rose-950/30 p-2 rounded-xl border border-rose-100 dark:border-rose-900/50">
-                                                            <AlertCircle size={14} />
-                                                            {record.children.observations}
+                                                <TableCell className="hidden md:table-cell py-4 min-w-[280px]">
+                                                    {(record.observations || record.children.observations) ? (
+                                                        <div className="flex flex-col gap-3">
+                                                            {record.observations && (
+                                                                <ObservationBadges text={record.observations} type="session" />
+                                                            )}
+                                                            {record.children.observations && (
+                                                                <ObservationBadges text={record.children.observations} type="permanent" />
+                                                            )}
                                                         </div>
                                                     ) : (
-                                                        <span className="text-xs text-slate-400 italic">Nenhuma observação</span>
+                                                        <div className="flex items-center gap-2 text-slate-300 dark:text-slate-700 italic text-xs ml-2">
+                                                            <ShieldCheck className="h-3.5 w-3.5 opacity-50" />
+                                                            Nenhuma observação
+                                                        </div>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-right pr-8">
@@ -408,13 +570,19 @@ export default function KidsDashboard() {
                                                                     <CheckCircle2 className="mr-2 h-4 w-4" /> Validar Check-out
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
+                                                                    className="rounded-xl py-2.5 font-bold text-primary focus:text-primary focus:bg-primary/5"
+                                                                    onClick={() => {
+                                                                        setSelectedRecord(record);
+                                                                        setPhotoUploadDialogOpen(true);
+                                                                    }}
+                                                                >
+                                                                    <Camera className="mr-2 h-4 w-4" /> Anexar Fotos ({(record.photos?.length || 0)}/5)
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
                                                                     className="rounded-xl py-2.5 font-medium"
                                                                     onClick={() => handlePrintLabel(record)}
                                                                 >
                                                                     <Printer className="mr-2 h-4 w-4" /> Reimprimir Etiqueta
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem className="rounded-xl py-2.5 font-medium">
-                                                                    <ClipboardList className="mr-2 h-4 w-4" /> Ver Ficha Médica
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
@@ -456,6 +624,117 @@ export default function KidsDashboard() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Photo Upload Dialog */}
+                <Dialog open={photoUploadDialogOpen} onOpenChange={setPhotoUploadDialogOpen}>
+                    <DialogContent className="max-w-2xl rounded-[40px] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-900">
+                        <DialogHeader className="p-8 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-primary/10 p-3 rounded-2xl">
+                                        <Camera className="h-6 w-6 text-primary" />
+                                    </div>
+                                    <div>
+                                        <DialogTitle className="text-2xl font-black">Fotos da Atividade</DialogTitle>
+                                        <DialogDescription className="text-sm font-medium">
+                                            Compartilhe momentos de <span className="text-slate-900 dark:text-slate-100 font-bold">{selectedRecord?.children.full_name}</span> com os pais hoje.
+                                        </DialogDescription>
+                                    </div>
+                                </div>
+                                <Badge variant="outline" className="h-8 px-4 rounded-full font-black text-xs uppercase tracking-tight border-primary/20 bg-primary/5 text-primary">
+                                    {selectedRecord?.photos?.length || 0} / 5 Fotos
+                                </Badge>
+                            </div>
+                        </DialogHeader>
+
+                        <div className="p-8 space-y-8">
+                            {/* Upload Area */}
+                            {(selectedRecord?.photos?.length || 0) < 5 && (
+                                <div className="relative group/upload">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files.length > 0) {
+                                                handleUploadPhotos(e.target.files);
+                                            }
+                                        }}
+                                        disabled={uploading}
+                                    />
+                                    <div className={`h-40 border-4 border-dashed rounded-[32px] flex flex-col items-center justify-center gap-3 transition-all ${uploading
+                                        ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
+                                        : "bg-primary/5 border-primary/20 group-hover/upload:border-primary group-hover/upload:bg-primary/10"
+                                        }`}>
+                                        {uploading ? (
+                                            <>
+                                                <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full" />
+                                                <p className="text-sm font-black text-primary uppercase tracking-widest">Enviando fotos...</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="bg-primary/10 p-4 rounded-full group-hover/upload:scale-110 transition-transform">
+                                                    <Upload className="h-8 w-8 text-primary" />
+                                                </div>
+                                                <div className="text-center">
+                                                    <p className="font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Clique ou arraste fotos aqui</p>
+                                                    <p className="text-xs text-slate-500 font-medium">JPG ou PNG (Máx 5MB)</p>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Gallery Grid */}
+                            {selectedRecord?.photos && selectedRecord.photos.length > 0 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    {selectedRecord.photos.map((photo, idx) => (
+                                        <div key={idx} className="relative aspect-square rounded-3xl overflow-hidden group/photo border-2 border-slate-100 dark:border-slate-800 shadow-sm">
+                                            <img
+                                                src={photo}
+                                                alt={`Momento ${idx + 1}`}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/photo:opacity-100 transition-opacity" />
+                                            <button
+                                                onClick={() => handleDeletePhoto(photo)}
+                                                className="absolute top-2 right-2 h-8 w-8 bg-black/50 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md flex items-center justify-center transition-colors opacity-0 group-hover/photo:opacity-100"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                            <div className="absolute bottom-3 left-3 opacity-0 group-hover/photo:opacity-100 transition-opacity">
+                                                <p className="text-[10px] font-black text-white uppercase tracking-widest">Foto {idx + 1}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {[...Array(5 - selectedRecord.photos.length)].map((_, i) => (
+                                        <div key={`empty-${i}`} className="aspect-square rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
+                                            <ImageIcon className="h-8 w-8 text-slate-200 dark:text-slate-800" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : !uploading && (
+                                <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[32px]">
+                                    <div className="bg-slate-50 dark:bg-slate-800 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <ImageIcon className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+                                    </div>
+                                    <p className="text-slate-400 text-sm font-medium italic">Nenhuma foto enviada ainda hoje.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                            <Button
+                                className="w-full h-16 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-all uppercase tracking-tight"
+                                onClick={() => setPhotoUploadDialogOpen(false)}
+                            >
+                                Concluído
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Checkout Verification Dialog */}
                 <Dialog open={checkoutDialogOpen} onOpenChange={setCheckoutDialogOpen}>

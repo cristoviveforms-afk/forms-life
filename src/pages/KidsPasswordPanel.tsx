@@ -4,6 +4,9 @@ import { ShieldAlert, Users, Bell } from 'lucide-react';
 
 interface AlertRecord {
     security_code: string;
+    observations?: string;
+    child?: { full_name: string };
+    responsible?: { full_name: string; phone: string };
 }
 
 export default function KidsPasswordPanel() {
@@ -12,7 +15,12 @@ export default function KidsPasswordPanel() {
     const fetchAlerts = async () => {
         const { data, error } = await supabase
             .from('kids_checkins' as any)
-            .select('security_code')
+            .select(`
+                security_code,
+                observations,
+                child:child_id(full_name),
+                responsible:responsible_id(full_name, phone)
+            `)
             .eq('status', 'alert');
 
         if (error) console.error('Error fetching alerts:', error);
@@ -60,14 +68,40 @@ export default function KidsPasswordPanel() {
                         {alerts.map((alert, idx) => (
                             <div
                                 key={idx}
-                                className="bg-zinc-900 border-4 border-rose-600/50 rounded-[60px] p-16 flex flex-col items-center justify-center animate-in zoom-in-50 duration-500"
+                                className="bg-zinc-900 border-4 border-rose-600/50 rounded-[60px] p-10 flex flex-col items-center justify-center animate-in zoom-in-50 duration-500"
                             >
-                                <div className="text-[12rem] leading-none mb-4 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                                <div className="text-[8rem] leading-none mb-2 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                                     {alert.security_code}
                                 </div>
-                                <div className="flex items-center gap-3 text-rose-500 text-3xl">
-                                    <Bell className="animate-bounce" size={40} />
-                                    <span>RESPONSÁVEL SOLICITADO</span>
+                                <div className="flex items-center gap-3 text-rose-500 text-xl mb-6">
+                                    <Bell className="animate-bounce" size={24} />
+                                    <span className="font-bold">RESPONSÁVEL SOLICITADO</span>
+                                </div>
+
+                                <div className="w-full space-y-2 border-t border-rose-600/20 pt-6">
+                                    <div className="text-center">
+                                        <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-1">Criança</p>
+                                        <p className="text-2xl text-white uppercase truncate px-2">
+                                            {alert.child?.full_name || 'NÃO IDENTIFICADA'}
+                                        </p>
+                                    </div>
+                                    {/* Responsável */}
+                                    <div className="flex flex-col items-center gap-1 mt-3">
+                                        <span className="text-xl text-slate-500 uppercase tracking-widest font-medium">Responsável</span>
+                                        <span className="text-3xl text-slate-200">{alert.responsible?.full_name || 'NÃO IDENTIFICADO'}</span>
+                                        <span className="text-2xl text-rose-500">{alert.responsible?.phone || '(00) 00000-0000'}</span>
+                                    </div>
+
+                                    {/* Observações Cruciais */}
+                                    {alert.observations && (
+                                        <div className="mt-6 w-full bg-rose-500/10 border-2 border-rose-500/30 p-4 rounded-3xl animate-pulse">
+                                            <div className="flex items-center justify-center gap-2 text-rose-500 mb-1">
+                                                <Bell size={24} className="fill-rose-500" />
+                                                <span className="text-xl uppercase tracking-tighter font-black">Observações Médicas/Urgentes</span>
+                                            </div>
+                                            <p className="text-3xl text-white text-center leading-tight">{alert.observations}</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

@@ -186,7 +186,7 @@ export default function Conexao() {
                                                         variant="secondary"
                                                         size="sm"
                                                         className="rounded-xl h-8 px-3 text-xs font-bold"
-                                                        onClick={() => navigate('/acompanhamento')}
+                                                        onClick={() => navigate(`/cadastro?id=${v.id}&mode=conexao&tipo=visitante`)}
                                                     >
                                                         <ExternalLink className="h-3 w-3 mr-1.5" />
                                                         Completar Dados

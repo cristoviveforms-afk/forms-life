@@ -53,17 +53,32 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import logo from '@/assets/logo_igreja.png';
 
-const menuItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Boas-Vindas', url: '/boas-vindas', icon: HeartHandshake },
-  { title: 'Conexão', url: '/conexao', icon: Puzzle },
+const voluntariosItems = [
+  {
+    title: 'Boas-Vindas',
+    icon: HeartHandshake,
+    subItems: [
+      { title: 'Visitantes', url: '/boas-vindas' },
+      { title: 'Cadastro Inicial', url: '/cadastro?mode=boas-vindas&tipo=visitante' },
+    ]
+  },
+  {
+    title: 'Conexão',
+    icon: Puzzle,
+    subItems: [
+      { title: 'Visitantes', url: '/conexao' },
+      { title: 'Cadastro Final', url: '/cadastro?mode=conexao&tipo=visitante' },
+      { title: 'Acompanhamento', url: '/acompanhamento' },
+    ]
+  },
+];
+
+const secretariaItems = [
   { title: 'Membros', url: '/membros', icon: Users },
-  { title: 'Visitantes', url: '/visitantes', icon: UserPlus },
   { title: 'Novos Convertidos', url: '/convertidos', icon: Heart },
-  { title: 'Ministérios', url: '/ministerios', icon: Building2 },
-  { title: 'Acompanhamento', url: '/acompanhamento', icon: ClipboardList },
-  { title: 'Financeiro', url: '/financeiro', icon: Wallet },
   { title: 'Aniversariantes', url: '/aniversariantes', icon: Cake },
+  { title: 'Financeiro', url: '/financeiro', icon: Wallet },
+  { title: 'Ministérios', url: '/ministerios', icon: Building2 },
 ];
 
 const kidsMenuItems = [
@@ -111,23 +126,79 @@ export function AppSidebar({ className }: { className?: string }) {
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    className="cursor-pointer"
-                  >
-                    <a
-                      onClick={() => navigate(item.url)}
-                      className="flex items-center gap-3"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/dashboard')}
+                  className="cursor-pointer"
+                >
+                  <a onClick={() => navigate('/dashboard')} className="flex items-center gap-3">
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Voluntários Group */}
+              {voluntariosItems.map((group) => (
+                <Collapsible key={group.title} className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip={group.title}>
+                        <group.icon className="h-4 w-4" />
+                        <span>{group.title}</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {group.subItems.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={isActive(subItem.url)}
+                            >
+                              <a onClick={() => navigate(subItem.url)} className="cursor-pointer">
+                                <span>{subItem.title}</span>
+                              </a>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
               ))}
+
+              {/* Secretária Group */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Secretária">
+                      <Building2 className="h-4 w-4" />
+                      <span>Secretária</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {secretariaItems.map((item) => (
+                        <SidebarMenuSubItem key={item.title}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isActive(item.url)}
+                          >
+                            <a onClick={() => navigate(item.url)} className="cursor-pointer">
+                              <item.icon className="h-4 w-4 mr-2" />
+                              <span>{item.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Kids Collapsible Menu */}
               <Collapsible className="group/collapsible">
@@ -143,12 +214,10 @@ export function AppSidebar({ className }: { className?: string }) {
                     <SidebarMenuSub>
                       {kidsMenuItems.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
+                          <SidebarMenuSubButton asChild isActive={isActive(subItem.url)}>
                             <a
-                              href={subItem.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2"
+                              onClick={() => navigate(subItem.url)}
+                              className="flex items-center gap-2 cursor-pointer"
                             >
                               <span>{subItem.title}</span>
                             </a>

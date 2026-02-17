@@ -10,8 +10,13 @@ import {
     Bell,
     Navigation,
     ArrowRight,
-    ShieldAlert
+    ShieldAlert,
+    Camera,
+    ChevronLeft,
+    ChevronRight,
+    Search as SearchIcon
 } from 'lucide-react';
+import useEmblaCarousel from 'embla-carousel-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,11 +29,79 @@ interface CheckinRecord {
     id: string;
     checkin_time: string;
     security_code: string;
-    status: string;
+    photos?: string[];
     children: {
         full_name: string;
     };
 }
+
+const PhotoSlideshow = ({ records }: { records: CheckinRecord[] }) => {
+    const allPhotos = records.flatMap(r => r.photos || []);
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, duration: 30 });
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    useEffect(() => {
+        if (!emblaApi) return;
+        emblaApi.on('select', () => {
+            setSelectedIndex(emblaApi.selectedScrollSnap());
+        });
+    }, [emblaApi]);
+
+    if (allPhotos.length === 0) return null;
+
+    return (
+        <div className="relative w-full overflow-hidden rounded-[40px] shadow-2xl bg-slate-900 border-4 border-white dark:border-slate-800 animate-in fade-in zoom-in duration-700">
+            <div className="absolute top-6 left-8 z-20 flex items-center gap-3">
+                <div className="bg-white/20 backdrop-blur-md p-2 rounded-2xl border border-white/20">
+                    <Camera className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-white text-xs font-black uppercase tracking-widest drop-shadow-lg">Momentos de Hoje</span>
+            </div>
+
+            <div className="embla overflow-hidden" ref={emblaRef}>
+                <div className="embla__container flex">
+                    {allPhotos.map((photo, index) => (
+                        <div key={index} className="embla__slide flex-[0_0_100%] min-w-0 relative aspect-[16/9]">
+                            <img
+                                src={photo}
+                                alt={`Momento ${index + 1}`}
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {allPhotos.length > 1 && (
+                <>
+                    <div className="absolute bottom-8 left-8 z-20 flex gap-2">
+                        {allPhotos.map((_, i) => (
+                            <div
+                                key={i}
+                                className={`h-1.5 rounded-full transition-all duration-500 ${i === selectedIndex ? "w-8 bg-white" : "w-1.5 bg-white/30"}`}
+                            />
+                        ))}
+                    </div>
+                    <div className="absolute bottom-8 right-8 z-20 flex gap-3">
+                        <button
+                            onClick={() => emblaApi?.scrollPrev()}
+                            className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all active:scale-90"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                        </button>
+                        <button
+                            onClick={() => emblaApi?.scrollNext()}
+                            className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white transition-all active:scale-90"
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
 
 export default function KidsParentPortal() {
     const [phone, setPhone] = useState('');
@@ -77,7 +150,7 @@ export default function KidsParentPortal() {
     const fetchActiveRecords = async (parentId: string) => {
         const { data, error } = await supabase
             .from('kids_checkins' as any)
-            .select('id, checkin_time, security_code, status, children:child_id(full_name)')
+            .select('id, checkin_time, security_code, status, photos, children:child_id(full_name)')
             .eq('responsible_id', parentId)
             .order('checkin_time', { ascending: false })
             .limit(10);
@@ -156,10 +229,13 @@ export default function KidsParentPortal() {
                 <div className="w-full max-w-2xl space-y-6 animate-in fade-in">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-black">Status da Família</h2>
-                        <Button variant="ghost" className="rounded-2xl font-bold" onClick={() => setIsLogged(false)}>
-                            <LogOut className="h-4 w-4 mr-2" /> Sair
+                        <Button variant="ghost" className="rounded-2xl font-bold group" onClick={() => setIsLogged(false)}>
+                            <LogOut className="h-4 w-4 mr-2 group-active:translate-x-1 transition-transform" /> Sair
                         </Button>
                     </div>
+
+                    {/* Photo Slideshow Component */}
+                    <PhotoSlideshow records={familyCheckins} />
 
                     {familyCheckins.length > 0 ? (
                         familyCheckins.map(record => (
