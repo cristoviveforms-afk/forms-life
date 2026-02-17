@@ -27,6 +27,12 @@ import NotFound from "./pages/NotFound";
 
 import BoasVindas from './pages/BoasVindas';
 import Conexao from './pages/Conexao';
+import Financeiro from './pages/Financeiro';
+import KidsCheckin from './pages/KidsCheckin';
+import KidsDashboard from './pages/KidsDashboard';
+import KidsParentPortal from './pages/KidsParentPortal';
+import KidsPasswordPanel from './pages/KidsPasswordPanel';
+
 
 const queryClient = new QueryClient();
 
@@ -44,6 +50,10 @@ const App = () => (
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path="/kids-checkin" element={<KidsCheckin />} />
+              <Route path="/kids-dashboard" element={<KidsDashboard />} />
+              <Route path="/kids-parent-portal" element={<KidsParentPortal />} />
+              <Route path="/kids-password-panel" element={<KidsPasswordPanel />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/pastoral" element={
                 <ProtectedRoute>
@@ -65,7 +75,11 @@ const App = () => (
               <Route path="/pastoral/resultados-avaliacao" element={<ProtectedRoute><ResultadosAvaliacao /></ProtectedRoute>} />
               <Route path="/boas-vindas" element={<ProtectedRoute><BoasVindas /></ProtectedRoute>} />
               <Route path="/conexao" element={<ProtectedRoute><Conexao /></ProtectedRoute>} />
+              <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
+              <Route path="/kids-checkin" element={<ProtectedRoute><KidsCheckin /></ProtectedRoute>} />
+              <Route path="/kids-dashboard" element={<ProtectedRoute><KidsDashboard /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
+
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

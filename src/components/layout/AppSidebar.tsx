@@ -13,8 +13,12 @@ import {
   HeartHandshake,
   ClipboardList,
   Shield,
-  Puzzle
+  Puzzle,
+  Wallet,
+  Baby,
+  ChevronRight
 } from "lucide-react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -26,7 +30,15 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,8 +62,17 @@ const menuItems = [
   { title: 'Novos Convertidos', url: '/convertidos', icon: Heart },
   { title: 'Ministérios', url: '/ministerios', icon: Building2 },
   { title: 'Acompanhamento', url: '/acompanhamento', icon: ClipboardList },
+  { title: 'Financeiro', url: '/financeiro', icon: Wallet },
   { title: 'Aniversariantes', url: '/aniversariantes', icon: Cake },
 ];
+
+const kidsMenuItems = [
+  { title: "Painel do Líder", url: "/kids-dashboard", icon: Baby },
+  { title: "Check-in", url: "/kids-checkin", icon: Baby },
+  { title: "Portal dos Pais", url: "/kids-parent-portal", icon: Baby },
+  { title: "Painel do Telão", url: "/kids-password-panel", icon: Baby },
+];
+
 
 const bottomItems = [
   { title: 'Avaliação', url: '/public/avaliacao', icon: Heart, external: true, badge: 'Novo' },
@@ -85,7 +106,7 @@ export function AppSidebar({ className }: { className?: string }) {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="scrollbar-thin">
         <SidebarGroup>
           <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -107,6 +128,37 @@ export function AppSidebar({ className }: { className?: string }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              {/* Kids Collapsible Menu */}
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Kids">
+                      <Baby className="h-4 w-4" />
+                      <span>Kids</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {kidsMenuItems.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <a
+                              href={subItem.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2"
+                            >
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

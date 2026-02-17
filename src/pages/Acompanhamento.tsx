@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Search, MessageSquare, ArrowRight, Phone, Plus, X, Users, UserPlus } from 'lucide-react';
+import { Search, MessageSquare, ArrowRight, Phone, Plus, X, Users, UserPlus, Baby } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -99,6 +99,7 @@ const getNextStage = (current?: string) => {
 
 interface PipelineCardProps {
   person: Person;
+  hasActiveCheckin?: boolean;
   onViewDetails: (p: Person) => void;
   onAddNote: (p: Person) => void;
   onUpdateStage: (id: string, stage: string) => void;
@@ -172,6 +173,11 @@ const PipelineCard = ({ person, onViewDetails, onAddNote, onUpdateStage }: Pipel
       {person.accepted_jesus && (
         <Badge className="mt-2 text-[10px] bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white w-full justify-center py-1">Novo Convertido</Badge>
       )}
+      {hasActiveCheckin && (
+        <Badge className="mt-2 text-[10px] bg-primary text-primary-foreground border-none w-full justify-center py-1 gap-1">
+          <Baby className="h-3 w-3" /> KIDS EM SALA
+        </Badge>
+      )}
     </CardContent>
   </Card>
 );
@@ -186,6 +192,7 @@ export default function Acompanhamento() {
   const [loading, setLoading] = useState(true);
   const [people, setPeople] = useState<Person[]>([]);
   const [availableMinistries, setAvailableMinistries] = useState<Ministry[]>([]);
+  const [activeCheckinFamilies, setActiveCheckinFamilies] = useState<Set<string>>(new Set());
 
   // Dialog/Sheet states
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -294,6 +301,18 @@ export default function Acompanhamento() {
       const { data, error } = await query;
 
       if (error) throw error;
+
+      // Fetch active check-ins to show on cards
+      const { data: activeCheckinsData } = await supabase
+        .from('kids_checkins' as any)
+        .select('child_id, people:child_id(family_id)')
+        .is('checkout_time', null);
+
+      const families = new Set(
+        (activeCheckinsData as any[])?.map(c => c.people?.family_id).filter(Boolean)
+      );
+      setActiveCheckinFamilies(families);
+
       setPeople(data as unknown as Person[]);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
@@ -603,6 +622,7 @@ export default function Acompanhamento() {
                           <PipelineCard
                             key={person.id}
                             person={person}
+                            hasActiveCheckin={activeCheckinFamilies.has(person.family_id || '')}
                             onViewDetails={handleViewDetails}
                             onUpdateStage={updateStage}
                             onAddNote={(p) => {

@@ -22,6 +22,7 @@ import { PersonType } from '@/types/database';
 interface Filho {
   nome: string;
   idade: string;
+  observacoes?: string;
 }
 
 const MINISTERIOS_LIST = [
@@ -104,6 +105,7 @@ export default function Cadastro() {
       setEstadoCivil(data.civil_status || '');
       setConjuge(data.spouse_name || '');
       setTelefone(data.phone || '');
+      setCpf(data.cpf || '');
       setEmail(data.email || '');
       setEndereco(data.address || '');
       setComoConheceu(data.how_met || '');
@@ -183,6 +185,7 @@ export default function Cadastro() {
   const [conjuge, setConjuge] = useState('');
 
   const [telefone, setTelefone] = useState('');
+  const [cpf, setCpf] = useState('');
   const [email, setEmail] = useState('');
   const [endereco, setEndereco] = useState('');
   const [comoConheceu, setComoConheceu] = useState('');
@@ -215,13 +218,8 @@ export default function Cadastro() {
   const [ministerioAnterior, setMinisterioAnterior] = useState('');
   const [quemConvidou, setQuemConvidou] = useState('');
 
-  const addFilho = () => {
-    setFilhos([...filhos, { nome: '', idade: '' }]);
-  };
-
-  const removeFilho = (index: number) => {
-    setFilhos(filhos.filter((_, i) => i !== index));
-  };
+  const addFilho = () => setFilhos([...filhos, { nome: '', idade: '', observacoes: '' }]);
+  const removeFilho = (index: number) => setFilhos(filhos.filter((_, i) => i !== index));
 
   // Auto-suggest ministries (Effect)
   useEffect(() => {
@@ -270,13 +268,16 @@ export default function Cadastro() {
         `)
         .eq('type', 'visitante'); // Only search for visitors
 
-      // Check if searching by last 4 digits or full number
-      const cleanPhone = searchPhone.replace(/\D/g, ''); // Remove non-digits
-      if (cleanPhone.length <= 4) {
-        // Search by suffix
-        query = query.ilike('phone', `%${cleanPhone}`).order('created_at', { ascending: false }).limit(1);
+      const cleanSearch = searchPhone.replace(/\D/g, ''); // Remove non-digits
+
+      if (cleanSearch.length === 11) {
+        // Search by CPF
+        query = query.eq('cpf', cleanSearch);
+      } else if (cleanSearch.length <= 4) {
+        // Search by phone suffix
+        query = query.ilike('phone', `%${cleanSearch}`).order('created_at', { ascending: false }).limit(1);
       } else {
-        // Exact match
+        // Exact match phone
         query = query.eq('phone', searchPhone);
       }
 
@@ -299,6 +300,7 @@ export default function Cadastro() {
       setEstadoCivil(data.civil_status || '');
       setConjuge(data.spouse_name || '');
       setTelefone(data.phone || '');
+      setCpf(data.cpf || '');
       setEmail(data.email || '');
       setEndereco(data.address || '');
       setComoConheceu(data.how_met || '');
@@ -324,7 +326,7 @@ export default function Cadastro() {
       // Children
       if (data.children && data.children.length > 0) {
         setPossuiFilhos(true);
-        setFilhos(data.children.map((c: any) => ({ nome: c.name, idade: c.age || '' })));
+        setFilhos(data.children.map((c: any) => ({ nome: c.name, idade: c.age || '', observacoes: c.observations || '' })));
       } else {
         setPossuiFilhos(false);
         setFilhos([]);
@@ -373,7 +375,8 @@ export default function Cadastro() {
         spouse_name: estadoCivil === 'casado' ? conjuge : null,
         family_id: familyId,
 
-        phone: telefone,
+        phone: telefone.replace(/\D/g, ''),
+        cpf: cpf.replace(/\D/g, '') || null,
         email: email || null,
         address: endereco || null,
         how_met: comoConheceu || null,
@@ -476,7 +479,8 @@ export default function Cadastro() {
               spouse_name: null,
               ministries: ['Ministério Infantil (Kids)'],
               type: 'visitante', // Or 'crianca' if we had it
-              family_id: familyId
+              family_id: familyId,
+              observations: filho.observacoes || null
             };
 
             await supabase.from('people' as any).insert(childPayload);
@@ -608,7 +612,7 @@ export default function Cadastro() {
               <CardContent className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Digite o Telefone ou últimos 4 dígitos"
+                    placeholder="Digite CPF ou Telefone (final ou completo)"
                     value={searchPhone}
                     onChange={e => setSearchPhone(e.target.value)}
                   />
@@ -664,7 +668,33 @@ export default function Cadastro() {
                             placeholder="(00) 00000-0000"
                             required
                             value={telefone}
-                            onChange={e => setTelefone(e.target.value)}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              const masked = val.length <= 11
+                                ? val.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3')
+                                : val.slice(0, 11).replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+
+                              if (val.length <= 2) setTelefone(val);
+                              else if (val.length <= 7) setTelefone(`(${val.slice(0, 2)}) ${val.slice(2)}`);
+                              else setTelefone(`(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7, 11)}`);
+                            }}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="cpf">CPF</Label>
+                          <Input
+                            id="cpf"
+                            placeholder="000.000.000-00"
+                            value={cpf}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              let masked = val;
+                              if (val.length > 3 && val.length <= 6) masked = `${val.slice(0, 3)}.${val.slice(3)}`;
+                              else if (val.length > 6 && val.length <= 9) masked = `${val.slice(0, 3)}.${val.slice(3, 6)}.${val.slice(6)}`;
+                              else if (val.length > 9) masked = `${val.slice(0, 3)}.${val.slice(3, 6)}.${val.slice(6, 9)}-${val.slice(9, 11)}`;
+                              setCpf(masked);
+                            }}
                           />
                         </div>
 
@@ -1010,7 +1040,16 @@ export default function Cadastro() {
                             placeholder="(00) 00000-0000"
                             required
                             value={telefone}
-                            onChange={e => setTelefone(e.target.value)}
+                            onChange={e => {
+                              const val = e.target.value.replace(/\D/g, '');
+                              const masked = val.length <= 11
+                                ? val.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3')
+                                : val.slice(0, 11).replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+
+                              if (val.length <= 2) setTelefone(val);
+                              else if (val.length <= 7) setTelefone(`(${val.slice(0, 2)}) ${val.slice(2)}`);
+                              else setTelefone(`(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7, 11)}`);
+                            }}
                           />
                         </div>
 

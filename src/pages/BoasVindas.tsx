@@ -73,6 +73,16 @@ export default function BoasVindas() {
             const wantsContact = people.filter(p => p.visitor_wants_contact).length;
             const totalChildren = people.reduce((acc, p) => acc + (p.children?.length || 0), 0);
 
+            // Fetch active check-ins to show status
+            const { data: activeCheckinsData } = await supabase
+                .from('kids_checkins' as any)
+                .select('child_id, people:child_id(family_id)')
+                .is('checkout_time', null);
+
+            const activeFamilies = new Set(
+                (activeCheckinsData as any[])?.map(c => c.people?.family_id).filter(Boolean)
+            );
+
             setStats({
                 total: people.length,
                 firstTime,
@@ -81,7 +91,10 @@ export default function BoasVindas() {
                 wantsContact
             });
 
-            setVisitors(people);
+            setVisitors(people.map(p => ({
+                ...p,
+                hasActiveCheckin: activeFamilies.has(p.family_id)
+            })));
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
         } finally {
@@ -202,6 +215,9 @@ export default function BoasVindas() {
                                                         <span className="font-bold text-sm tracking-tight">{v.full_name}</span>
                                                         {v.visitor_first_time && (
                                                             <Badge variant="secondary" className="text-[10px] h-4 bg-green-500/10 text-green-700 border-green-500/20">1ª VEZ</Badge>
+                                                        )}
+                                                        {v.hasActiveCheckin && (
+                                                            <Badge variant="default" className="text-[10px] h-4 bg-primary text-primary-foreground border-none">KIDS EM SALA</Badge>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
