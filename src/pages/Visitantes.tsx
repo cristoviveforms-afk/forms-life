@@ -150,9 +150,14 @@ export default function Visitantes() {
     if (!window.confirm(confirmMsg)) return;
 
     try {
+      const updates: any = { type: newType };
+      if (newType === 'membro') {
+        updates.integration_date = new Date().toISOString().split('T')[0];
+      }
+
       const { error } = await supabase
         .from('people' as any)
-        .update({ type: newType } as any)
+        .update(updates)
         .eq('id', person.id);
 
       if (error) throw error;

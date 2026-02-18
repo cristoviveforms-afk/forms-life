@@ -249,11 +249,11 @@ export default function Cadastro() {
   const [outraReligiao, setOutraReligiao] = useState('');
   const [pedidoOracao, setPedidoOracao] = useState('');
 
-  const [dataConversao, setDataConversao] = useState('');
+  const [dataConversao, setDataConversao] = useState(new Date().toISOString().split('T')[0]);
   const [convertidoQuerAcompanhamento, setConvertidoQuerAcompanhamento] = useState(false);
   const [necessidades, setNecessidades] = useState('');
 
-  const [dataIntegracao, setDataIntegracao] = useState('');
+  const [dataIntegracao, setDataIntegracao] = useState(new Date().toISOString().split('T')[0]);
   const [jaServiu, setJaServiu] = useState(false);
   const [ministerioAnterior, setMinisterioAnterior] = useState('');
   const [quemConvidou, setQuemConvidou] = useState('');
@@ -467,11 +467,11 @@ export default function Cadastro() {
         visitor_religion: tipoPessoa === 'visitante' ? outraReligiao : null,
         visitor_prayer_request: tipoPessoa === 'visitante' ? pedidoOracao : null,
 
-        conversion_date: tipoPessoa === 'convertido' ? dataConversao || null : null,
+        conversion_date: tipoPessoa === 'convertido' ? (dataConversao || new Date().toISOString().split('T')[0]) : null,
         convert_wants_accompaniment: tipoPessoa === 'convertido' ? convertidoQuerAcompanhamento : false,
         convert_needs: tipoPessoa === 'convertido' ? necessidades : null,
 
-        integration_date: tipoPessoa === 'membro' ? dataIntegracao || null : null,
+        integration_date: tipoPessoa === 'membro' ? (dataIntegracao || new Date().toISOString().split('T')[0]) : null,
         member_has_served: tipoPessoa === 'membro' ? jaServiu : false,
         member_prev_ministry: tipoPessoa === 'membro' && jaServiu ? ministerioAnterior : null,
 

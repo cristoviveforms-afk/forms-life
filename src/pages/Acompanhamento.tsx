@@ -345,9 +345,16 @@ export default function Acompanhamento() {
 
   const updateStage = async (personId: string, newStage: string) => {
     try {
+      const updates: any = { journey_stage: newStage };
+
+      if (newStage === 'concluido') {
+        updates.type = 'membro';
+        updates.integration_date = new Date().toISOString().split('T')[0];
+      }
+
       const { error } = await supabase
         .from('people' as any)
-        .update({ journey_stage: newStage } as any)
+        .update(updates)
         .eq('id', personId);
 
       if (error) throw error;
@@ -457,9 +464,14 @@ export default function Acompanhamento() {
     if (!window.confirm(confirmMsg)) return;
 
     try {
+      const updates: any = { type: newType };
+      if (newType === 'membro') {
+        updates.integration_date = new Date().toISOString().split('T')[0];
+      }
+
       const { error } = await supabase
         .from('people' as any)
-        .update({ type: newType } as any)
+        .update(updates)
         .eq('id', selectedPerson.id);
 
       if (error) throw error;
