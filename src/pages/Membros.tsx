@@ -34,12 +34,14 @@ export default function Membros() {
   const fetchMembros = async (start: string, end: string) => {
     setLoading(true);
     try {
+      const startDay = `${start}T00:00:00`;
+      const endDay = `${end}T23:59:59`;
+
       const { data, error } = await supabase
         .from('people' as any)
         .select('*')
         .eq('type', 'membro')
-        .gte('integration_date', start)
-        .lte('integration_date', end);
+        .or(`and(integration_date.gte.${start},integration_date.lte.${end}),and(integration_date.is.null,created_at.gte.${startDay},created_at.lte.${endDay})`);
 
       if (error) throw error;
       setMembros(data as unknown as Person[]);

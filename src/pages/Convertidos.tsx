@@ -30,12 +30,15 @@ export default function Convertidos() {
   const fetchConvertidos = async (start: string, end: string) => {
     setLoading(true);
     try {
+      const startDay = `${start}T00:00:00`;
+      const endDay = `${end}T23:59:59`;
+
       const { data, error } = await supabase
         .from('people' as any)
         .select('*')
-        .not('conversion_date', 'is', null)
-        .gte('conversion_date', start)
-        .lte('conversion_date', end);
+        .eq('type', 'convertido' as any)
+        .or(`and(conversion_date.gte.${start},conversion_date.lte.${end}),and(conversion_date.is.null,created_at.gte.${startDay},created_at.lte.${endDay})`);
+
 
       if (error) throw error;
       setConvertidos(data as unknown as Person[]);
