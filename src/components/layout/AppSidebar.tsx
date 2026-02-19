@@ -16,7 +16,8 @@ import {
   Puzzle,
   Wallet,
   Baby,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 
 import {
@@ -79,6 +80,10 @@ const secretariaItems = [
   { title: 'Aniversariantes', url: '/aniversariantes', icon: Cake },
   { title: 'Financeiro', url: '/financeiro', icon: Wallet },
   { title: 'Ministérios', url: '/ministerios', icon: Building2 },
+];
+
+const discipuladoItems = [
+  { title: 'Parando por Um', url: '/parando-por-um', icon: Sparkles },
 ];
 
 const kidsMenuItems = [
@@ -174,9 +179,9 @@ export function AppSidebar({ className }: { className?: string }) {
               <Collapsible className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip="Secretária">
+                    <SidebarMenuButton tooltip="Secretaria">
                       <Building2 className="h-4 w-4" />
-                      <span>Secretária</span>
+                      <span>Secretaria</span>
                       <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
@@ -199,6 +204,21 @@ export function AppSidebar({ className }: { className?: string }) {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
+              {/* Ecossistema Group */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/parando-por-um')}
+                  className="cursor-pointer"
+                >
+                  <a onClick={() => navigate('/parando-por-um')} className="flex items-center gap-3">
+                    <Sparkles className="h-4 w-4 text-amber-500" />
+                    <span>Ecossistema</span>
+                    <span className="ml-auto bg-amber-500/20 text-amber-500 text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Premium</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
 
               {/* Kids Collapsible Menu */}
               <Collapsible className="group/collapsible">

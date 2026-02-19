@@ -39,7 +39,7 @@ export default function Membros() {
 
       const { data, error } = await supabase
         .from('people' as any)
-        .select('*')
+        .select('*, leader:leader_id(full_name)')
         .eq('type', 'membro')
         .or(`and(integration_date.gte.${start},integration_date.lte.${end}),and(integration_date.is.null,created_at.gte.${startDay},created_at.lte.${endDay})`);
 
@@ -154,15 +154,33 @@ export default function Membros() {
                       onClick={() => navigate(`/acompanhamento?personId=${membro.id}`)}
                     >
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
-                          {membro.full_name.charAt(0)}
+                        <div className="h-12 w-12 shrink-0 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors overflow-hidden border-2 border-transparent group-hover:border-primary/20">
+                          {membro.avatar_url ? (
+                            <img src={membro.avatar_url} alt={membro.full_name} className="h-full w-full object-cover" />
+                          ) : (
+                            membro.full_name.charAt(0)
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="font-medium flex items-center gap-2 truncate">
-                            {membro.full_name}
-                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
-                          </p>
-                          <p className="text-sm text-muted-foreground truncate">{membro.phone}</p>
+                          <div className="flex flex-col">
+                            <p className="font-bold flex items-center gap-2 truncate">
+                              {membro.full_name}
+                              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              {membro.member_role && (
+                                <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${membro.member_role === 'Líder' ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-600'}`}>
+                                  {membro.member_role}
+                                </span>
+                              )}
+                              {membro.leader && (
+                                <span className="text-[10px] text-muted-foreground italic">
+                                  Líder: {(membro.leader as any).full_name}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate mt-1">{membro.phone}</p>
+                          </div>
                         </div>
                       </div>
 

@@ -119,14 +119,19 @@ export default function KidsParentPortal() {
             // Re-fetch with a more flexible query to handle existing formatted data
             const { data: people, error: fetchError } = await supabase
                 .from('people')
-                .select('id, cpf, phone');
+                .select('id, cpf, phone, whatsapp');
 
             if (fetchError) throw fetchError;
 
             const parent = people.find(p => {
                 const dbCpf = p.cpf?.replace(/\D/g, '');
                 const dbPhone = p.phone?.replace(/\D/g, '');
-                return dbCpf === cleanSearch || (cleanSearch.length >= 8 && dbPhone?.endsWith(cleanSearch.slice(-8)));
+                const dbWhatsapp = p.whatsapp?.replace(/\D/g, '');
+
+                return dbCpf === cleanSearch ||
+                    (cleanSearch.length >= 8 && dbPhone?.endsWith(cleanSearch.slice(-8))) ||
+                    (dbWhatsapp === cleanSearch) ||
+                    (cleanSearch.length >= 8 && dbWhatsapp?.endsWith(cleanSearch.slice(-8)));
             });
 
             if (!parent) {
@@ -195,18 +200,15 @@ export default function KidsParentPortal() {
                     <Card className="rounded-[40px] border-none shadow-2xl p-4">
                         <CardContent className="space-y-6 pt-6">
                             <div className="space-y-3">
-                                <label className="text-sm font-black uppercase tracking-widest text-slate-500 ml-1">CPF ou Telefone / WhatsApp</label>
+                                <label className="text-sm font-black uppercase tracking-widest text-slate-500 block text-center">WhatsApp</label>
                                 <Input
-                                    placeholder="CPF ou Telefone"
+                                    placeholder="Seu WhatsApp"
                                     className="h-16 text-xl rounded-3xl border-2 focus:ring-primary/20"
                                     value={phone}
                                     onChange={e => {
                                         const val = e.target.value.replace(/\D/g, '');
-                                        if (val.length === 11) {
-                                            // Mask as CPF
-                                            setPhone(val.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'));
-                                        } else if (val.length === 10 || val.length === 11) {
-                                            // Mask as Phone
+                                        if (val.length === 10 || val.length === 11) {
+                                            // Mask as Phone/WhatsApp
                                             if (val.length === 10) setPhone(`(${val.slice(0, 2)}) ${val.slice(2, 6)}-${val.slice(6)}`);
                                             else setPhone(`(${val.slice(0, 2)}) ${val.slice(2, 7)}-${val.slice(7)}`);
                                         } else {

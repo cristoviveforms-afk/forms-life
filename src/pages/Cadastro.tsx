@@ -1,14 +1,16 @@
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle, ChevronRight } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -57,13 +59,20 @@ export default function Cadastro() {
 
   const [loading, setLoading] = useState(false);
   const [tipoPessoa, setTipoPessoa] = useState<PersonType>(tipoParam || 'membro');
-  const mode = searchParams.get('mode') || 'completo'; // inicial, final, completo
-  const [visitorQuestionAnswered, setVisitorQuestionAnswered] = useState(mode === 'inicial');
+  const mode = searchParams.get('mode') || 'completo'; // boas-vindas, conexao, completo
+  const [visitorQuestionAnswered, setVisitorQuestionAnswered] = useState(mode === 'conexao');
+  const [memberRole, setMemberRole] = useState<string>('liderado');
+  const [discipuladoLeaderId, setDiscipuladoLeaderId] = useState<string | null>(null);
+  const [isMinistryLeader, setIsMinistryLeader] = useState<boolean>(false);
+  const [isDiscipuladoLeader, setIsDiscipuladoLeader] = useState<boolean>(false);
+  const [allPotentialLeaders, setAllPotentialLeaders] = useState<any[]>([]);
+  const [avatarUrl, setAvatarUrl] = useState('');
 
-  // Search / Update Logic
-  const [personId, setPersonId] = useState<string | null>(null);
   const [isReturningVisitor, setIsReturningVisitor] = useState(false);
   const [searchPhone, setSearchPhone] = useState('');
+  const [personId, setPersonId] = useState<string | null>(null);
+  const [dateVisitors, setDateVisitors] = useState<any[]>([]);
+  const [loadingDateVisitors, setLoadingDateVisitors] = useState(false);
 
   // Fetch data if personId is provided in URL
   useEffect(() => {
@@ -71,7 +80,21 @@ export default function Cadastro() {
     if (editPersonId) {
       loadPersonData(editPersonId);
     }
+    fetchPotentialLeaders();
   }, [searchParams]);
+
+  const fetchPotentialLeaders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('people' as any)
+        .select('id, full_name, name')
+        .eq('type', 'membro');
+
+      if (data) setAllPotentialLeaders(data);
+    } catch (err) {
+      console.error('Error fetching leaders:', err);
+    }
+  };
 
   const loadPersonData = async (id: string) => {
     setLoading(true);
@@ -97,6 +120,11 @@ export default function Cadastro() {
 
       // Populate fields
       setPersonId(data.id);
+      setVisitorQuestionAnswered(true); // Fix: Mark question as answered when loading existing data
+      setMemberRole(data.member_role || 'liderado');
+      setDiscipuladoLeaderId(data.leader_id);
+      setIsMinistryLeader(!!data.is_ministry_leader);
+      setIsDiscipuladoLeader(!!data.is_discipulado_leader);
       setFamilyId(data.family_id);
 
       // Determine type if not set correctly or override
@@ -151,6 +179,11 @@ export default function Cadastro() {
         setDataIntegracao(data.integration_date || '');
         setJaServiu(data.member_has_served);
         setMinisterioAnterior(data.member_prev_ministry || '');
+        setAvatarUrl(data.avatar_url || '');
+        setMemberRole(data.member_role || 'liderado');
+        setDiscipuladoLeaderId(data.leader_id || null);
+        setIsMinistryLeader(!!data.is_ministry_leader);
+        setIsDiscipuladoLeader(!!data.is_discipulado_leader);
       }
 
       setQuemConvidou(data.invited_by || '');
@@ -257,6 +290,35 @@ export default function Cadastro() {
   const [jaServiu, setJaServiu] = useState(false);
   const [ministerioAnterior, setMinisterioAnterior] = useState('');
   const [quemConvidou, setQuemConvidou] = useState('');
+
+
+  const handleDateChange = async (start: string, end: string) => {
+    if (mode !== 'conexao' || personId) return;
+
+    setLoadingDateVisitors(true);
+    try {
+      const { data, error } = await supabase
+        .from('people' as any)
+        .select(`
+          id,
+          full_name,
+          phone,
+          created_at,
+          children (count)
+        `)
+        .eq('type', 'visitante')
+        .gte('created_at', `${start}T00:00:00`)
+        .lte('created_at', `${end}T23:59:59`)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDateVisitors(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar visitantes por data:', error);
+    } finally {
+      setLoadingDateVisitors(false);
+    }
+  };
 
   const addFamilyMember = (parentesco: FamilyMember['parentesco'] = 'filho') =>
     setFamilyMembers([...familyMembers, { nome: '', parentesco, idade: '', observacoes: '' }]);
@@ -456,7 +518,10 @@ export default function Cadastro() {
         baptized_water: batizadoAguas,
         baptism_date: dataBatismo || null,
         baptized_spirit: batizadoEspirito,
-        has_ministry: participaMinisterio,
+        member_role: tipoPessoa === 'membro' ? memberRole : null,
+        leader_id: tipoPessoa === 'membro' ? discipuladoLeaderId : null,
+        is_ministry_leader: tipoPessoa === 'membro' ? isMinistryLeader : false,
+        is_discipulado_leader: tipoPessoa === 'membro' ? isDiscipuladoLeader : false,
         ministries: [...ministeriosServindo, ...ministeriosAcompanhamento],
         natural_skills: donsNaturais || null,
         spiritual_gifts: donsEspirituais || null,
@@ -478,6 +543,11 @@ export default function Cadastro() {
         invited_by: quemConvidou || null,
         accepted_jesus: acceptedJesus,
         journey_stage: personId ? undefined : 'fase1_porta', // Default stage for new registrations
+
+        // Hierarchy and profile
+        avatar_url: avatarUrl || null,
+        member_role: memberRole || null,
+        leader_id: leaderId || null,
 
         // Always update visit date when saving/updating a visitor
         last_visit_date: new Date().toISOString(),
@@ -553,8 +623,8 @@ export default function Cadastro() {
   };
 
   return (
-    <DashboardLayout title="Novo Cadastro">
-      <div className="max-w-3xl mx-auto animate-fade-in">
+    <DashboardLayout title={mode === 'conexao' ? "Finalizar Cadastro" : mode === 'boas-vindas' ? "Cadastro Inicial" : "Ficha de Cadastro"}>
+      <div className="max-w-4xl mx-auto animate-fade-in px-2 md:px-0">
         <Button
           variant="ghost"
           className="mb-4"
@@ -564,7 +634,7 @@ export default function Cadastro() {
           Voltar para Dashboard
         </Button>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-8 pb-12">
           {/* Tipo de Pessoa - Hidden in specific modes */}
           {mode === 'completo' && (
             <Card className="mb-6">
@@ -597,8 +667,8 @@ export default function Cadastro() {
             </Card>
           )}
 
-          {/* Pergunta Inicial para Visitante */}
-          {tipoPessoa === 'visitante' && !visitorQuestionAnswered && !isReturningVisitor && (
+          {/* Pergunta Inicial para Visitante - Only in Boas-Vindas */}
+          {tipoPessoa === 'visitante' && mode === 'boas-vindas' && !visitorQuestionAnswered && !isReturningVisitor && (
             <Card className="mb-6 animate-in fade-in slide-in-from-bottom-4">
               <CardHeader>
                 <CardTitle className="text-center text-xl">É sua primeira vez ou está retornando?</CardTitle>
@@ -632,8 +702,8 @@ export default function Cadastro() {
             </Card>
           )}
 
-          {/* Busca de Visitante Retornante */}
-          {isReturningVisitor && !visitorQuestionAnswered && (
+          {/* Busca de Visitante Retornante - Only in Boas-Vindas */}
+          {isReturningVisitor && mode === 'boas-vindas' && !visitorQuestionAnswered && (
             <Card className="mb-6 animate-in zoom-in-95">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -673,10 +743,68 @@ export default function Cadastro() {
             </Card>
           )}
 
+          {/* Seleção por Calendário para Conexão */}
+          {mode === 'conexao' && !personId && (
+            <div className="space-y-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+              <div className="text-center space-y-3 py-6 relative overflow-hidden rounded-[3rem] bg-gradient-to-b from-primary/5 to-transparent border border-primary/10 mb-2">
+                <div className="absolute inset-0 bg-grid-slate-100/[0.03] bg-[size:20px_20px]" />
+                <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary animate-in fade-in zoom-in duration-1000">
+                  <HeartHandshake className="h-4 w-4 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em]">Ambiente de Conexão</span>
+                </div>
+                <h3 className="text-4xl font-black text-slate-800 dark:text-white uppercase tracking-tighter leading-none">Localizar Visitante</h3>
+                <p className="text-sm text-slate-500 font-medium max-w-xs mx-auto">Posicione o calendário e escolha o dia da visita para finalizar a ficha</p>
+              </div>
+
+              <MonthYearPicker onDateChange={handleDateChange} />
+
+              <div className="grid grid-cols-1 gap-3">
+                {loadingDateVisitors ? (
+                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-sm font-medium text-slate-500">Buscando registros...</p>
+                  </div>
+                ) : dateVisitors.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {dateVisitors.map((v) => (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => navigate(`/cadastro?id=${v.id}&mode=conexao&tipo=visitante`)}
+                        className="flex items-center gap-4 p-5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-[2rem] border-2 border-slate-100/50 dark:border-slate-800/50 hover:border-primary/50 hover:bg-primary/[0.04] transition-all text-left shadow-lg group"
+                      >
+                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-primary font-black group-hover:scale-105 group-hover:shadow-lg transition-all">
+                          {v.full_name ? v.full_name.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold truncate text-slate-800 dark:text-slate-100">{v.full_name}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {new Date(v.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                            {v.children?.[0]?.count > 0 && (
+                              <Badge className="h-4 text-[9px] bg-orange-100 text-orange-600 border-none font-bold uppercase">Com Filhos</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
+                    <Users className="h-8 w-8 text-slate-300" />
+                    <p className="text-sm font-medium text-slate-500">Nenhum visitante encontrado nesta data.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Header de Dados Gerais (Resumo) - visível em ambos os modos se estiver editando */}
           {personId && (
-            <Card className="mb-6 bg-gradient-to-r from-primary/5 to-transparent border-primary/20 overflow-hidden relative">
-              <div className="absolute right-0 top-0 h-full w-32 bg-primary/5 -skew-x-12 translate-x-16" />
+            <Card className="mb-8 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative shadow-2xl backdrop-blur-xl rounded-[2.5rem] animate-in slide-in-from-top-4">
+              <div className="absolute right-0 top-0 h-full w-48 bg-primary/10 -skew-x-12 translate-x-24 blur-3xl" />
               <CardContent className="p-6">
                 <div className="flex items-center gap-4 relative">
                   <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shadow-inner">
@@ -686,7 +814,7 @@ export default function Cadastro() {
                     <h3 className="text-xl font-bold tracking-tight">{nome || 'Visitante sem nome'}</h3>
                     <div className="flex flex-wrap gap-2 items-center">
                       <Badge variant="outline" className="bg-white/50 backdrop-blur-sm border-primary/20 text-primary font-bold">
-                        {tipoPessoa.toUpperCase()}
+                        {(tipoPessoa || '').toUpperCase()}
                       </Badge>
                       <span className="text-sm text-muted-foreground flex items-center gap-1">
                         {telefone || 'Sem telefone'}
@@ -704,8 +832,8 @@ export default function Cadastro() {
             </Card>
           )}
 
-          {/* Dados Pessoais e Restante do Formulário */}
-          {(tipoPessoa !== 'visitante' || visitorQuestionAnswered) && (
+          {/* Dados Pessoais e Restante do Formulário - Hidden in Conexão if no person selected */}
+          {((tipoPessoa !== 'visitante' || visitorQuestionAnswered) && (mode !== 'conexao' || personId)) && (
             <>
               {/* LAYOUT PARA VISITANTES */}
               {tipoPessoa === 'visitante' ? (
@@ -799,7 +927,7 @@ export default function Cadastro() {
                               className="rounded-xl h-9 text-xs font-bold"
                               onClick={() => addFamilyMember('conjuge')}
                             >
-                              <Plus className="h-3.5 w-3.5 mr-1.5" /> + Cônjuge/Noivo
+                              <Plus className="h-3.5 w-3.5 mr-1.5" /> Cônjuge/Noivo
                             </Button>
                             <Button
                               type="button"
@@ -808,7 +936,7 @@ export default function Cadastro() {
                               className="rounded-xl h-9 text-xs font-bold"
                               onClick={() => addFamilyMember('filho')}
                             >
-                              <Plus className="h-3.5 w-3.5 mr-1.5" /> + Filho
+                              <Plus className="h-3.5 w-3.5 mr-1.5" /> Filho
                             </Button>
                           </div>
                         </div>
@@ -856,11 +984,16 @@ export default function Cadastro() {
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        <SelectItem value="conjuge">Cônjuge</SelectItem>
-                                        <SelectItem value="noivo">Noivo(a)</SelectItem>
-                                        <SelectItem value="namorado">Namorado(a)</SelectItem>
-                                        <SelectItem value="filho">Filho(a)</SelectItem>
-                                        <SelectItem value="outro">Outro</SelectItem>
+                                        {member.parentesco === 'filho' ? (
+                                          <SelectItem value="filho">Filho(a)</SelectItem>
+                                        ) : (
+                                          <>
+                                            <SelectItem value="conjuge">Cônjuge</SelectItem>
+                                            <SelectItem value="noivo">Noivo(a)</SelectItem>
+                                            <SelectItem value="namorado">Namorado(a)</SelectItem>
+                                            <SelectItem value="outro">Outro</SelectItem>
+                                          </>
+                                        )}
                                       </SelectContent>
                                     </Select>
                                   </div>
@@ -1098,6 +1231,24 @@ export default function Cadastro() {
                             }}
                           />
                         </div>
+
+                        {tipoPessoa === 'membro' && (
+                          <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="avatar_url" className="flex items-center gap-2">
+                              URL da Foto de Perfil
+                              {avatarUrl && (
+                                <img src={avatarUrl} alt="Preview" className="h-6 w-6 rounded-full object-cover border border-primary/20" />
+                              )}
+                            </Label>
+                            <Input
+                              id="avatar_url"
+                              placeholder="https://exemplo.com/foto.jpg"
+                              className="h-12 rounded-xl"
+                              value={avatarUrl}
+                              onChange={e => setAvatarUrl(e.target.value)}
+                            />
+                          </div>
+                        )}
                         <div className="space-y-2">
                           <Label htmlFor="sexo_membro">Sexo</Label>
                           <Select value={sexo} onValueChange={setSexo}>
@@ -1291,6 +1442,16 @@ export default function Cadastro() {
                             <Label htmlFor="batizado_aguas">Batizado nas águas?</Label>
                           </div>
 
+                          <div className="flex items-center space-x-2 py-2 bg-amber-50 rounded-xl px-2 border border-amber-100">
+                            <Checkbox
+                              id="is_ministry_leader"
+                              className="border-amber-500 data-[state=checked]:bg-amber-500"
+                              checked={isMinistryLeader}
+                              onCheckedChange={c => setIsMinistryLeader(!!c)}
+                            />
+                            <Label htmlFor="is_ministry_leader" className="text-amber-900 font-bold">Líder de Ministério?</Label>
+                          </div>
+
                           <div className="space-y-2">
                             <Label htmlFor="data_batismo">Data do Batismo</Label>
                             <Input
@@ -1322,6 +1483,98 @@ export default function Cadastro() {
                             />
                             <Label htmlFor="participa_ministerio">Participa de algum Ministério?</Label>
                           </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="member_role">Cargo</Label>
+                            <Select value={memberRole} onValueChange={(val: any) => setMemberRole(val)}>
+                              <SelectTrigger id="member_role" className="h-12 rounded-xl">
+                                <SelectValue placeholder="Selecione o cargo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Líder">Líder</SelectItem>
+                                <SelectItem value="Liderado">Liderado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {memberRole === 'Liderado' && (
+                            <div className="space-y-2">
+                              <Label htmlFor="leader_id">Líder Vinculado</Label>
+                              <Select value={leaderId || ""} onValueChange={setLeaderId}>
+                                <SelectTrigger id="leader_id" className="h-12 rounded-xl">
+                                  <SelectValue placeholder="Selecione o líder" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {leaders.map(leader => (
+                                    <SelectItem key={leader.id} value={leader.id}>
+                                      {leader.full_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+
+                          {participaMinisterio && (
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                              <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-4 border border-amber-500/20 shadow-xl overflow-hidden relative">
+                                <div className="absolute top-0 right-0 p-4 opacity-10">
+                                  <Sparkles className="h-12 w-12 text-amber-500" />
+                                </div>
+                                <div className="flex items-center gap-2 text-amber-500 font-black uppercase tracking-tighter text-sm relative z-10">
+                                  <Sparkles className="h-4 w-4" />
+                                  Painel Ecossistema Parando por Um
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                                  <div className="space-y-2">
+                                    <Label className="text-slate-400">Posição no Ecossistema</Label>
+                                    <Select value={memberRole} onValueChange={setMemberRole}>
+                                      <SelectTrigger className="bg-slate-800 border-slate-700 h-10">
+                                        <SelectValue placeholder="Selecione" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-900 text-white border-slate-700">
+                                        <SelectItem value="lider" className="focus:bg-amber-500/20 focus:text-amber-500">Líder (Gera frutos)</SelectItem>
+                                        <SelectItem value="liderado" className="focus:bg-amber-500/20 focus:text-amber-500">Liderado (Em crescimento)</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label className="text-slate-400">Quem é o Líder?</Label>
+                                    <Select
+                                      value={discipuladoLeaderId || "none"}
+                                      onValueChange={(val) => setDiscipuladoLeaderId(val === "none" ? null : val)}
+                                    >
+                                      <SelectTrigger className="bg-slate-800 border-slate-700 h-10">
+                                        <SelectValue placeholder="Selecione o Líder" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-900 text-white border-slate-700 max-h-[200px]">
+                                        <SelectItem value="none" className="focus:bg-amber-500/20 focus:text-amber-500">Sem Líder Direto</SelectItem>
+                                        {allPotentialLeaders
+                                          .filter(l => l.id !== personId)
+                                          .map(leader => (
+                                            <SelectItem key={leader.id} value={leader.id} className="focus:bg-amber-500/20 focus:text-amber-500">
+                                              {leader.full_name || leader.name}
+                                            </SelectItem>
+                                          ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center space-x-2 bg-slate-800/50 p-3 rounded-xl border border-slate-700 relative z-10">
+                                  <Checkbox
+                                    id="is_discipulado_leader"
+                                    className="border-amber-500 data-[state=checked]:bg-amber-500"
+                                    checked={isDiscipuladoLeader}
+                                    onCheckedChange={c => setIsDiscipuladoLeader(!!c)}
+                                  />
+                                  <Label htmlFor="is_discipulado_leader" className="text-amber-100 font-medium">Este membro é um Líder no Ecossistema?</Label>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {participaMinisterio && (
@@ -1393,6 +1646,8 @@ export default function Cadastro() {
               </div>
             </>
           )}
+          {/* Bottom Padding for Mobile */}
+          <div className="h-20 md:hidden" />
         </form>
       </div>
     </DashboardLayout>

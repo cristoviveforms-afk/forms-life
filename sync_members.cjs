@@ -4,14 +4,13 @@ const PROJECT_ID = 'fqgepoacypohelxltzlb';
 const TOKEN = 'sbp_20132f0306554f481da84923e728e2d68bc1f5c4';
 
 const QUERY = `
-UPDATE people 
-SET integration_date = COALESCE(integration_date, created_at::date)
-WHERE type = 'membro' AND (integration_date IS NULL OR integration_date = '');
+ALTER TABLE people ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE people ADD COLUMN IF NOT EXISTS member_role TEXT;
+ALTER TABLE people ADD COLUMN IF NOT EXISTS leader_id UUID REFERENCES people(id);
+ALTER TABLE people ADD COLUMN IF NOT EXISTS whatsapp TEXT;
 
--- Also ensure conversion_date is set for converts if missing
-UPDATE people
-SET conversion_date = COALESCE(conversion_date, created_at::date)
-WHERE type = 'convertido' AND (conversion_date IS NULL OR conversion_date = '');
+-- Sync existing phone numbers to whatsapp if whatsapp is null
+UPDATE people SET whatsapp = phone WHERE (whatsapp IS NULL OR whatsapp = '') AND phone IS NOT NULL;
 
 NOTIFY pgrst, 'reload schema';
 `;

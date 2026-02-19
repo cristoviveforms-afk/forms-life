@@ -23,6 +23,7 @@ import Aniversariantes from "./pages/Aniversariantes";
 import Configuracoes from "./pages/Configuracoes";
 import Avaliacao from "./pages/Avaliacao";
 import ResultadosAvaliacao from "./pages/ResultadosAvaliacao";
+import ParandoPorUm from "./pages/ParandoPorUm";
 import NotFound from "./pages/NotFound";
 
 import BoasVindas from './pages/BoasVindas';
@@ -78,6 +79,7 @@ const App = () => (
               <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
               <Route path="/kids-checkin" element={<ProtectedRoute><KidsCheckin /></ProtectedRoute>} />
               <Route path="/kids-dashboard" element={<ProtectedRoute><KidsDashboard /></ProtectedRoute>} />
+              <Route path="/parando-por-um" element={<ProtectedRoute><ParandoPorUm /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>

@@ -654,6 +654,10 @@ export type Database = {
           visitor_wants_discipleship: boolean | null
           journey_stage: string | null
           accepted_jesus: boolean | null
+          avatar_url: string | null
+          member_role: string | null
+          leader_id: string | null
+          whatsapp: string | null
         }
         Insert: {
           address?: string | null
@@ -693,6 +697,11 @@ export type Database = {
           visitor_religion?: string | null
           visitor_wants_contact?: boolean | null
           visitor_wants_discipleship?: boolean | null
+          journey_stage?: string | null
+          accepted_jesus?: boolean | null
+          avatar_url?: string | null
+          member_role?: string | null
+          leader_id?: string | null
         }
         Update: {
           address?: string | null
@@ -732,6 +741,11 @@ export type Database = {
           visitor_religion?: string | null
           visitor_wants_contact?: boolean | null
           visitor_wants_discipleship?: boolean | null
+          journey_stage?: string | null
+          accepted_jesus?: boolean | null
+          avatar_url?: string | null
+          member_role?: string | null
+          leader_id?: string | null
         }
         Relationships: []
       }

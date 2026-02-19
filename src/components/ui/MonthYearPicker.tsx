@@ -36,19 +36,36 @@ export function MonthYearPicker({ onDateChange }: MonthYearPickerProps) {
     const [year, setYear] = useState(new Date().getFullYear().toString());
     const [selectedDay, setSelectedDay] = useState<number | null>(null);
     const [days, setDays] = useState<{ day: number; weekday: number; isWeekend: boolean; isFriday: boolean; isWednesday: boolean }[]>([]);
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeft, setScrollLeft] = useState(0);
 
     useEffect(() => {
+        const today = new Date();
+        const isCurrentMonth = today.getMonth().toString() === month && today.getFullYear().toString() === year;
+
         calculateDays(parseInt(month), parseInt(year));
-        // We don't call updateDates here because calculateDays is called, 
-        // but we need an initial trigger. Let's do it.
-        const y = parseInt(year);
-        const m = parseInt(month);
-        const lastDayDate = new Date(y, m + 1, 0);
-        const startStr = `${y}-${(m + 1).toString().padStart(2, '0')}-01`;
-        const endStr = `${y}-${(m + 1).toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
-        onDateChange(startStr, endStr);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        if (isCurrentMonth && !selectedDay) {
+            const currentDay = today.getDate();
+            setSelectedDay(currentDay);
+            triggerChange(month, year, currentDay);
+            // Scroll to today after rendering
+            setTimeout(() => {
+                const todayBtn = viewportRef.current?.querySelector(`[data-day="${currentDay}"]`);
+                if (todayBtn) {
+                    todayBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            }, 100);
+        } else {
+            const y = parseInt(year);
+            const m = parseInt(month);
+            const lastDayDate = new Date(y, m + 1, 0);
+            const startStr = `${y}-${(m + 1).toString().padStart(2, '0')}-01`;
+            const endStr = `${y}-${(m + 1).toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
+            onDateChange(startStr, endStr);
+        }
     }, []);
 
     const calculateDays = (m: number, y: number) => {
@@ -114,6 +131,30 @@ export function MonthYearPicker({ onDateChange }: MonthYearPickerProps) {
         triggerChange(month, year, null);
     };
 
+    const isToday = (day: number) => {
+        const today = new Date();
+        return day === today.getDate() &&
+            parseInt(month) === today.getMonth() &&
+            parseInt(year) === today.getFullYear();
+    };
+
+    const onMouseDown = (e: React.MouseEvent) => {
+        if (!viewportRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - viewportRef.current.offsetLeft);
+        setScrollLeft(viewportRef.current.scrollLeft);
+    };
+
+    const handleMouseUp = () => setIsDragging(false);
+
+    const onMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !viewportRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - viewportRef.current.offsetLeft;
+        const walk = (x - startX) * 2;
+        viewportRef.current.scrollLeft = scrollLeft - walk;
+    };
+
     const getWeekdayLabel = (weekday: number) => {
         return ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"][weekday];
     };
@@ -157,8 +198,15 @@ export function MonthYearPicker({ onDateChange }: MonthYearPickerProps) {
                 </div>
             </div>
 
-            <ScrollArea className="w-full whitespace-nowrap">
-                <div className="flex gap-2 pb-4" ref={scrollRef}>
+            <ScrollArea
+                className="w-full whitespace-nowrap cursor-grab active:cursor-grabbing"
+                viewportRef={viewportRef}
+                onMouseDown={onMouseDown}
+                onMouseLeave={handleMouseUp}
+                onMouseUp={handleMouseUp}
+                onMouseMove={onMouseMove}
+            >
+                <div className="flex gap-2 pb-4 select-none">
                     <button
                         onClick={handleViewAll}
                         className={cn(
@@ -175,25 +223,29 @@ export function MonthYearPicker({ onDateChange }: MonthYearPickerProps) {
                     {days.map((d) => (
                         <button
                             key={d.day}
+                            data-day={d.day}
                             onClick={() => handleDayClick(d.day)}
                             className={cn(
-                                "flex flex-col items-center justify-center min-w-[50px] h-16 rounded-2xl border transition-all duration-200",
+                                "flex flex-col items-center justify-center min-w-[50px] h-18 rounded-2xl border transition-all duration-300 relative",
                                 selectedDay === d.day
-                                    ? "ring-2 ring-primary ring-offset-2 bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105"
-                                    : d.isWeekend
-                                        ? "bg-primary/20 text-primary border-primary/30"
-                                        : (d.isFriday || d.isWednesday)
-                                            ? "bg-primary/10 border-primary/20 text-primary"
+                                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20 scale-105"
+                                    : isToday(d.day)
+                                        ? "bg-primary/5 border-primary/40 text-primary animate-pulse"
+                                        : d.isWeekend
+                                            ? "bg-slate-100/50 dark:bg-slate-800/50 text-slate-400 border-transparent opacity-60"
                                             : "bg-background/40 border-border/40 text-muted-foreground hover:bg-background/70"
                             )}
                         >
+                            {isToday(d.day) && (
+                                <div className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-primary rounded-full ring-2 ring-background z-10" />
+                            )}
                             <span className={cn(
-                                "text-[10px] uppercase font-black tracking-widest leading-none mb-1",
-                                selectedDay === d.day ? "text-primary-foreground/80" : "text-muted-foreground/60"
+                                "text-[9px] uppercase font-black tracking-widest leading-none mb-1",
+                                selectedDay === d.day ? "text-primary-foreground/70" : "text-muted-foreground/50"
                             )}>
                                 {getWeekdayLabel(d.weekday)}
                             </span>
-                            <span className="text-lg font-black leading-none">{d.day}</span>
+                            <span className="text-xl font-black leading-none">{d.day}</span>
                         </button>
                     ))}
                 </div>
