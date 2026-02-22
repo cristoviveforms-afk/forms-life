@@ -100,7 +100,7 @@ export default function EventForm({
                     event_id: event.id,
                     assignee: person,
                     description: "Avaliar demandas para o evento grande.",
-                    status: "pendente",
+                    status: "pendente"
                 }));
 
                 const { error: demandsError } = await supabase
