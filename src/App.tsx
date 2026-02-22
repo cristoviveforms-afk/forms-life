@@ -25,6 +25,7 @@ import Avaliacao from "./pages/Avaliacao";
 import ResultadosAvaliacao from "./pages/ResultadosAvaliacao";
 import ParandoPorUm from "./pages/ParandoPorUm";
 import NotFound from "./pages/NotFound";
+import Midia from "./pages/Midia";
 
 import BoasVindas from './pages/BoasVindas';
 import Conexao from './pages/Conexao';
@@ -80,6 +81,7 @@ const App = () => (
               <Route path="/kids-checkin" element={<ProtectedRoute><KidsCheckin /></ProtectedRoute>} />
               <Route path="/kids-dashboard" element={<ProtectedRoute><KidsDashboard /></ProtectedRoute>} />
               <Route path="/parando-por-um" element={<ProtectedRoute><ParandoPorUm /></ProtectedRoute>} />
+              <Route path="/midia" element={<ProtectedRoute><Midia /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>

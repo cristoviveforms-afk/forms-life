@@ -17,7 +17,8 @@ import {
   Wallet,
   Baby,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  Radio
 } from "lucide-react";
 
 import {
@@ -216,6 +217,20 @@ export function AppSidebar({ className }: { className?: string }) {
                     <Sparkles className="h-4 w-4 text-amber-500" />
                     <span>Ecossistema</span>
                     <span className="ml-auto bg-amber-500/20 text-amber-500 text-[9px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Premium</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Mídia Group */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive('/midia')}
+                  className="cursor-pointer"
+                >
+                  <a onClick={() => navigate('/midia')} className="flex items-center gap-3">
+                    <Radio className="h-4 w-4 text-emerald-500" />
+                    <span>Mídia & Comunicação</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
