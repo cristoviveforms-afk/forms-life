@@ -546,11 +546,6 @@ export default function Cadastro() {
 
         // Hierarchy and profile
         avatar_url: avatarUrl || null,
-        member_role: memberRole || null,
-        leader_id: leaderId || null,
-
-        // Always update visit date when saving/updating a visitor
-        last_visit_date: new Date().toISOString(),
       };
 
       if (personId) {
@@ -1497,17 +1492,17 @@ export default function Cadastro() {
                             </Select>
                           </div>
 
-                          {memberRole === 'Liderado' && (
+                          {(memberRole?.toLowerCase() === 'liderado') && (
                             <div className="space-y-2">
                               <Label htmlFor="leader_id">Líder Vinculado</Label>
-                              <Select value={leaderId || ""} onValueChange={setLeaderId}>
+                              <Select value={discipuladoLeaderId || ""} onValueChange={setDiscipuladoLeaderId}>
                                 <SelectTrigger id="leader_id" className="h-12 rounded-xl">
                                   <SelectValue placeholder="Selecione o líder" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {leaders.map(leader => (
+                                  {allPotentialLeaders.map(leader => (
                                     <SelectItem key={leader.id} value={leader.id}>
-                                      {leader.full_name}
+                                      {leader.full_name || leader.name}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
