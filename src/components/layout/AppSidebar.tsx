@@ -222,18 +222,38 @@ export function AppSidebar({ className }: { className?: string }) {
               </SidebarMenuItem>
 
               {/* Mídia Group */}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive('/midia')}
-                  className="cursor-pointer"
-                >
-                  <a onClick={() => navigate('/midia')} className="flex items-center gap-3">
-                    <Radio className="h-4 w-4 text-emerald-500" />
-                    <span>Mídia & Comunicação</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              <Collapsible className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Mídia & Comunicação">
+                      <Radio className="h-4 w-4 text-emerald-500" />
+                      <span>Mídia & Comunicação</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={isActive('/midia/calendario')}>
+                          <a onClick={() => navigate('/midia/calendario')} className="flex items-center gap-2 cursor-pointer">
+                            <Calendar className="h-4 w-4" />
+                            <span>Calendário Mensal</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={isActive('/midia/quadro')}>
+                          <a onClick={() => navigate('/midia/quadro')} className="flex items-center gap-2 cursor-pointer">
+                            <LayoutDashboard className="h-4 w-4" />
+                            <span>Quadro de Mídia</span>
+                            <Shield className="h-3 w-3 ml-auto text-amber-500" />
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Kids Collapsible Menu */}
               <Collapsible className="group/collapsible">

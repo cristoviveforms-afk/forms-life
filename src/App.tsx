@@ -59,7 +59,12 @@ const App = () => (
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/pastoral" element={
                 <ProtectedRoute>
-                  <KeywordProtected>
+                  <KeywordProtected
+                    keyword="mcv1234"
+                    storageKey="pastoral_access_granted"
+                    title="Área Pastoral"
+                    description="Esta área é exclusiva para a liderança pastoral."
+                  >
                     <Pastoral />
                   </KeywordProtected>
                 </ProtectedRoute>
@@ -81,7 +86,19 @@ const App = () => (
               <Route path="/kids-checkin" element={<ProtectedRoute><KidsCheckin /></ProtectedRoute>} />
               <Route path="/kids-dashboard" element={<ProtectedRoute><KidsDashboard /></ProtectedRoute>} />
               <Route path="/parando-por-um" element={<ProtectedRoute><ParandoPorUm /></ProtectedRoute>} />
-              <Route path="/midia" element={<ProtectedRoute><Midia /></ProtectedRoute>} />
+              <Route path="/midia/calendario" element={<ProtectedRoute><Midia hideTabs={true} /></ProtectedRoute>} />
+              <Route path="/midia/quadro" element={
+                <ProtectedRoute>
+                  <KeywordProtected
+                    keyword="midia1234"
+                    storageKey="media_board_access_granted"
+                    title="Quadro de Mídia"
+                    description="Esta área é exclusiva para a equipe de comunicação."
+                  >
+                    <Midia defaultTab="quadro" hideTabs={true} />
+                  </KeywordProtected>
+                </ProtectedRoute>
+              } />
               <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>
