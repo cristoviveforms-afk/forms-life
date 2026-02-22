@@ -63,8 +63,6 @@ export default function Cadastro() {
   const [visitorQuestionAnswered, setVisitorQuestionAnswered] = useState(mode === 'conexao');
   const [memberRole, setMemberRole] = useState<string>('liderado');
   const [discipuladoLeaderId, setDiscipuladoLeaderId] = useState<string | null>(null);
-  const [isMinistryLeader, setIsMinistryLeader] = useState<boolean>(false);
-  const [isDiscipuladoLeader, setIsDiscipuladoLeader] = useState<boolean>(false);
   const [allPotentialLeaders, setAllPotentialLeaders] = useState<any[]>([]);
   const [avatarUrl, setAvatarUrl] = useState('');
 
@@ -123,8 +121,7 @@ export default function Cadastro() {
       setVisitorQuestionAnswered(true); // Fix: Mark question as answered when loading existing data
       setMemberRole(data.member_role || 'liderado');
       setDiscipuladoLeaderId(data.leader_id);
-      setIsMinistryLeader(!!data.is_ministry_leader);
-      setIsDiscipuladoLeader(!!data.is_discipulado_leader);
+      setDiscipuladoLeaderId(data.leader_id);
       setFamilyId(data.family_id);
 
       // Determine type if not set correctly or override
@@ -182,8 +179,7 @@ export default function Cadastro() {
         setAvatarUrl(data.avatar_url || '');
         setMemberRole(data.member_role || 'liderado');
         setDiscipuladoLeaderId(data.leader_id || null);
-        setIsMinistryLeader(!!data.is_ministry_leader);
-        setIsDiscipuladoLeader(!!data.is_discipulado_leader);
+        setDiscipuladoLeaderId(data.leader_id || null);
       }
 
       setQuemConvidou(data.invited_by || '');
@@ -520,8 +516,6 @@ export default function Cadastro() {
         baptized_spirit: batizadoEspirito,
         member_role: tipoPessoa === 'membro' ? memberRole : null,
         leader_id: tipoPessoa === 'membro' ? discipuladoLeaderId : null,
-        is_ministry_leader: tipoPessoa === 'membro' ? isMinistryLeader : false,
-        is_discipulado_leader: tipoPessoa === 'membro' ? isDiscipuladoLeader : false,
         ministries: [...ministeriosServindo, ...ministeriosAcompanhamento],
         natural_skills: donsNaturais || null,
         spiritual_gifts: donsEspirituais || null,
@@ -1437,15 +1431,6 @@ export default function Cadastro() {
                             <Label htmlFor="batizado_aguas">Batizado nas águas?</Label>
                           </div>
 
-                          <div className="flex items-center space-x-2 py-2 bg-amber-50 rounded-xl px-2 border border-amber-100">
-                            <Checkbox
-                              id="is_ministry_leader"
-                              className="border-amber-500 data-[state=checked]:bg-amber-500"
-                              checked={isMinistryLeader}
-                              onCheckedChange={c => setIsMinistryLeader(!!c)}
-                            />
-                            <Label htmlFor="is_ministry_leader" className="text-amber-900 font-bold">Líder de Ministério?</Label>
-                          </div>
 
                           <div className="space-y-2">
                             <Label htmlFor="data_batismo">Data do Batismo</Label>
@@ -1558,15 +1543,6 @@ export default function Cadastro() {
                                   </div>
                                 </div>
 
-                                <div className="flex items-center space-x-2 bg-slate-800/50 p-3 rounded-xl border border-slate-700 relative z-10">
-                                  <Checkbox
-                                    id="is_discipulado_leader"
-                                    className="border-amber-500 data-[state=checked]:bg-amber-500"
-                                    checked={isDiscipuladoLeader}
-                                    onCheckedChange={c => setIsDiscipuladoLeader(!!c)}
-                                  />
-                                  <Label htmlFor="is_discipulado_leader" className="text-amber-100 font-medium">Este membro é um Líder no Ecossistema?</Label>
-                                </div>
                               </div>
                             </div>
                           )}
