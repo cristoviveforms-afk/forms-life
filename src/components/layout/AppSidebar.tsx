@@ -250,6 +250,14 @@ export function AppSidebar({ className }: { className?: string }) {
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={isActive('/midia/escala')}>
+                          <a onClick={() => navigate('/midia/escala')} className="flex items-center gap-2 cursor-pointer">
+                            <Users className="h-4 w-4" />
+                            <span>Escala Mensal</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>

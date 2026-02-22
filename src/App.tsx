@@ -99,6 +99,7 @@ const App = () => (
                   </KeywordProtected>
                 </ProtectedRoute>
               } />
+              <Route path="/midia/escala" element={<ProtectedRoute><Midia defaultTab="escala" hideTabs={true} /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>

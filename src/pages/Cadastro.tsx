@@ -41,6 +41,7 @@ const MINISTERIOS_LIST = [
   'Pastor',
   'Mestre CFB',
   'Missão',
+  'Mídia e Comunicação',
 ];
 
 const FOLLOWUP_MINISTRIES = [
@@ -157,6 +158,7 @@ export default function Cadastro() {
       const allMinistries = data.ministries || [];
       setMinisteriosServindo(allMinistries.filter((m: string) => MINISTERIOS_LIST.includes(m)));
       setMinisteriosAcompanhamento(allMinistries.filter((m: string) => FOLLOWUP_MINISTRIES.includes(m)));
+      setMinistryRoles(data.ministry_roles || {});
       setDonsNaturais(data.natural_skills || '');
       setDonsEspirituais(data.spiritual_gifts || '');
 
@@ -268,6 +270,7 @@ export default function Cadastro() {
   const [participaMinisterio, setParticipaMinisterio] = useState(false);
   const [ministeriosServindo, setMinisteriosServindo] = useState<string[]>([]);
   const [ministeriosAcompanhamento, setMinisteriosAcompanhamento] = useState<string[]>([]);
+  const [ministryRoles, setMinistryRoles] = useState<Record<string, string>>({});
   const [donsNaturais, setDonsNaturais] = useState('');
   const [donsEspirituais, setDonsEspirituais] = useState('');
 
@@ -363,11 +366,25 @@ export default function Cadastro() {
   }, [estadoCivil, sexo, possuiFilhos]);
 
   const toggleMinisterioServindo = (ministerio: string) => {
-    setMinisteriosServindo(prev =>
-      prev.includes(ministerio)
-        ? prev.filter(m => m !== ministerio)
-        : [...prev, ministerio]
-    );
+    setMinisteriosServindo(prev => {
+      if (prev.includes(ministerio)) {
+        // Remove ministry and its role
+        const { [ministerio]: _, ...remainingRoles } = ministryRoles;
+        setMinistryRoles(remainingRoles);
+        return prev.filter(m => m !== ministerio);
+      } else {
+        // Add ministry and set default role to 'liderado'
+        setMinistryRoles(prevRoles => ({ ...prevRoles, [ministerio]: 'liderado' }));
+        return [...prev, ministerio];
+      }
+    });
+  };
+
+  const handleMinistryRoleChange = (ministerio: string, role: string) => {
+    setMinistryRoles(prev => ({
+      ...prev,
+      [ministerio]: role
+    }));
   };
 
   const toggleMinisterioAcompanhamento = (ministerio: string) => {
@@ -517,6 +534,7 @@ export default function Cadastro() {
         member_role: tipoPessoa === 'membro' ? memberRole : null,
         leader_id: tipoPessoa === 'membro' ? discipuladoLeaderId : null,
         ministries: [...ministeriosServindo, ...ministeriosAcompanhamento],
+        ministry_roles: ministryRoles,
         natural_skills: donsNaturais || null,
         spiritual_gifts: donsEspirituais || null,
 
@@ -1549,20 +1567,41 @@ export default function Cadastro() {
                         </div>
 
                         {participaMinisterio && (
-                          <div className="space-y-3 pt-4 border-t">
-                            <Label className="font-bold">Selecione os Ministérios:</Label>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <div className="space-y-4 pt-4 border-t">
+                            <Label className="font-bold">Selecione os Ministérios e Funções:</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {MINISTERIOS_LIST.map((ministerio) => (
-                                <div key={ministerio} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-50 transition-colors">
-                                  <Checkbox
-                                    id={`ministerio-${ministerio}`}
-                                    checked={ministeriosServindo.includes(ministerio)}
-                                    onCheckedChange={() => toggleMinisterioServindo(ministerio)}
-                                  />
-                                  <Label htmlFor={`ministerio-${ministerio}`} className="text-sm font-normal cursor-pointer flex-1">
-                                    {ministerio}
-                                  </Label>
-                                </div>
+                                <Card key={ministerio} className={`p-3 transition-all ${ministeriosServindo.includes(ministerio) ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'}`}>
+                                  <div className="flex flex-col gap-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox
+                                        id={`ministerio-${ministerio}`}
+                                        checked={ministeriosServindo.includes(ministerio)}
+                                        onCheckedChange={() => toggleMinisterioServindo(ministerio)}
+                                      />
+                                      <Label htmlFor={`ministerio-${ministerio}`} className="text-sm font-semibold cursor-pointer flex-1">
+                                        {ministerio}
+                                      </Label>
+                                    </div>
+
+                                    {ministeriosServindo.includes(ministerio) && (
+                                      <div className="pl-6 animate-in fade-in slide-in-from-left-2 duration-200">
+                                        <Select
+                                          value={ministryRoles[ministerio] || 'liderado'}
+                                          onValueChange={(value) => handleMinistryRoleChange(ministerio, value)}
+                                        >
+                                          <SelectTrigger className="h-8 text-xs bg-white">
+                                            <SelectValue placeholder="Selecione a função" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="liderado">Liderado (Membro)</SelectItem>
+                                            <SelectItem value="lider">Líder de Ministério</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    )}
+                                  </div>
+                                </Card>
                               ))}
                             </div>
                           </div>
