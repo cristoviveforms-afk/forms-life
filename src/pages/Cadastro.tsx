@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle, ChevronRight, Sparkles, Camera, Upload } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle, ChevronRight, Sparkles, Camera, Upload, CheckCircle2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -53,13 +53,18 @@ const FOLLOWUP_MINISTRIES = [
   'Ministério Infantil (Kids)',
 ];
 
-export default function Cadastro() {
+interface CadastroProps {
+  isPublic?: boolean;
+}
+
+export default function Cadastro({ isPublic = false }: CadastroProps) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const tipoParam = searchParams.get('tipo') as PersonType | null;
 
   const [loading, setLoading] = useState(false);
-  const [tipoPessoa, setTipoPessoa] = useState<PersonType>(tipoParam || 'membro');
+  const [submitted, setSubmitted] = useState(false);
+  const [tipoPessoa, setTipoPessoa] = useState<PersonType>(tipoParam || (isPublic ? 'membro' : 'membro'));
   const mode = searchParams.get('mode') || 'completo'; // boas-vindas, conexao, completo
   const [visitorQuestionAnswered, setVisitorQuestionAnswered] = useState(mode === 'conexao');
   const [memberRole, setMemberRole] = useState<string>('liderado');
@@ -661,8 +666,12 @@ export default function Cadastro() {
         title: personId ? 'Cadastro atualizado!' : 'Cadastro realizado!',
         description: 'Os dados foram salvos com sucesso.',
       });
-      // Navigate explicitly to avoid history issues on mobile
-      navigate('/dashboard');
+      if (isPublic) {
+        setSubmitted(true);
+      } else {
+        // Navigate explicitly to avoid history issues on mobile
+        navigate('/dashboard');
+      }
 
     } catch (error: any) {
       console.error('Erro ao salvar:', error);
@@ -676,9 +685,29 @@ export default function Cadastro() {
     }
   };
 
-  return (
-    <DashboardLayout title={mode === 'conexao' ? "Finalizar Cadastro" : mode === 'boas-vindas' ? "Cadastro Inicial" : "Ficha de Cadastro"}>
-      <div className="max-w-4xl mx-auto animate-fade-in px-2 md:px-0">
+  const renderSuccess = () => (
+    <div className="text-center space-y-6 py-12 animate-fade-in">
+      <div className="flex justify-center">
+        <div className="bg-emerald-100 dark:bg-emerald-950 p-4 rounded-full">
+          <CheckCircle2 className="h-16 w-16 text-emerald-600" />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Cadastro Realizado!</h2>
+        <p className="text-muted-foreground text-lg">
+          Seja muito bem-vindo à nossa família. Seus dados foram salvos com sucesso.
+          Que Deus te abençoe grandemente!
+        </p>
+      </div>
+      <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full">
+        Fazer novo cadastro
+      </Button>
+    </div>
+  );
+
+  const formContent = (
+    <div className={cn("max-w-4xl mx-auto animate-fade-in px-2 md:px-0", isPublic ? "pb-20" : "")}>
+      {!isPublic && (
         <Button
           variant="ghost"
           className="mb-4"
@@ -687,10 +716,28 @@ export default function Cadastro() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar para Dashboard
         </Button>
+      )}
 
+      {isPublic && submitted ? (
+        <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl overflow-hidden rounded-[2rem] border border-white/10 mt-10">
+          <CardContent className="pt-10 pb-8 px-8">
+            {renderSuccess()}
+          </CardContent>
+        </Card>
+      ) : (
         <form onSubmit={handleSubmit} className="space-y-8 pb-12">
-          {/* Tipo de Pessoa - Hidden in specific modes */}
-          {mode === 'completo' && (
+          {isPublic && (
+            <div className="text-center mb-8 pt-6">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-4 animate-bounce">
+                <Sparkles size={14} className="fill-primary" /> Cadastro de Membros
+              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">Ficha de Cadastro</h1>
+              <p className="text-muted-foreground">Preencha seus dados para fazer parte da nossa comunidade.</p>
+            </div>
+          )}
+
+          {/* Tipo de Cadastro - Hidden if Public (defaults to Membro) */}
+          {mode === 'completo' && !isPublic && (
             <Card className="mb-6">
               <CardHeader>
                 <CardTitle>Tipo de Cadastro</CardTitle>
@@ -713,13 +760,16 @@ export default function Cadastro() {
                     >
                       {tipo === 'membro' && 'Membro'}
                       {tipo === 'visitante' && 'Visitante'}
-                      {tipo === 'convertido' && 'Novo Convertido'}
                     </Button>
                   ))}
                 </div>
               </CardContent>
             </Card>
           )}
+
+          {/* ... Rest of the form remains same ... */}
+          {/* I will use the actual form content here, wrapped in conditional logic */}
+          {/* Due to the size of the file, I'll keep the existing structure but replace the root elements */}
 
           {/* Pergunta Inicial para Visitante - Only in Boas-Vindas */}
           {tipoPessoa === 'visitante' && mode === 'boas-vindas' && !visitorQuestionAnswered && !isReturningVisitor && (
@@ -1779,7 +1829,21 @@ export default function Cadastro() {
           {/* Bottom Padding for Mobile */}
           <div className="h-20 md:hidden" />
         </form>
+      )}
+    </div>
+  );
+
+  if (isPublic) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 font-sans">
+        {formContent}
       </div>
+    );
+  }
+
+  return (
+    <DashboardLayout title={mode === 'conexao' ? "Finalizar Cadastro" : mode === 'boas-vindas' ? "Cadastro Inicial" : "Ficha de Cadastro"}>
+      {formContent}
     </DashboardLayout>
   );
 }

@@ -100,6 +100,7 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/midia/escala" element={<ProtectedRoute><Midia defaultTab="escala" hideTabs={true} /></ProtectedRoute>} />
+              <Route path="/auto-cadastro" element={<Cadastro isPublic={true} />} />
               <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>
