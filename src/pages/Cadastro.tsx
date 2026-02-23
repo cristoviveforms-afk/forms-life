@@ -706,7 +706,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
   );
 
   const formContent = (
-    <div className={cn("max-w-4xl mx-auto animate-fade-in px-2 md:px-0", isPublic ? "pb-20" : "")}>
+    <div className={cn("max-w-4xl mx-auto px-2 md:px-0", isPublic ? "pb-20" : "")}>
       {!isPublic && (
         <Button
           variant="ghost"

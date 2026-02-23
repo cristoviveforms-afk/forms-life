@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Download, MoreHorizontal, Loader2, ExternalLink } from 'lucide-react';
+import { Search, Plus, Filter, Download, MoreHorizontal, Loader2, ExternalLink, Link as LinkIcon, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -65,13 +65,28 @@ export default function Membros() {
   };
   return (
     <DashboardLayout title="Membros">
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 p-1">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="space-y-1">
             <h2 className="text-2xl font-bold tracking-tight">Membros</h2>
             <p className="text-muted-foreground">Gerencie os membros da igreja e seus ministérios.</p>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                const url = `${window.location.origin}/auto-cadastro`;
+                navigator.clipboard.writeText(url);
+                toast({
+                  title: "Link Copiado!",
+                  description: "O link de auto-cadastro foi copiado para a área de transferência.",
+                });
+              }}
+              className="rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
+            >
+              <LinkIcon className="h-4 w-4 mr-2" />
+              Link de Cadastro
+            </Button>
             <Button variant="outline" size="icon" className="rounded-xl">
               <Download className="h-4 w-4" />
             </Button>

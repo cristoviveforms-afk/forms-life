@@ -129,7 +129,7 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout title="Dashboard">
-      <div className="space-y-8 animate-fade-in p-1">
+      <div className="space-y-8 p-1">
 
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -193,6 +193,19 @@ export default function Dashboard() {
                 <Button variant="outline" onClick={() => navigate('/ministerios')} className="w-full justify-start text-left sm:col-span-2 lg:col-span-1" size="lg">
                   <Building2 className="h-5 w-5 mr-3" />
                   Gerenciar Ministérios
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const url = `${window.location.origin}/auto-cadastro`;
+                    navigator.clipboard.writeText(url);
+                    toast.success("Link de auto-cadastro copiado!");
+                  }}
+                  className="w-full justify-start text-left sm:col-span-2 lg:col-span-1 border-primary/20 text-primary hover:bg-primary/5"
+                  size="lg"
+                >
+                  <UserPlus className="h-5 w-5 mr-3" />
+                  Link de Auto-Cadastro
                 </Button>
               </CardContent>
             </Card>
