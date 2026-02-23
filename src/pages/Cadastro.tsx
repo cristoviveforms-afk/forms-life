@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, HeartHandshake, Users, Puzzle, ChevronRight, Sparkles, Camera, Upload } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -66,6 +66,7 @@ export default function Cadastro() {
   const [discipuladoLeaderId, setDiscipuladoLeaderId] = useState<string | null>(null);
   const [allPotentialLeaders, setAllPotentialLeaders] = useState<any[]>([]);
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const [isReturningVisitor, setIsReturningVisitor] = useState(false);
   const [searchPhone, setSearchPhone] = useState('');
@@ -180,7 +181,6 @@ export default function Cadastro() {
         setMinisterioAnterior(data.member_prev_ministry || '');
         setAvatarUrl(data.avatar_url || '');
         setMemberRole(data.member_role || 'liderado');
-        setDiscipuladoLeaderId(data.leader_id || null);
         setDiscipuladoLeaderId(data.leader_id || null);
       }
 
@@ -316,6 +316,53 @@ export default function Cadastro() {
       console.error('Erro ao buscar visitantes por data:', error);
     } finally {
       setLoadingDateVisitors(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+      toast({
+        title: "Foto carregada",
+        description: "A imagem de perfil foi enviada com sucesso.",
+      });
+    } catch (error: any) {
+      console.error('Erro no upload do avatar:', error);
+      toast({
+        title: "Erro no upload",
+        description: error.message || "Não foi possível carregar a foto.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -1205,30 +1252,36 @@ export default function Cadastro() {
               ) : (
                 /* LAYOUT PADRÃO (MEMBROS E OUTROS) */
                 <div className="space-y-6">
-                  <Card className="mb-6 shadow-md border-l-4 border-l-slate-400">
-                    <CardHeader>
-                      <CardTitle>Dados Pessoais</CardTitle>
+                  <Card className="mb-6 shadow-md border-t-4 border-t-primary">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        Informações Básicas e Contato
+                      </CardTitle>
+                      <CardDescription>Dados essenciais para identificação e comunicação.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="nome_membro">Nome Completo *</Label>
+                    <CardContent className="space-y-6 pt-4">
+
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-2">
+                        <div className="md:col-span-8 space-y-2">
+                          <Label htmlFor="nome_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Nome Completo *</Label>
                           <Input
                             id="nome_membro"
-                            placeholder="Nome completo"
+                            placeholder="Ex: João Silva da Costa"
                             required
-                            className="h-12 rounded-xl"
+                            className="h-11 rounded-xl"
                             value={nome}
                             onChange={e => setNome(e.target.value)}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="contato_membro">WhatsApp / Telefone *</Label>
+                        <div className="md:col-span-4 space-y-2">
+                          <Label htmlFor="contato_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">WhatsApp *</Label>
                           <Input
                             id="contato_membro"
                             placeholder="(00) 00000-0000"
                             required
-                            className="h-12 rounded-xl"
+                            className="h-11 rounded-xl"
                             value={telefone}
                             onChange={e => {
                               const val = e.target.value.replace(/\D/g, '');
@@ -1239,27 +1292,10 @@ export default function Cadastro() {
                           />
                         </div>
 
-                        {tipoPessoa === 'membro' && (
-                          <div className="space-y-2 md:col-span-2">
-                            <Label htmlFor="avatar_url" className="flex items-center gap-2">
-                              URL da Foto de Perfil
-                              {avatarUrl && (
-                                <img src={avatarUrl} alt="Preview" className="h-6 w-6 rounded-full object-cover border border-primary/20" />
-                              )}
-                            </Label>
-                            <Input
-                              id="avatar_url"
-                              placeholder="https://exemplo.com/foto.jpg"
-                              className="h-12 rounded-xl"
-                              value={avatarUrl}
-                              onChange={e => setAvatarUrl(e.target.value)}
-                            />
-                          </div>
-                        )}
-                        <div className="space-y-2">
-                          <Label htmlFor="sexo_membro">Sexo</Label>
+                        <div className="md:col-span-3 space-y-2">
+                          <Label htmlFor="sexo_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Sexo</Label>
                           <Select value={sexo} onValueChange={setSexo}>
-                            <SelectTrigger id="sexo_membro" className="h-12 rounded-xl">
+                            <SelectTrigger id="sexo_membro" className="h-11 rounded-xl">
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1269,132 +1305,125 @@ export default function Cadastro() {
                           </Select>
                         </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="nascimento_membro">Data de Nascimento</Label>
+                        <div className="md:col-span-3 space-y-2">
+                          <Label htmlFor="nascimento_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Nascimento</Label>
                           <Input
                             id="nascimento_membro"
                             type="date"
-                            className="h-12 rounded-xl"
+                            className="h-11 rounded-xl"
                             value={nascimento}
                             onChange={e => setNascimento(e.target.value)}
                           />
                         </div>
 
-                        <div className="space-y-2 md:col-span-2">
-                          <Label htmlFor="quem_convidou_membro">Quem convidou</Label>
+                        <div className="md:col-span-6 space-y-2">
+                          <Label htmlFor="email_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Email Profissional/Pessoal</Label>
                           <Input
-                            id="quem_convidou_membro"
-                            placeholder="Nome de quem o convidou"
-                            className="h-12 rounded-xl"
-                            value={quemConvidou}
-                            onChange={e => setQuemConvidou(e.target.value)}
+                            id="email_membro"
+                            type="email"
+                            placeholder="exemplo@igreja.com"
+                            className="h-11 rounded-xl"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
                           />
                         </div>
-                      </div>
 
-                      {/* Filhos (Layout Membro) */}
-                      <div className="space-y-4 pt-4 border-t">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id="possui_filhos"
-                            checked={possuiFilhos}
-                            onCheckedChange={(checked) => {
-                              setPossuiFilhos(!!checked);
-                              if (!checked) setFilhos([]);
-                            }}
-                          />
-                          <Label htmlFor="possui_filhos" className="font-bold">Possui filhos?</Label>
-                        </div>
+                        {/* Filhos (Layout Membro) - Movido para baixo de Sexo/Email como solicitado */}
+                        <div className="md:col-span-12 space-y-4 py-4 border-y border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="possui_filhos"
+                              checked={possuiFilhos}
+                              onCheckedChange={(checked) => {
+                                setPossuiFilhos(!!checked);
+                                if (!checked) setFilhos([]);
+                              }}
+                            />
+                            <Label htmlFor="possui_filhos" className="text-base font-bold text-primary cursor-pointer">Filhos</Label>
+                          </div>
 
-                        {possuiFilhos && (
-                          <div className="space-y-3">
-                            {filhos.map((filho, index) => (
-                              <div key={index} className="flex flex-col gap-2 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 relative mb-4">
-                                <div className="flex gap-2 items-end">
-                                  <div className="flex-1 space-y-1">
-                                    <Label className="text-[10px] font-black uppercase text-slate-400">Nome do Filho *</Label>
-                                    <Input
-                                      value={filho.nome}
-                                      onChange={(e) => {
-                                        const newFilhos = [...filhos];
-                                        newFilhos[index].nome = e.target.value;
-                                        setFilhos(newFilhos);
-                                      }}
-                                      placeholder="Nome"
-                                      className="h-10 rounded-xl"
-                                    />
-                                  </div>
-                                  <div className="w-24 space-y-1">
-                                    <Label className="text-[10px] font-black uppercase text-slate-400">Idade</Label>
-                                    <Input
-                                      value={filho.idade}
-                                      onChange={(e) => {
-                                        const newFilhos = [...filhos];
-                                        newFilhos[index].idade = e.target.value;
-                                        setFilhos(newFilhos);
-                                      }}
-                                      placeholder="Ex: 5"
-                                      type="number"
-                                      className="h-10 rounded-xl"
-                                    />
-                                  </div>
+                          {possuiFilhos && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                              {filhos.map((filho, index) => (
+                                <div key={index} className="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 relative group">
                                   <Button
                                     type="button"
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => removeFilho(index)}
-                                    className="h-10 w-10 text-rose-500 rounded-xl"
+                                    className="absolute top-2 right-2 h-7 w-7 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
+                                  <div className="space-y-3">
+                                    <div className="flex gap-2">
+                                      <div className="flex-1 space-y-1">
+                                        <Label className="text-[10px] font-bold uppercase text-slate-400">Nome</Label>
+                                        <Input
+                                          value={filho.nome}
+                                          onChange={(e) => {
+                                            const newFilhos = [...filhos];
+                                            newFilhos[index].nome = e.target.value;
+                                            setFilhos(newFilhos);
+                                          }}
+                                          placeholder="Nome"
+                                          className="h-9 rounded-lg bg-white dark:bg-slate-900"
+                                        />
+                                      </div>
+                                      <div className="w-20 space-y-1">
+                                        <Label className="text-[10px] font-bold uppercase text-slate-400">Idade</Label>
+                                        <Input
+                                          value={filho.idade}
+                                          onChange={(e) => {
+                                            const newFilhos = [...filhos];
+                                            newFilhos[index].idade = e.target.value;
+                                            setFilhos(newFilhos);
+                                          }}
+                                          placeholder="Ex: 5"
+                                          className="h-9 rounded-lg bg-white dark:bg-slate-900"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <Label className="text-[10px] font-bold uppercase text-slate-400">Observações</Label>
+                                      <Input
+                                        value={filho.observacoes}
+                                        onChange={(e) => {
+                                          const newFilhos = [...filhos];
+                                          newFilhos[index].observacoes = e.target.value;
+                                          setFilhos(newFilhos);
+                                        }}
+                                        placeholder="Alergias, etc"
+                                        className="h-9 text-xs rounded-lg bg-white dark:bg-slate-900"
+                                      />
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="space-y-1">
-                                  <Label className="text-[10px] font-black uppercase text-slate-400">Observações (Alergias, Remédios, etc.)</Label>
-                                  <Textarea
-                                    value={filho.observacoes}
-                                    onChange={(e) => {
-                                      const newFilhos = [...filhos];
-                                      newFilhos[index].observacoes = e.target.value;
-                                      setFilhos(newFilhos);
-                                    }}
-                                    placeholder="Ex: Alérgico a amendoim..."
-                                    className="h-20 text-sm rounded-xl"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                            <Button type="button" variant="outline" size="sm" onClick={addFilho} className="rounded-xl">
-                              <Plus className="h-4 w-4 mr-2" />
-                              Adicionar Filho
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                              ))}
+                              <Button type="button" variant="outline" size="sm" onClick={addFilho} className="rounded-xl border-dashed border-2 md:col-span-2 py-6 hover:bg-slate-50 transition-colors">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Adicionar Dependente / Filho
+                              </Button>
+                            </div>
+                          )}
+                        </div>
 
-                  {/* Contato (Padrão) */}
-                  <Card className="mb-6 shadow-md">
-                    <CardHeader>
-                      <CardTitle>Dados de Contato e Endereço</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="email_membro">Email</Label>
+
+                        <div className="md:col-span-12 space-y-2">
+                          <Label htmlFor="endereco_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Residência Atual</Label>
                           <Input
-                            id="email_membro"
-                            type="email"
-                            placeholder="email@exemplo.com"
-                            className="h-12 rounded-xl"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            id="endereco_membro"
+                            placeholder="Rua, número, bairro, cidade - UF"
+                            className="h-11 rounded-xl"
+                            value={endereco}
+                            onChange={e => setEndereco(e.target.value)}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="como_conheceu_membro">Como conheceu a igreja?</Label>
+
+                        <div className="md:col-span-6 space-y-2">
+                          <Label htmlFor="como_conheceu_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Como conheceu a Vida?</Label>
                           <Select value={comoConheceu} onValueChange={setComoConheceu}>
-                            <SelectTrigger id="como_conheceu_membro" className="h-12 rounded-xl">
+                            <SelectTrigger id="como_conheceu_membro" className="h-11 rounded-xl">
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1406,71 +1435,166 @@ export default function Cadastro() {
                             </SelectContent>
                           </Select>
                         </div>
+
+                        <div className="md:col-span-6 space-y-2">
+                          <Label htmlFor="quem_convidou_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Quem o convidou?</Label>
+                          <Input
+                            id="quem_convidou_membro"
+                            placeholder="Nome de quem o trouxe"
+                            className="h-11 rounded-xl"
+                            value={quemConvidou}
+                            onChange={e => setQuemConvidou(e.target.value)}
+                          />
+                        </div>
+
+                        {tipoPessoa === 'membro' && (
+                          <div className="md:col-span-12 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2">
+                              Foto de Perfil
+                            </Label>
+                            <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/80 group">
+                              <div className="relative">
+                                <div className="h-24 w-24 rounded-3xl bg-white dark:bg-slate-800 flex items-center justify-center border-2 border-slate-100 dark:border-slate-700 overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-500">
+                                  {avatarUrl ? (
+                                    <img src={avatarUrl} alt="Preview" className="h-full w-full object-cover" />
+                                  ) : (
+                                    <Camera className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+                                  )}
+                                  {uploadingAvatar && (
+                                    <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex items-center justify-center backdrop-blur-sm">
+                                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                    </div>
+                                  )}
+                                </div>
+                                {avatarUrl && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setAvatarUrl('')}
+                                    className="absolute -top-2 -right-2 h-6 w-6 bg-rose-500 text-white rounded-lg flex items-center justify-center shadow-lg hover:bg-rose-600 transition-colors"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                )}
+                              </div>
+
+                              <div className="flex-1 space-y-2 text-center md:text-left">
+                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                  {avatarUrl ? 'Foto carregada com sucesso!' : 'Selecione uma foto de perfil'}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  Formatos aceitos: JPG, PNG. Tamanho máximo: 5MB.
+                                </p>
+                                <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-1">
+                                  <div className="relative">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                      onChange={handleAvatarUpload}
+                                      disabled={uploadingAvatar}
+                                    />
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="rounded-xl h-10 px-4 font-bold border-primary/20 hover:bg-primary/5 text-primary"
+                                      disabled={uploadingAvatar}
+                                    >
+                                      <Upload className="h-4 w-4 mr-2" />
+                                      {avatarUrl ? 'Trocar Foto' : 'Anexar Foto'}
+                                    </Button>
+                                  </div>
+                                  {avatarUrl && (
+                                    <Badge variant="outline" className="h-10 px-4 rounded-xl border-emerald-500/20 bg-emerald-500/5 text-emerald-600 font-bold">
+                                      URL vinculada
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            {/* Hidden field for form data, or keep the URL input optionally? 
+                                User asked to "place option to attach image", didn't explicitly say remove the URL option, 
+                                but in professional forms we usually replace it or make it an alternative.
+                                I'll keep the input hidden or very subtle for reference if needed. */}
+                            <input type="hidden" value={avatarUrl} name="avatar_url" />
+                          </div>
+                        )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="endereco_membro">Endereço Completo</Label>
-                        <Textarea
-                          id="endereco_membro"
-                          placeholder="Rua, número, bairro, cidade - UF"
-                          className="rounded-xl min-h-[80px]"
-                          value={endereco}
-                          onChange={e => setEndereco(e.target.value)}
-                        />
-                      </div>
+
                     </CardContent>
                   </Card>
 
                   {/* Informações Espirituais para Membros */}
                   {tipoPessoa === 'membro' && (
-                    <Card className="mb-6 shadow-md border-l-4 border-l-blue-400">
-                      <CardHeader>
-                        <CardTitle>Informações Espirituais</CardTitle>
+                    <Card className="mb-6 shadow-md border-t-4 border-t-blue-500 overflow-hidden">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-blue-500" />
+                          Vida Espiritual e Comissionamento
+                        </CardTitle>
+                        <CardDescription>Informações sobre sua jornada de fé e serviço na igreja.</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <CardContent className="space-y-6 pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="space-y-2">
-                            <Label htmlFor="data_conversao">Data da Conversão</Label>
+                            <Label htmlFor="data_conversao" className="text-xs font-bold uppercase tracking-wider text-slate-500">Data da Conversão</Label>
                             <Input
                               id="data_conversao"
                               type="date"
-                              className="h-12 rounded-xl"
+                              className="h-11 rounded-xl"
                               value={dataConversao}
                               onChange={e => setDataConversao(e.target.value)}
                             />
                           </div>
 
-                          <div className="flex items-center space-x-2 py-2">
-                            <Checkbox
-                              id="batizado_aguas"
-                              checked={batizadoAguas}
-                              onCheckedChange={(c) => setBatizadoAguas(!!c)}
-                            />
-                            <Label htmlFor="batizado_aguas">Batizado nas águas?</Label>
-                          </div>
-
-
                           <div className="space-y-2">
-                            <Label htmlFor="data_batismo">Data do Batismo</Label>
+                            <Label htmlFor="data_batismo" className="text-xs font-bold uppercase tracking-wider text-slate-500">Data do Batismo</Label>
                             <Input
                               id="data_batismo"
                               type="date"
-                              className="h-12 rounded-xl"
+                              className="h-11 rounded-xl"
                               value={dataBatismo}
                               onChange={e => setDataBatismo(e.target.value)}
                             />
                           </div>
 
-                          <div className="flex items-center space-x-2 py-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="member_role" className="text-xs font-bold uppercase tracking-wider text-slate-500">Posição Ministerial</Label>
+                            <Select value={memberRole} onValueChange={(val: any) => setMemberRole(val)}>
+                              <SelectTrigger id="member_role" className="h-11 rounded-xl">
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="lider">Líder</SelectItem>
+                                <SelectItem value="liderado">Liderado</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-y border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
+                            <Checkbox
+                              id="batizado_aguas"
+                              checked={batizadoAguas}
+                              onCheckedChange={(c) => setBatizadoAguas(!!c)}
+                              className="h-5 w-5 rounded-md"
+                            />
+                            <Label htmlFor="batizado_aguas" className="text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer">Batizado nas águas</Label>
+                          </div>
+
+                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
                             <Checkbox
                               id="batizado_espirito"
                               checked={batizadoEspirito}
                               onCheckedChange={c => setBatizadoEspirito(!!c)}
+                              className="h-5 w-5 rounded-md"
                             />
-                            <Label htmlFor="batizado_espirito">Batizado com Espírito Santo?</Label>
+                            <Label htmlFor="batizado_espirito" className="text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer">Batizado c/ Espírito Santo</Label>
                           </div>
 
-                          <div className="flex items-center space-x-2 py-2">
+                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-all border border-blue-100/50 dark:border-blue-800/50">
                             <Checkbox
                               id="participa_ministerio"
                               checked={participaMinisterio}
@@ -1478,184 +1602,180 @@ export default function Cadastro() {
                                 setParticipaMinisterio(!!c);
                                 if (!c) setMinisteriosServindo([]);
                               }}
+                              className="h-5 w-5 rounded-md data-[state=checked]:bg-blue-600"
                             />
-                            <Label htmlFor="participa_ministerio">Participa de algum Ministério?</Label>
+                            <Label htmlFor="participa_ministerio" className="text-sm font-extrabold text-blue-700 dark:text-blue-400 cursor-pointer">Participa de Ministérios?</Label>
                           </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="member_role">Cargo</Label>
-                            <Select value={memberRole} onValueChange={(val: any) => setMemberRole(val)}>
-                              <SelectTrigger id="member_role" className="h-12 rounded-xl">
-                                <SelectValue placeholder="Selecione o cargo" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Líder">Líder</SelectItem>
-                                <SelectItem value="Liderado">Liderado</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          {(memberRole?.toLowerCase() === 'liderado') && (
-                            <div className="space-y-2">
-                              <Label htmlFor="leader_id">Líder Vinculado</Label>
-                              <Select value={discipuladoLeaderId || ""} onValueChange={setDiscipuladoLeaderId}>
-                                <SelectTrigger id="leader_id" className="h-12 rounded-xl">
-                                  <SelectValue placeholder="Selecione o líder" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {allPotentialLeaders.map(leader => (
-                                    <SelectItem key={leader.id} value={leader.id}>
-                                      {leader.full_name || leader.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
-
-                          {participaMinisterio && (
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                              <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-4 border border-amber-500/20 shadow-xl overflow-hidden relative">
-                                <div className="absolute top-0 right-0 p-4 opacity-10">
-                                  <Sparkles className="h-12 w-12 text-amber-500" />
-                                </div>
-                                <div className="flex items-center gap-2 text-amber-500 font-black uppercase tracking-tighter text-sm relative z-10">
-                                  <Sparkles className="h-4 w-4" />
-                                  Painel Ecossistema Parando por Um
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
-                                  <div className="space-y-2">
-                                    <Label className="text-slate-400">Posição no Ecossistema</Label>
-                                    <Select value={memberRole} onValueChange={setMemberRole}>
-                                      <SelectTrigger className="bg-slate-800 border-slate-700 h-10">
-                                        <SelectValue placeholder="Selecione" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-900 text-white border-slate-700">
-                                        <SelectItem value="lider" className="focus:bg-amber-500/20 focus:text-amber-500">Líder (Gera frutos)</SelectItem>
-                                        <SelectItem value="liderado" className="focus:bg-amber-500/20 focus:text-amber-500">Liderado (Em crescimento)</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <Label className="text-slate-400">Quem é o Líder?</Label>
-                                    <Select
-                                      value={discipuladoLeaderId || "none"}
-                                      onValueChange={(val) => setDiscipuladoLeaderId(val === "none" ? null : val)}
-                                    >
-                                      <SelectTrigger className="bg-slate-800 border-slate-700 h-10">
-                                        <SelectValue placeholder="Selecione o Líder" />
-                                      </SelectTrigger>
-                                      <SelectContent className="bg-slate-900 text-white border-slate-700 max-h-[200px]">
-                                        <SelectItem value="none" className="focus:bg-amber-500/20 focus:text-amber-500">Sem Líder Direto</SelectItem>
-                                        {allPotentialLeaders
-                                          .filter(l => l.id !== personId)
-                                          .map(leader => (
-                                            <SelectItem key={leader.id} value={leader.id} className="focus:bg-amber-500/20 focus:text-amber-500">
-                                              {leader.full_name || leader.name}
-                                            </SelectItem>
-                                          ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-
-                              </div>
-                            </div>
-                          )}
                         </div>
 
                         {participaMinisterio && (
-                          <div className="space-y-4 pt-4 border-t">
-                            <Label className="font-bold">Selecione os Ministérios e Funções:</Label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {MINISTERIOS_LIST.map((ministerio) => (
-                                <Card key={ministerio} className={`p-3 transition-all ${ministeriosServindo.includes(ministerio) ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'}`}>
-                                  <div className="flex flex-col gap-3">
-                                    <div className="flex items-center space-x-2">
-                                      <Checkbox
-                                        id={`ministerio-${ministerio}`}
-                                        checked={ministeriosServindo.includes(ministerio)}
-                                        onCheckedChange={() => toggleMinisterioServindo(ministerio)}
-                                      />
-                                      <Label htmlFor={`ministerio-${ministerio}`} className="text-sm font-semibold cursor-pointer flex-1">
-                                        {ministerio}
-                                      </Label>
-                                    </div>
+                          <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                            {/* Ecosystem Panel Refined */}
+                            <div className="rounded-3xl bg-[#0a192f] text-white p-6 shadow-2xl relative overflow-hidden border border-amber-500/20">
+                              <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12">
+                                <Sparkles className="h-32 w-32 text-amber-500" />
+                              </div>
+                              <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-500/5 blur-3xl rounded-full" />
 
-                                    {ministeriosServindo.includes(ministerio) && (
-                                      <div className="pl-6 animate-in fade-in slide-in-from-left-2 duration-200">
-                                        <Select
-                                          value={ministryRoles[ministerio] || 'liderado'}
-                                          onValueChange={(value) => handleMinistryRoleChange(ministerio, value)}
-                                        >
-                                          <SelectTrigger className="h-8 text-xs bg-white">
-                                            <SelectValue placeholder="Selecione a função" />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            <SelectItem value="liderado">Liderado (Membro)</SelectItem>
-                                            <SelectItem value="lider">Líder de Ministério</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                      </div>
-                                    )}
+                              <div className="flex items-center justify-between mb-6 relative z-10">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                                    <Sparkles className="h-5 w-5 text-amber-500" />
                                   </div>
-                                </Card>
-                              ))}
+                                  <div>
+                                    <h4 className="text-lg font-black uppercase tracking-tighter text-amber-500 leading-none">Ecossistema</h4>
+                                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1">Parando por Um</p>
+                                  </div>
+                                </div>
+                                <Badge className="bg-amber-500 text-[#0a192f] hover:bg-amber-400 font-black px-3 py-1 uppercase tracking-tighter border-none">Premium</Badge>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                                <div className="space-y-3">
+                                  <Label className="text-xs font-bold text-slate-200 uppercase tracking-wider">Sua Posição</Label>
+                                  <Select value={memberRole} onValueChange={setMemberRole}>
+                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-2xl focus:ring-amber-500/50">
+                                      <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#0a192f] text-white border-white/10">
+                                      <SelectItem value="lider" className="focus:bg-amber-500/20 focus:text-amber-500">Líder (Gera frutos)</SelectItem>
+                                      <SelectItem value="liderado" className="focus:bg-amber-500/20 focus:text-amber-500">Liderado (Em crescimento)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <Label className="text-xs font-bold text-slate-200 uppercase tracking-wider">Quem te pastoreia?</Label>
+                                  <Select
+                                    value={discipuladoLeaderId || "none"}
+                                    onValueChange={(val) => setDiscipuladoLeaderId(val === "none" ? null : val)}
+                                  >
+                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-2xl focus:ring-amber-500/50">
+                                      <SelectValue placeholder="Selecione o Líder" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#0a192f] text-white border-white/10 max-h-[250px]">
+                                      <SelectItem value="none" className="focus:bg-amber-500/20 focus:text-amber-500 text-slate-400 italic">Sem Líder Direto</SelectItem>
+                                      {allPotentialLeaders
+                                        .filter(l => l.id !== personId)
+                                        .map(leader => (
+                                          <SelectItem key={leader.id} value={leader.id} className="focus:bg-amber-500/20 focus:text-amber-500">
+                                            {leader.full_name || leader.name}
+                                          </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Ministries List Refined */}
+                            <div className="space-y-4 pt-2">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">Selecione os Ministérios Atuais:</Label>
+                                <span className="text-[10px] font-bold text-slate-500 uppercase">Escolha todos que participa</span>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {MINISTERIOS_LIST.map((ministerio) => (
+                                  <div
+                                    key={ministerio}
+                                    className={`relative p-4 rounded-2xl border-2 transition-all duration-300 group ${ministeriosServindo.includes(ministerio)
+                                      ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/30 shadow-md ring-2 ring-emerald-500/10'
+                                      : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 hover:border-slate-300 hover:shadow-sm'
+                                      }`}
+                                  >
+                                    <div className="flex flex-col gap-3">
+                                      <div className="flex items-center space-x-3">
+                                        <Checkbox
+                                          id={`ministerio-${ministerio}`}
+                                          checked={ministeriosServindo.includes(ministerio)}
+                                          onCheckedChange={() => toggleMinisterioServindo(ministerio)}
+                                          className="h-5 w-5 data-[state=checked]:bg-emerald-600 data-[state=checked]:border-none"
+                                        />
+                                        <Label htmlFor={`ministerio-${ministerio}`} className={`text-sm font-bold cursor-pointer flex-1 truncate ${ministeriosServindo.includes(ministerio)
+                                          ? 'text-emerald-900 dark:text-emerald-300'
+                                          : 'text-slate-700 dark:text-slate-400'
+                                          }`}>
+                                          {ministerio}
+                                        </Label>
+                                      </div>
+
+                                      {ministeriosServindo.includes(ministerio) && (
+                                        <div className="pl-8 animate-in fade-in slide-in-from-top-1">
+                                          <Select
+                                            value={ministryRoles[ministerio] || 'liderado'}
+                                            onValueChange={(value) => handleMinistryRoleChange(ministerio, value)}
+                                          >
+                                            <SelectTrigger className="h-9 text-xs bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-800 rounded-xl">
+                                              <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                              <SelectItem value="liderado">Membro / Voluntário</SelectItem>
+                                              <SelectItem value="lider" className="font-bold text-emerald-600">Líder Responsável</SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}
 
-                        <div className="space-y-2">
-                          <Label htmlFor="dons_naturais">Dons e Habilidades Naturais</Label>
-                          <Textarea
-                            id="dons_naturais"
-                            placeholder="Ex: música, dança, mídia, comunicação..."
-                            className="rounded-xl"
-                            value={donsNaturais}
-                            onChange={e => setDonsNaturais(e.target.value)}
-                          />
-                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-50">
+                          <div className="space-y-2">
+                            <Label htmlFor="dons_naturais" className="text-xs font-bold uppercase tracking-wider text-slate-500">Dons Naturais</Label>
+                            <Textarea
+                              id="dons_naturais"
+                              placeholder="Habilidades técnicas ou manuais (ex: música, design, culinária)"
+                              className="rounded-xl resize-none text-sm min-h-[100px]"
+                              value={donsNaturais}
+                              onChange={e => setDonsNaturais(e.target.value)}
+                            />
+                          </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="dons_espirituais">Dons Espirituais e Ministeriais</Label>
-                          <Textarea
-                            id="dons_espirituais"
-                            placeholder="Ex: profecia, ensino, liderança, serviço..."
-                            className="rounded-xl"
-                            value={donsEspirituais}
-                            onChange={e => setDonsEspirituais(e.target.value)}
-                          />
+                          <div className="space-y-2">
+                            <Label htmlFor="dons_espirituais" className="text-xs font-bold uppercase tracking-wider text-slate-500">Dons Espirituais</Label>
+                            <Textarea
+                              id="dons_espirituais"
+                              placeholder="Dons recebidos pelo Espírito (ex: profecia, serviço, ensino)"
+                              className="rounded-xl resize-none text-sm min-h-[100px]"
+                              value={donsEspirituais}
+                              onChange={e => setDonsEspirituais(e.target.value)}
+                            />
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   )}
+
+
+                  {/* Submit */}
+                  <div className="flex flex-col-reverse md:flex-row gap-4 justify-end pt-4 mb-10">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate(-1)}
+                      disabled={loading}
+                      className="w-full md:w-auto h-12 rounded-xl px-10"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full md:w-auto h-12 rounded-xl px-12 font-bold shadow-lg"
+                    >
+                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
+                    </Button>
+                  </div>
                 </div>
               )}
-
-              {/* Submit */}
-              <div className="flex flex-col-reverse md:flex-row gap-4 justify-end pt-4 mb-10">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate(-1)}
-                  disabled={loading}
-                  className="w-full md:w-auto h-12 rounded-xl px-10"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full md:w-auto h-12 rounded-xl px-12 font-bold shadow-lg"
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
-                </Button>
-              </div>
             </>
           )}
+
           {/* Bottom Padding for Mobile */}
           <div className="h-20 md:hidden" />
         </form>

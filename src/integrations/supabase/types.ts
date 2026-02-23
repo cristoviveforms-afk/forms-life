@@ -658,6 +658,7 @@ export type Database = {
           member_role: string | null
           leader_id: string | null
           whatsapp: string | null
+          ministry_roles: Json | null
         }
         Insert: {
           address?: string | null
@@ -702,6 +703,7 @@ export type Database = {
           avatar_url?: string | null
           member_role?: string | null
           leader_id?: string | null
+          ministry_roles?: Json | null
         }
         Update: {
           address?: string | null
@@ -746,6 +748,7 @@ export type Database = {
           avatar_url?: string | null
           member_role?: string | null
           leader_id?: string | null
+          ministry_roles?: Json | null
         }
         Relationships: []
       }

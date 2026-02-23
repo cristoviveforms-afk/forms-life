@@ -4,9 +4,8 @@ const PROJECT_ID = 'kbtpayhzcgivgimvbyqe';
 const TOKEN = 'sbp_9aeb7e2abc5d2f962c7277b74b98f857593d6d3c';
 
 const QUERY = `
-SELECT column_name, is_nullable, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'people';
+ALTER TABLE public.people ADD COLUMN IF NOT EXISTS ministry_roles JSONB DEFAULT '{}'::jsonb;
+NOTIFY pgrst, 'reload schema';
 `;
 
 const options = {
