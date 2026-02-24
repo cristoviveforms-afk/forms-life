@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { cn } from "@/lib/utils";
 import { Users, UserPlus, Heart, ClipboardList, Building2, HandHeart, Loader2 } from 'lucide-react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 import {
   BarChart,
   Bar,
@@ -199,7 +201,10 @@ export default function Dashboard() {
                   onClick={() => {
                     const url = `${window.location.origin}/auto-cadastro`;
                     navigator.clipboard.writeText(url);
-                    toast.success("Link de auto-cadastro copiado!");
+                    toast({
+                      title: "Link de auto-cadastro copiado!",
+                      description: "O link foi copiado para a sua área de transferência.",
+                    });
                   }}
                   className="w-full justify-start text-left sm:col-span-2 lg:col-span-1 border-primary/20 text-primary hover:bg-primary/5"
                   size="lg"
