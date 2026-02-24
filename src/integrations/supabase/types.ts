@@ -570,6 +570,7 @@ export type Database = {
           created_at: string | null
           id: string
           observations: string | null
+          photos: string[] | null
           responsible_id: string
           security_code: string
           status: string | null
@@ -581,6 +582,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           observations?: string | null
+          photos?: string[] | null
           responsible_id: string
           security_code: string
           status?: string | null
@@ -592,6 +594,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           observations?: string | null
+          photos?: string[] | null
           responsible_id?: string
           security_code?: string
           status?: string | null
@@ -613,9 +616,132 @@ export type Database = {
           },
         ]
       }
+      media_demands: {
+        Row: {
+          assignee: string
+          created_at: string | null
+          description: string
+          event_id: string | null
+          id: string
+          status: string | null
+        }
+        Insert: {
+          assignee: string
+          created_at?: string | null
+          description: string
+          event_id?: string | null
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          assignee?: string
+          created_at?: string | null
+          description?: string
+          event_id?: string | null
+          id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_demands_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "media_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_events: {
+        Row: {
+          central_message: string | null
+          created_at: string | null
+          cta: string | null
+          event_date: string
+          id: string
+          media_needs: string[] | null
+          responsible_contact: string | null
+          responsible_name: string | null
+          strategy: string | null
+          target_audience: string | null
+          title: string
+          tone: string | null
+          verse: string | null
+        }
+        Insert: {
+          central_message?: string | null
+          created_at?: string | null
+          cta?: string | null
+          event_date: string
+          id?: string
+          media_needs?: string[] | null
+          responsible_contact?: string | null
+          responsible_name?: string | null
+          strategy?: string | null
+          target_audience?: string | null
+          title: string
+          tone?: string | null
+          verse?: string | null
+        }
+        Update: {
+          central_message?: string | null
+          created_at?: string | null
+          cta?: string | null
+          event_date?: string
+          id?: string
+          media_needs?: string[] | null
+          responsible_contact?: string | null
+          responsible_name?: string | null
+          strategy?: string | null
+          target_audience?: string | null
+          title?: string
+          tone?: string | null
+          verse?: string | null
+        }
+        Relationships: []
+      }
+      ministry_scales: {
+        Row: {
+          created_at: string | null
+          id: string
+          ministry_name: string
+          notes: string | null
+          person_id: string
+          role: string | null
+          scale_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ministry_name: string
+          notes?: string | null
+          person_id: string
+          role?: string | null
+          scale_date: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ministry_name?: string
+          notes?: string | null
+          person_id?: string
+          role?: string | null
+          scale_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ministry_scales_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       people: {
         Row: {
+          accepted_jesus: boolean | null
           address: string | null
+          avatar_url: string | null
           baptism_date: string | null
           baptized_spirit: boolean | null
           baptized_water: boolean | null
@@ -637,9 +763,13 @@ export type Database = {
           id: string
           integration_date: string | null
           invited_by: string | null
+          journey_stage: string | null
+          leader_id: string | null
           member_has_served: boolean | null
           member_prev_ministry: string | null
+          member_role: string | null
           ministries: string[] | null
+          ministry_roles: Json | null
           name: string
           natural_skills: string | null
           observations: string | null
@@ -652,16 +782,11 @@ export type Database = {
           visitor_religion: string | null
           visitor_wants_contact: boolean | null
           visitor_wants_discipleship: boolean | null
-          journey_stage: string | null
-          accepted_jesus: boolean | null
-          avatar_url: string | null
-          member_role: string | null
-          leader_id: string | null
-          whatsapp: string | null
-          ministry_roles: Json | null
         }
         Insert: {
+          accepted_jesus?: boolean | null
           address?: string | null
+          avatar_url?: string | null
           baptism_date?: string | null
           baptized_spirit?: boolean | null
           baptized_water?: boolean | null
@@ -669,7 +794,7 @@ export type Database = {
           cell_name?: string | null
           civil_status?: string | null
           conversion_date?: string | null
-          convert_needs?: string | null
+          convert_needs: string | null
           convert_wants_accompaniment?: boolean | null
           cpf?: string | null
           created_at?: string | null
@@ -683,9 +808,13 @@ export type Database = {
           id?: string
           integration_date?: string | null
           invited_by?: string | null
+          journey_stage?: string | null
+          leader_id?: string | null
           member_has_served?: boolean | null
           member_prev_ministry?: string | null
+          member_role?: string | null
           ministries?: string[] | null
+          ministry_roles?: Json | null
           name: string
           natural_skills?: string | null
           observations?: string | null
@@ -698,15 +827,11 @@ export type Database = {
           visitor_religion?: string | null
           visitor_wants_contact?: boolean | null
           visitor_wants_discipleship?: boolean | null
-          journey_stage?: string | null
-          accepted_jesus?: boolean | null
-          avatar_url?: string | null
-          member_role?: string | null
-          leader_id?: string | null
-          ministry_roles?: Json | null
         }
         Update: {
+          accepted_jesus?: boolean | null
           address?: string | null
+          avatar_url?: string | null
           baptism_date?: string | null
           baptized_spirit?: boolean | null
           baptized_water?: boolean | null
@@ -728,9 +853,13 @@ export type Database = {
           id?: string
           integration_date?: string | null
           invited_by?: string | null
+          journey_stage?: string | null
+          leader_id?: string | null
           member_has_served?: boolean | null
           member_prev_ministry?: string | null
+          member_role?: string | null
           ministries?: string[] | null
+          ministry_roles?: Json | null
           name?: string
           natural_skills?: string | null
           observations?: string | null
@@ -743,14 +872,16 @@ export type Database = {
           visitor_religion?: string | null
           visitor_wants_contact?: boolean | null
           visitor_wants_discipleship?: boolean | null
-          journey_stage?: string | null
-          accepted_jesus?: boolean | null
-          avatar_url?: string | null
-          member_role?: string | null
-          leader_id?: string | null
-          ministry_roles?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "people_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       word_cloud: {
         Row: {
