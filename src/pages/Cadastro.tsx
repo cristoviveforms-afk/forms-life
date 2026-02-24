@@ -687,22 +687,34 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
   };
 
   const renderSuccess = () => (
-    <div className="text-center space-y-6 py-12 animate-fade-in">
+    <div className="text-center space-y-8 py-16 animate-in fade-in zoom-in duration-700">
       <div className="flex justify-center">
-        <div className="bg-emerald-100 dark:bg-emerald-950 p-4 rounded-full">
-          <CheckCircle2 className="h-16 w-16 text-emerald-600" />
+        <div className="relative">
+          <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full" />
+          <div className="relative bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/50 dark:to-emerald-800/50 p-6 rounded-full shadow-inner border border-emerald-200/50 dark:border-emerald-700/30">
+            <CheckCircle2 className="h-20 w-20 text-emerald-600 dark:text-emerald-400 stroke-[1.5]" />
+          </div>
         </div>
       </div>
-      <div className="space-y-2">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Cadastro Realizado!</h2>
-        <p className="text-muted-foreground text-lg">
+      <div className="space-y-4 max-w-sm mx-auto">
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
+          Cadastro <br />
+          <span className="text-emerald-600 underline decoration-emerald-500/30 underline-offset-8">Realizado!</span>
+        </h2>
+        <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">
           Seja muito bem-vindo à nossa família. Seus dados foram salvos com sucesso.
           Que Deus te abençoe grandemente!
         </p>
       </div>
-      <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full">
-        Fazer novo cadastro
-      </Button>
+      <div className="pt-4">
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="rounded-2xl h-14 px-10 font-bold border-emerald-500/20 hover:bg-emerald-500/5 text-emerald-600 transition-all hover:scale-105 active:scale-95"
+        >
+          Fazer novo cadastro
+        </Button>
+      </div>
     </div>
   );
 
@@ -728,12 +740,21 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8 pb-12">
           {isPublic && (
-            <div className="text-center mb-8 pt-6">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-4 animate-bounce">
-                <Sparkles size={14} className="fill-primary" /> Cadastro de Membros
+            <div className="text-center mb-12 pt-10 space-y-4">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-[10px] font-black tracking-widest uppercase mb-2 animate-in fade-in slide-in-from-top-4 duration-1000">
+                <Sparkles size={12} className="fill-primary" />
+                <span>Ministério Cristo Vive</span>
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight mb-2 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">Ficha de Cadastro</h1>
-              <p className="text-muted-foreground">Preencha seus dados para fazer parte da nossa comunidade.</p>
+              <div className="space-y-2">
+                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
+                  Ficha de <br />
+                  <span className="text-primary tracking-normal font-serif italic lowercase">Cadastro</span>
+                </h1>
+                <div className="h-1.5 w-20 bg-primary/20 mx-auto rounded-full" />
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm mx-auto text-sm leading-relaxed">
+                Seja bem-vindo! Preencha seus dados com atenção para fazer parte da nossa comunidade.
+              </p>
             </div>
           )}
 
@@ -1836,8 +1857,17 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
   if (isPublic) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 font-sans">
-        {formContent}
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617] font-sans relative overflow-x-hidden">
+        {/* Abstract Background Shapes */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
+          <div className="absolute top-[20%] -right-[10%] w-[30%] h-[50%] bg-blue-500/5 blur-[120px] rounded-full" />
+          <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] bg-emerald-500/5 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="relative z-10 w-full">
+          {formContent}
+        </div>
       </div>
     );
   }

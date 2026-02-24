@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
+import { toast } from '@/hooks/use-toast';
 
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 

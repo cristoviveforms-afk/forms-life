@@ -210,7 +210,7 @@ export default function Dashboard() {
                   size="lg"
                 >
                   <UserPlus className="h-5 w-5 mr-3" />
-                  Link de Auto-Cadastro
+                  Link de Cadastro
                 </Button>
               </CardContent>
             </Card>
