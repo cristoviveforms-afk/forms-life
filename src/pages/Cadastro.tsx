@@ -1823,28 +1823,29 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                   )}
 
 
-                  {/* Submit */}
-                  <div className="flex flex-col-reverse md:flex-row gap-4 justify-end pt-4 mb-10">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate(-1)}
-                      disabled={loading}
-                      className="w-full md:w-auto h-12 rounded-xl px-10"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full md:w-auto h-12 rounded-xl px-12 font-bold shadow-lg"
-                    >
-                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
-                    </Button>
-                  </div>
+
                 </div>
               )}
+              {/* Submit */}
+              <div className="flex flex-col-reverse md:flex-row gap-4 justify-end pt-4 mb-10">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(-1)}
+                  disabled={loading}
+                  className="w-full md:w-auto h-12 rounded-xl px-10"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full md:w-auto h-12 rounded-xl px-12 font-bold shadow-lg"
+                >
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}
+                </Button>
+              </div>
             </>
           )}
 
