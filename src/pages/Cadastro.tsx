@@ -592,8 +592,8 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
       let personResponse;
       let currentFamilyId = familyId;
 
-      if (!personId && !currentFamilyId) {
-        // If new person, generate a family ID
+      if (!currentFamilyId && familyMembers.length > 0) {
+        // If we have family members but no family ID (common in existing registrations), generate one
         currentFamilyId = crypto.randomUUID();
         setFamilyId(currentFamilyId);
       }
@@ -668,6 +668,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
       // 2. Manage Family Members
       if (person) {
+        console.log(`Salvando ${familyMembers.length} membros da família para o family_id: ${currentFamilyId}`);
         for (const member of familyMembers) {
           if (!member.nome) continue;
 
@@ -687,10 +688,16 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
             ministries: member.parentesco === 'filho' ? ['Ministério Infantil (Kids)'] : []
           };
 
-          if (member.id) {
-            await supabase.from('people' as any).update(memberPayload).eq('id', member.id);
-          } else {
-            await supabase.from('people' as any).insert(memberPayload);
+          try {
+            if (member.id) {
+              const { error: updateError } = await supabase.from('people' as any).update(memberPayload).eq('id', member.id);
+              if (updateError) console.error(`Erro ao atualizar membro ${member.nome}:`, updateError);
+            } else {
+              const { error: insertError } = await supabase.from('people' as any).insert(memberPayload);
+              if (insertError) console.error(`Erro ao inserir membro ${member.nome}:`, insertError);
+            }
+          } catch (mErr) {
+            console.error(`Erro inesperado ao salvar membro ${member.nome}:`, mErr);
           }
         }
       }
