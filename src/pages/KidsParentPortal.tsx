@@ -108,6 +108,7 @@ export default function KidsParentPortal() {
     const [loading, setLoading] = useState(false);
     const [familyCheckins, setFamilyCheckins] = useState<CheckinRecord[]>([]);
     const [isLogged, setIsLogged] = useState(false);
+    const [currentParentId, setCurrentParentId] = useState<string | null>(null);
     const { toast } = useToast();
 
     const handleSearch = async () => {
@@ -116,22 +117,32 @@ export default function KidsParentPortal() {
         try {
             const cleanSearch = phone.replace(/\D/g, '');
 
-            // Re-fetch with a more flexible query to handle existing formatted data
-            const { data: people, error: fetchError } = await supabase
+            if (cleanSearch.length < 4) {
+                toast({
+                    title: "Busca muito curta",
+                    description: "Digite pelo menos os últimos 4 dígitos do seu telefone ou o CPF completo.",
+                    variant: "destructive"
+                });
+                return;
+            }
+
+            // Otimizado: Busca direta no servidor apenas pelas colunas necessárias
+            // Usamos .or para buscar por CPF ou Phone (contendo os dígitos fornecidos)
+            const { data: parents, error: fetchError } = await supabase
                 .from('people')
-                .select('id, cpf, phone, whatsapp');
+                .select('id, cpf, phone, full_name')
+                .or(`cpf.eq.${cleanSearch},phone.ilike.%${cleanSearch}%`);
 
             if (fetchError) throw fetchError;
 
-            const parent = people.find(p => {
+            // Refinamento no front-end caso a busca ilike retorne mais de um
+            const parent = parents?.find(p => {
                 const dbCpf = p.cpf?.replace(/\D/g, '');
                 const dbPhone = p.phone?.replace(/\D/g, '');
-                const dbWhatsapp = p.whatsapp?.replace(/\D/g, '');
 
                 return dbCpf === cleanSearch ||
-                    (cleanSearch.length >= 8 && dbPhone?.endsWith(cleanSearch.slice(-8))) ||
-                    (dbWhatsapp === cleanSearch) ||
-                    (cleanSearch.length >= 8 && dbWhatsapp?.endsWith(cleanSearch.slice(-8)));
+                    (dbPhone && dbPhone.includes(cleanSearch)) ||
+                    (dbPhone && cleanSearch.length >= 8 && dbPhone.endsWith(cleanSearch.slice(-8)));
             });
 
             if (!parent) {
@@ -143,10 +154,17 @@ export default function KidsParentPortal() {
                 return;
             }
 
+            console.log(`Pai encontrado: ${parent.full_name} (${parent.id})`);
+            setCurrentParentId(parent.id);
             fetchActiveRecords(parent.id);
             setIsLogged(true);
         } catch (error) {
             console.error('Portal login error:', error);
+            toast({
+                title: "Erro ao acessar",
+                description: "Ocorreu um problema na comunicação com o servidor.",
+                variant: "destructive"
+            });
         } finally {
             setLoading(false);
         }
@@ -165,24 +183,29 @@ export default function KidsParentPortal() {
     };
 
     useEffect(() => {
-        if (!isLogged) return;
+        if (!isLogged || !currentParentId) return;
 
         // Subscribe to changes for real-time alerts
         const channel = supabase
             .channel('parent-alerts')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'kids_checkins' }, () => {
-                if (familyCheckins.length > 0) {
-                    // Refetch using the parent id logic (implied by previous fetch)
-                    // Simplify: we just rerender if anything changes, but better to target parent
-                    handleSearch();
+            .on('postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'kids_checkins',
+                    filter: `responsible_id=eq.${currentParentId}`
+                },
+                () => {
+                    console.log('Real-time update: refetching checkins');
+                    fetchActiveRecords(currentParentId);
                 }
-            })
+            )
             .subscribe();
 
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [isLogged]);
+    }, [isLogged, currentParentId, familyCheckins.length]);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 flex flex-col items-center">
@@ -231,7 +254,16 @@ export default function KidsParentPortal() {
                 <div className="w-full max-w-2xl space-y-6 animate-in fade-in">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-black">Status da Família</h2>
-                        <Button variant="ghost" className="rounded-2xl font-bold group" onClick={() => setIsLogged(false)}>
+                        <Button
+                            variant="ghost"
+                            className="rounded-2xl font-bold group"
+                            onClick={() => {
+                                setIsLogged(false);
+                                setCurrentParentId(null);
+                                setFamilyCheckins([]);
+                                setPhone('');
+                            }}
+                        >
                             <LogOut className="h-4 w-4 mr-2 group-active:translate-x-1 transition-transform" /> Sair
                         </Button>
                     </div>
