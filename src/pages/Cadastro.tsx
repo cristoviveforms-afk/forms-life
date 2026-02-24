@@ -494,6 +494,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
       // Populate fields
       setPersonId(data.id);
+      setFamilyId(data.family_id);
       setNome(data.full_name || '');
       setNascimento(data.birth_date || '');
       setSexo(data.gender || '');
@@ -523,16 +524,47 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
       setOutraReligiao(data.visitor_religion || '');
       setPedidoOracao(data.visitor_prayer_request || '');
 
-      // Children
-      if (data.children && data.children.length > 0) {
-        setPossuiFilhos(true);
-        setFilhos(data.children.map((c: any) => ({ nome: c.name, idade: c.age || '', observacoes: c.observations || '' })));
-      } else {
-        setPossuiFilhos(false);
-        setFilhos([]);
+      // Load Family Members if family_id exists
+      if (data.family_id) {
+        const { data: familyData } = await supabase
+          .from('people' as any)
+          .select('*')
+          .eq('family_id', data.family_id)
+          .neq('id', data.id);
+
+        if (familyData && familyData.length > 0) {
+          const members: FamilyMember[] = familyData.map((m: any) => {
+            let parentesco: any = 'outro';
+            if (m.civil_status === 'conjuge' || m.civil_status === 'casado') parentesco = 'conjuge';
+            else if (m.civil_status === 'noivo') parentesco = 'noivo';
+            else if (m.civil_status === 'namorado') parentesco = 'namorado';
+            else if (m.ministries?.includes('Ministério Infantil (Kids)')) parentesco = 'filho';
+
+            return {
+              id: m.id,
+              nome: m.full_name || '',
+              parentesco: parentesco,
+              idade: m.birth_date ? (new Date().getFullYear() - new Date(m.birth_date).getFullYear()).toString() : '',
+              observacoes: m.observations || ''
+            };
+          });
+
+          setFamilyMembers(members);
+        } else {
+          // Fallback to legacy children table if no people found in family
+          if (data.children && data.children.length > 0) {
+            const legacyMembers: FamilyMember[] = data.children.map((c: any) => ({
+              nome: c.name,
+              parentesco: 'filho' as const,
+              idade: c.age || '',
+              observacoes: c.observations || ''
+            }));
+            setFamilyMembers(legacyMembers);
+          }
+        }
       }
 
-      // Reveal form
+      // Hide initial questions and show form
       setVisitorQuestionAnswered(true);
       toast({
         title: 'Cadastro Encontrado!',
