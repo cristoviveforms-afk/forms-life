@@ -592,7 +592,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
       let personResponse;
       let currentFamilyId = familyId;
 
-      if (!currentFamilyId && familyMembers.length > 0) {
+      if (!currentFamilyId && (familyMembers.length > 0 || (tipoPessoa === 'membro' && possuiFilhos && filhos.length > 0))) {
         // If we have family members but no family ID (common in existing registrations), generate one
         currentFamilyId = crypto.randomUUID();
         setFamilyId(currentFamilyId);
@@ -600,6 +600,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
       const payload: any = {
         type: tipoPessoa,
+        name: nome, // Mandatory field
         full_name: nome,
         birth_date: nascimento || null,
         gender: sexo || null,
@@ -668,13 +669,33 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
       // 2. Manage Family Members
       if (person) {
-        console.log(`Salvando ${familyMembers.length} membros da família para o family_id: ${currentFamilyId}`);
-        for (const member of familyMembers) {
+        // Collect all potential family members to save
+        // We start with familyMembers (which has spouse and children from Visitante layout)
+        let totalMembers = [...familyMembers];
+
+        // If in Membro layout, also consider the 'filhos' array if it's not already in familyMembers
+        if (tipoPessoa === 'membro' && possuiFilhos) {
+          filhos.forEach(f => {
+            if (f.nome && !totalMembers.some(m => m.nome === f.nome)) {
+              totalMembers.push({
+                nome: f.nome,
+                parentesco: 'filho',
+                idade: f.idade,
+                observacoes: f.observacoes
+              });
+            }
+          });
+        }
+
+        console.log(`Salvando ${totalMembers.length} membros da família para o family_id: ${currentFamilyId}`);
+        for (const member of totalMembers) {
           if (!member.nome) continue;
 
           const memberPayload: any = {
             type: 'visitante',
+            name: member.nome, // Mandatory field
             full_name: member.nome,
+            phone: (telefone || '').replace(/\D/g, '') || '00000000000', // Mandatory field
             family_id: currentFamilyId,
             civil_status: member.parentesco === 'conjuge' ? 'conjuge' :
               member.parentesco === 'noivo' ? 'noivo' :
