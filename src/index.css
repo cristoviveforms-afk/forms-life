@@ -94,7 +94,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border) / 0.8);
     -webkit-tap-highlight-color: transparent;
     /* Fix for dark flash on mobile tap */
   }
