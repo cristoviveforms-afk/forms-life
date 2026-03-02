@@ -81,54 +81,45 @@ export default function Convertidos() {
               placeholder="Buscar convertidos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="rounded-sm">
+              <Filter className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <Button variant="outline" size="icon">
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="rounded-sm">
+              <Download className="h-4 w-4 text-muted-foreground" />
             </Button>
-
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.total}</div>
-              <p className="text-xs text-muted-foreground">Total de Convertidos</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.esteMes}</div>
-              <p className="text-xs text-muted-foreground">Este Mês</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.acompanhamento}</div>
-              <p className="text-xs text-muted-foreground">Querem Acompanhamento</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.integrados}</div>
-              <p className="text-xs text-muted-foreground">Integrados</p>
-            </CardContent>
-          </Card>
+          <div className="p-6 bg-card border rounded-sm border-l-4 border-l-primary/50">
+            <div className="text-3xl font-light">{loading ? '-' : stats.total}</div>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-2">Total de Convertidos</p>
+          </div>
+          <div className="p-6 bg-card border rounded-sm border-l-4 border-l-primary/50">
+            <div className="text-3xl font-light">{loading ? '-' : stats.esteMes}</div>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-2">Este Mês</p>
+          </div>
+          <div className="p-6 bg-card border rounded-sm border-l-4 border-l-primary/50">
+            <div className="text-3xl font-light">{loading ? '-' : stats.acompanhamento}</div>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-2">Querem Acompanhamento</p>
+          </div>
+          <div className="p-6 bg-card border rounded-sm border-l-4 border-l-primary/50">
+            <div className="text-3xl font-light">{loading ? '-' : stats.integrados}</div>
+            <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-2">Integrados</p>
+          </div>
         </div>
 
         {/* Converts List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Lista de Novos Convertidos</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-card border rounded-sm overflow-hidden min-h-[400px]">
+          <div className="p-4 border-b">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Lista de Novos Convertidos</h2>
+          </div>
+          <div className="p-4 bg-muted/10 h-full">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -141,26 +132,26 @@ export default function Convertidos() {
                   filteredConvertidos.map((convertido) => (
                     <div
                       key={convertido.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                      className="flex items-center justify-between p-4 bg-card rounded-sm border hover:border-primary/50 transition-all cursor-pointer group"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center">
                           <Heart className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium">{convertido.full_name}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="font-medium group-hover:text-primary transition-colors">{convertido.full_name}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
                             Conversão: {convertido.conversion_date ? new Date(convertido.conversion_date + 'T12:00:00').toLocaleDateString('pt-BR') : '-'}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={convertido.convert_wants_accompaniment ? 'default' : 'outline'}>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={convertido.convert_wants_accompaniment ? 'default' : 'outline'} className="rounded-sm text-[10px] uppercase font-bold tracking-wider">
                           {convertido.convert_wants_accompaniment ? 'Com Acompanhamento' : 'Sem Acompanhamento'}
                         </Badge>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm">
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
@@ -177,8 +168,8 @@ export default function Convertidos() {
                 )}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

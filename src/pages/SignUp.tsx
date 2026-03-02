@@ -81,9 +81,9 @@ export default function SignUp() {
                 <ThemeToggle />
             </header>
 
-            <main className="flex-1 flex items-center justify-center p-4">
-                <Card className="w-full max-w-md animate-fade-in border-border/50 shadow-lg">
-                    <CardHeader className="text-center space-y-4 pb-2">
+            <main className="flex-1 flex items-center justify-center p-4 my-8">
+                <div className="w-full max-w-md animate-fade-in bg-card border rounded-sm p-8 shadow-sm">
+                    <div className="text-center space-y-4 pb-8">
                         <div className="mx-auto">
                             <img
                                 src={logo}
@@ -92,17 +92,17 @@ export default function SignUp() {
                             />
                         </div>
                         <div className="space-y-1">
-                            <h1 className="text-2xl font-bold tracking-tight">Criar Conta</h1>
-                            <p className="text-sm text-muted-foreground">
-                                Junte-se ao Sistema de Gestão
+                            <h1 className="text-2xl font-bold tracking-tight uppercase">Criar Conta</h1>
+                            <p className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+                                Sistema de Gestão
                             </p>
                         </div>
-                    </CardHeader>
+                    </div>
 
                     <form onSubmit={handleSubmit}>
-                        <CardContent className="space-y-4">
+                        <div className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Nome Completo</Label>
+                                <Label htmlFor="name" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Nome Completo</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -110,12 +110,12 @@ export default function SignUp() {
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
-                                    className="h-11"
+                                    className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
+                                <Label htmlFor="email" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Email</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -123,12 +123,12 @@ export default function SignUp() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
-                                    className="h-11"
+                                    className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="password">Senha</Label>
+                                <Label htmlFor="password" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Senha</Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -136,20 +136,20 @@ export default function SignUp() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    className="h-11"
+                                    className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                                     minLength={6}
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="ministry">Ministério Principal</Label>
+                                <Label htmlFor="ministry" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Ministério Principal</Label>
                                 <Select value={ministry} onValueChange={setMinistry}>
-                                    <SelectTrigger className="h-11">
+                                    <SelectTrigger className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20">
                                         <SelectValue placeholder="Selecione seu ministério" />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="rounded-sm">
                                         {ministries.map((m) => (
-                                            <SelectItem key={m.id} value={m.name}>
+                                            <SelectItem key={m.id} value={m.name} className="rounded-sm">
                                                 {m.name}
                                             </SelectItem>
                                         ))}
@@ -158,36 +158,36 @@ export default function SignUp() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="leader">Líder Direto (Opcional)</Label>
+                                <Label htmlFor="leader" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Líder Direto (Opcional)</Label>
                                 <Input
                                     id="leader"
                                     type="text"
                                     placeholder="Nome do seu líder"
                                     value={leader}
                                     onChange={(e) => setLeader(e.target.value)}
-                                    className="h-11"
+                                    className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                                 />
                             </div>
-                        </CardContent>
+                        </div>
 
-                        <CardFooter className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 mt-8">
                             <Button
                                 type="submit"
-                                className="w-full h-11 font-medium"
+                                className="w-full h-11 font-bold rounded-sm uppercase tracking-widest text-xs"
                                 disabled={isLoading}
                             >
                                 {isLoading ? 'Criando conta...' : 'Criar Conta'}
                             </Button>
 
-                            <div className="text-center text-sm text-muted-foreground">
+                            <div className="text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-4 border-t pt-6 w-full">
                                 Já tem uma conta?{' '}
-                                <Link to="/login" className="text-primary hover:underline font-medium">
+                                <Link to="/login" className="text-primary hover:underline font-black">
                                     Entrar
                                 </Link>
                             </div>
-                        </CardFooter>
+                        </div>
                     </form>
-                </Card>
+                </div>
             </main>
         </div>
     );

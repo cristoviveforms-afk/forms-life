@@ -29,10 +29,10 @@ export function DashboardLayout({ children, title }: { children: React.ReactNode
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background/50">
-        <AppSidebar className="glass-sidebar" />
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar />
         <main className="flex-1 overflow-x-hidden min-w-0">
-          <div className="glass sticky top-0 z-10 p-4 md:p-6 border-b border-border/40 flex justify-between items-center backdrop-blur-md">
+          <div className="sticky top-0 z-10 p-4 md:p-6 border-b bg-background flex justify-between items-center">
             <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
               <SidebarTrigger />
               <h1 className="text-lg md:text-xl font-semibold tracking-tight text-foreground/90 truncate">{title}</h1>

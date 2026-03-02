@@ -40,6 +40,42 @@ import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/database';
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 
+interface FamilyGroup {
+  id: string;
+  mainPerson: Person;
+  dependents: Person[];
+}
+
+const getFamilyGroups = (visitors: Person[]): FamilyGroup[] => {
+  const groups = new Map<string, FamilyGroup>();
+
+  visitors.forEach(v => {
+    const key = v.family_id || v.id;
+    if (!groups.has(key)) {
+      groups.set(key, { id: key, mainPerson: v, dependents: [] });
+    } else {
+      const group = groups.get(key)!;
+      const ministries = Array.isArray(v.ministries) ? v.ministries as string[] : [];
+      const mainMinistries = Array.isArray(group.mainPerson.ministries) ? group.mainPerson.ministries as string[] : [];
+
+      const isVDependent = v.civil_status === 'conjuge' || v.civil_status === 'noivo' || v.civil_status === 'namorado' || ministries.includes('Ministério Infantil (Kids)');
+      const isMainDependent = group.mainPerson.civil_status === 'conjuge' || group.mainPerson.civil_status === 'noivo' || group.mainPerson.civil_status === 'namorado' || mainMinistries.includes('Ministério Infantil (Kids)');
+
+      if (isMainDependent && !isVDependent) {
+        group.dependents.push(group.mainPerson);
+        group.mainPerson = v;
+      } else if (new Date(v.created_at) < new Date(group.mainPerson.created_at) && !isVDependent && !isMainDependent) {
+        group.dependents.push(group.mainPerson);
+        group.mainPerson = v;
+      } else {
+        group.dependents.push(v);
+      }
+    }
+  });
+
+  return Array.from(groups.values());
+};
+
 export default function Visitantes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [visitantes, setVisitantes] = useState<Person[]>([]);
@@ -179,9 +215,11 @@ export default function Visitantes() {
     }
   }, [searchParams, visitantes, selectedPerson?.id]);
 
-  const filteredVisitantes = visitantes.filter((v) =>
-    v.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredGroups = getFamilyGroups(visitantes).filter((group) => {
+    const term = searchTerm.toLowerCase();
+    return group.mainPerson.full_name.toLowerCase().includes(term) ||
+      group.dependents.some(dep => dep.full_name.toLowerCase().includes(term));
+  });
 
   const stats = {
     total: visitantes.length,
@@ -197,160 +235,158 @@ export default function Visitantes() {
   return (
     <DashboardLayout title="Visitantes">
       <div className="space-y-6 animate-fade-in">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">Visitantes</h2>
-            <p className="text-muted-foreground">Gerencie os visitantes e sua jornada na igreja.</p>
+            <h2 className="text-3xl font-light tracking-tight text-foreground">Visitantes</h2>
+            <p className="text-sm text-muted-foreground">Gerencie os visitantes e sua jornada na igreja.</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="rounded-xl">
-              <Download className="h-4 w-4" />
+            <Button variant="outline" size="sm" className="hidden sm:flex rounded-sm h-9">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
             </Button>
-            <Button onClick={() => navigate('/cadastro?tipo=visitante')} className="rounded-xl font-bold shadow-lg shadow-primary/20">
+            <Button onClick={() => navigate('/cadastro?tipo=visitante')} size="sm" className="rounded-sm h-9 font-medium">
               <Plus className="h-4 w-4 mr-2" />
               Novo Visitante
             </Button>
           </div>
         </div>
 
-        <div className="w-full">
-          <MonthYearPicker onDateChange={handleDateChange} />
-        </div>
-
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 py-4 border-b border-border/60">
+          <div className="w-full sm:w-64">
+            <MonthYearPicker onDateChange={handleDateChange} />
+          </div>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar visitantes..."
+              placeholder="Buscar por nome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
+              className="pl-9 h-10 rounded-sm bg-muted/20 border-border/50 focus-visible:ring-1 focus-visible:ring-primary/20"
             />
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl">
-              <Filter className="h-4 w-4" />
-            </Button>
+          <Button variant="outline" className="h-10 rounded-sm hidden sm:flex">
+            <Filter className="h-4 w-4 mr-2" />
+            Filtros
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-4 mb-8">
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Geral</p>
+            <div className="text-3xl font-light text-foreground">{loading ? '-' : stats.total}</div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Hoje</p>
+            <div className="text-3xl font-light text-foreground">{loading ? '-' : stats.hoje}</div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">1ª Vez</p>
+            <div className="text-3xl font-light text-primary">{loading ? '-' : stats.primeiraVez}</div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Contato Req.</p>
+            <div className="text-3xl font-light text-foreground">{loading ? '-' : stats['aguardando contato']}</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.total}</div>
-              <p className="text-xs text-muted-foreground">Total de Visitantes</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.hoje}</div>
-              <p className="text-xs text-muted-foreground">Hoje</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.primeiraVez}</div>
-              <p className="text-xs text-muted-foreground">Primeira Vez</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats['aguardando contato']}</div>
-              <p className="text-xs text-muted-foreground">Querem Contato</p>
-            </CardContent>
-          </Card>
-        </div>
+        <div className="space-y-0 pb-12">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/50" />
+            </div>
+          ) : filteredGroups.length === 0 ? (
+            <p className="text-center text-muted-foreground py-12 text-sm">Nenhum visitante encontrado neste período.</p>
+          ) : (
+            filteredGroups.map((group) => {
+              const visitante = group.mainPerson;
+              return (
+                <div
+                  key={group.id}
+                  className="clean-list-item cursor-pointer group flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  onClick={() => handleViewDetails(visitante)}
+                >
+                  <div className="flex flex-col sm:flex-row gap-4 relative">
+                    {group.dependents.length > 0 && <div className="family-node-line top-14 bottom-4"></div>}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Lista de Visitantes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredVisitantes.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum visitante encontrado.</p>
-                ) : (
-                  filteredVisitantes.map((visitante) => (
-                    <div
-                      key={visitante.id}
-                      className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group"
-                      onClick={() => handleViewDetails(visitante)}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors">
-                          {visitante.full_name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-medium flex items-center gap-2">
-                            {visitante.full_name}
-                            <MoreHorizontal className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity rotate-90" />
-                          </p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Phone className="h-3 w-3" />
-                            {visitante.phone}
-                          </div>
-                        </div>
-                      </div>
+                    <div className="h-10 w-10 shrink-0 rounded-full bg-muted/50 border border-border flex items-center justify-center font-medium text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary transition-colors">
+                      {visitante.full_name.charAt(0).toUpperCase()}
+                    </div>
+
+                    <div className="space-y-1">
                       <div className="flex items-center gap-2">
+                        <span className="font-semibold text-base tracking-tight text-foreground/90">{visitante.full_name}</span>
                         {visitante.visitor_first_time && (
-                          <Badge>Primeira Vez</Badge>
+                          <span className="text-[10px] uppercase font-bold tracking-wider text-primary border border-primary/30 px-1.5 py-0.5 rounded-sm">1ª Vez</span>
                         )}
-                        <Badge variant={!visitante.visitor_wants_contact ? 'secondary' : 'outline'}>
-                          {visitante.visitor_wants_contact ? 'Quer Contato' : 'Não quer contato'}
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
+                      </div>
+
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground font-medium">
+                        <span className="flex items-center gap-1.5"><Phone className="h-3 w-3" />{visitante.phone || 'S/N'}</span>
+                      </div>
+
+                      {group.dependents.length > 0 && (
+                        <div className="pt-2 pl-4 space-y-2 relative z-10">
+                          {group.dependents.map(dep => (
+                            <div key={dep.id} className="text-xs text-muted-foreground flex items-center gap-2 relative">
+                              <div className="family-sub-node-corner"></div>
+                              <span className="font-medium text-foreground/80">{dep.full_name}</span>
+                              <span className="text-[9px] uppercase tracking-widest opacity-60 bg-muted px-1.5 py-0.5 rounded-sm">{dep.civil_status || 'dependente'}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 sm:mt-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-green-600 hover:bg-green-500/10"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const cleanPhone = visitante.phone?.replace(/\D/g, '');
+                        if (!cleanPhone) return toast.error("Sem telefone");
+                        const phoneWithCountry = cleanPhone?.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
+                        window.open(`https://wa.me/${phoneWithCountry}`, '_blank');
+                      }}
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewDetails(visitante);
+                        }}>
+                          Ver Perfil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Registrar Contato</DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleToggleStatus(visitante); }}>Converter para Membro</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const cleanPhone = visitante.phone?.replace(/\D/g, '');
-                            const phoneWithCountry = cleanPhone?.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-                            window.open(`https://wa.me/${phoneWithCountry}`, '_blank');
+                            setVisitanteToDelete(visitante);
+                            setDeleteDialogOpen(true);
                           }}
                         >
-                          <MessageCircle className="h-4 w-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewDetails(visitante);
-                            }}>
-                              Ver Perfil
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Registrar Contato</DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleToggleStatus(visitante); }}>Converter para Membro</DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setVisitanteToDelete(visitante);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              Remover
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                          Remover
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>
@@ -367,7 +403,7 @@ export default function Visitantes() {
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-sm"
               >
                 Remover
               </AlertDialogAction>
@@ -540,7 +576,7 @@ export default function Visitantes() {
             )}
           </SheetContent>
         </Sheet>
-      </div>
-    </DashboardLayout>
+      </div >
+    </DashboardLayout >
   );
 }

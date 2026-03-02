@@ -45,14 +45,14 @@ export default function KidsPasswordPanel() {
     return (
         <div className="min-h-screen bg-black text-white p-8 flex flex-col items-center justify-center font-black">
             {/* Header Panel */}
-            <div className="w-full max-w-7xl flex justify-between items-center mb-12 border-b-4 border-white/10 pb-8">
+            <div className="w-full max-w-7xl flex justify-between items-center mb-12 border-b border-white/10 pb-8">
                 <div className="flex items-center gap-6">
-                    <div className="bg-rose-600 p-6 rounded-[30px] animate-pulse">
+                    <div className="bg-rose-600 p-6 rounded-sm animate-pulse">
                         <ShieldAlert size={64} className="text-white" />
                     </div>
                     <div>
-                        <h1 className="text-6xl tracking-tighter uppercase">Chamada Kids</h1>
-                        <p className="text-2xl text-slate-400 font-medium tracking-wide">Solicitamos a presença dos responsáveis no Ministério Infantil</p>
+                        <h1 className="text-6xl tracking-tighter uppercase font-black">Chamada Kids</h1>
+                        <p className="text-2xl text-slate-400 font-bold tracking-wide">Solicitamos a presença dos responsáveis no Ministério Infantil</p>
                     </div>
                 </div>
                 <div className="text-right">
@@ -68,9 +68,9 @@ export default function KidsPasswordPanel() {
                         {alerts.map((alert, idx) => (
                             <div
                                 key={idx}
-                                className="bg-zinc-900 border-4 border-rose-600/50 rounded-[60px] p-10 flex flex-col items-center justify-center animate-in zoom-in-50 duration-500"
+                                className="bg-zinc-900 border border-rose-600/50 rounded-sm p-10 flex flex-col items-center justify-center animate-in zoom-in-50 duration-500"
                             >
-                                <div className="text-[8rem] leading-none mb-2 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                                <div className="text-[8rem] font-black leading-none mb-2 text-white drop-shadow-sm">
                                     {alert.security_code}
                                 </div>
                                 <div className="flex items-center gap-3 text-rose-500 text-xl mb-6">
@@ -80,26 +80,26 @@ export default function KidsPasswordPanel() {
 
                                 <div className="w-full space-y-2 border-t border-rose-600/20 pt-6">
                                     <div className="text-center">
-                                        <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-1">Criança</p>
-                                        <p className="text-2xl text-white uppercase truncate px-2">
+                                        <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold mb-1">Criança</p>
+                                        <p className="text-2xl text-white font-bold uppercase truncate px-2">
                                             {alert.child?.full_name || 'NÃO IDENTIFICADA'}
                                         </p>
                                     </div>
                                     {/* Responsável */}
                                     <div className="flex flex-col items-center gap-1 mt-3">
-                                        <span className="text-xl text-slate-500 uppercase tracking-widest font-medium">Responsável</span>
-                                        <span className="text-3xl text-slate-200">{alert.responsible?.full_name || 'NÃO IDENTIFICADO'}</span>
-                                        <span className="text-2xl text-rose-500">{alert.responsible?.phone || '(00) 00000-0000'}</span>
+                                        <span className="text-xl text-slate-500 uppercase tracking-widest font-bold">Responsável</span>
+                                        <span className="text-3xl text-slate-200 font-bold">{alert.responsible?.full_name || 'NÃO IDENTIFICADO'}</span>
+                                        <span className="text-2xl text-rose-500 font-bold">{alert.responsible?.phone || '(00) 00000-0000'}</span>
                                     </div>
 
                                     {/* Observações Cruciais */}
                                     {alert.observations && (
-                                        <div className="mt-6 w-full bg-rose-500/10 border-2 border-rose-500/30 p-4 rounded-3xl animate-pulse">
+                                        <div className="mt-6 w-full bg-rose-500/10 border border-rose-500/30 p-4 rounded-sm animate-pulse">
                                             <div className="flex items-center justify-center gap-2 text-rose-500 mb-1">
                                                 <Bell size={24} className="fill-rose-500" />
-                                                <span className="text-xl uppercase tracking-tighter font-black">Observações Médicas/Urgentes</span>
+                                                <span className="text-xl uppercase tracking-widest font-bold">Observações Médicas/Urgentes</span>
                                             </div>
-                                            <p className="text-3xl text-white text-center leading-tight">{alert.observations}</p>
+                                            <p className="text-xl font-bold text-white text-center leading-tight">{alert.observations}</p>
                                         </div>
                                     )}
                                 </div>

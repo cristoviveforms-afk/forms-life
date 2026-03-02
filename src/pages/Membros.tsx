@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Filter, Download, MoreHorizontal, Loader2, ExternalLink, Link as LinkIcon, Check } from 'lucide-react';
+import { Search, Plus, Filter, Download, MoreHorizontal, Loader2, ExternalLink, Link as LinkIcon, Check, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -67,10 +67,10 @@ export default function Membros() {
   return (
     <DashboardLayout title="Membros">
       <div className="space-y-6 p-1">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">Membros</h2>
-            <p className="text-muted-foreground">Gerencie os membros da igreja e seus ministérios.</p>
+            <h2 className="text-3xl font-light tracking-tight text-foreground">Membros</h2>
+            <p className="text-sm text-muted-foreground">Gerencie os membros da igreja e seus ministérios.</p>
           </div>
           <div className="flex gap-2">
             <Button
@@ -83,15 +83,15 @@ export default function Membros() {
                   description: "O link de auto-cadastro foi copiado para a área de transferência.",
                 });
               }}
-              className="rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
+              className="rounded-sm font-semibold border-primary/20 text-primary hover:bg-primary/5"
             >
               <LinkIcon className="h-4 w-4 mr-2" />
               Link de Cadastro
             </Button>
-            <Button variant="outline" size="icon" className="rounded-xl">
+            <Button variant="outline" size="icon" className="rounded-sm border-border/50 bg-background/50 hover:bg-background">
               <Download className="h-4 w-4" />
             </Button>
-            <Button onClick={() => navigate('/cadastro?tipo=membro')} className="rounded-xl font-bold shadow-lg shadow-primary/20">
+            <Button onClick={() => navigate('/cadastro?tipo=membro')} className="rounded-sm font-semibold shadow-none">
               <Plus className="h-4 w-4 mr-2" />
               Novo Membro
             </Button>
@@ -103,74 +103,66 @@ export default function Membros() {
         </div>
 
         {/* Actions Bar */}
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4 mt-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar membros..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
+              className="pl-9 h-11 rounded-sm bg-muted/10 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/20"
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl">
-              <Filter className="h-4 w-4" />
+            <Button variant="outline" size="icon" className="h-11 w-11 rounded-sm border-border/40 bg-muted/10 hover:bg-accent/50">
+              <Filter className="h-4 w-4 opacity-70" />
             </Button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="bg-primary/5 border-primary/10">
-            <CardContent className="pt-4 p-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.total}</div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 p-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.batizados}</div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Batizados</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 p-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.servindo}</div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Servindo</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-4 p-4">
-              <div className="text-2xl font-bold">{loading ? '-' : stats.ministerios}</div>
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Ministérios</p>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+          <div className="p-4 rounded-sm border border-primary/20 bg-primary/5">
+            <div className="text-2xl font-light tracking-tight text-primary">{loading ? '-' : stats.total}</div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Total</p>
+          </div>
+          <div className="p-4 rounded-sm border border-border/40 bg-card/30">
+            <div className="text-2xl font-light tracking-tight">{loading ? '-' : stats.batizados}</div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Batizados</p>
+          </div>
+          <div className="p-4 rounded-sm border border-border/40 bg-card/30">
+            <div className="text-2xl font-light tracking-tight">{loading ? '-' : stats.servindo}</div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Servindo</p>
+          </div>
+          <div className="p-4 rounded-sm border border-border/40 bg-card/30">
+            <div className="text-2xl font-light tracking-tight">{loading ? '-' : stats.ministerios}</div>
+            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Ministérios</p>
+          </div>
         </div>
 
         {/* Members List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Lista de Membros</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Lista de Membros</h3>
+          </div>
+          <div className="w-full">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {filteredMembros.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Nenhum membro encontrado.</p>
+                  <p className="text-center text-muted-foreground py-8 text-sm">Nenhum membro encontrado.</p>
                 ) : (
                   filteredMembros.map((membro) => (
                     <div
                       key={membro.id}
-                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-lg border hover:bg-accent/50 transition-colors cursor-pointer group gap-4"
+                      className="clean-list-item flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-sm border border-border/40 bg-card/20 hover:bg-accent/10 transition-colors cursor-pointer group gap-4"
                       onClick={() => navigate(`/acompanhamento?personId=${membro.id}`)}
                     >
                       <div className="flex items-center gap-4 w-full sm:w-auto">
-                        <div className="h-12 w-12 shrink-0 rounded-full bg-muted flex items-center justify-center font-medium group-hover:bg-primary/20 transition-colors overflow-hidden border-2 border-transparent group-hover:border-primary/20">
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-muted/50 flex items-center justify-center font-bold text-muted-foreground text-sm group-hover:bg-primary/10 transition-colors overflow-hidden border border-border/20 group-hover:border-primary/20">
                           {membro.avatar_url ? (
                             <img src={membro.avatar_url} alt={membro.full_name} className="h-full w-full object-cover" />
                           ) : (
@@ -179,50 +171,50 @@ export default function Membros() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-col">
-                            <p className="font-bold flex items-center gap-2 truncate">
+                            <p className="text-sm font-bold flex items-center gap-2 truncate text-foreground/90">
                               {membro.full_name}
-                              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity shrink-0" />
+                              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 text-primary transition-opacity shrink-0" />
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5">
+                            <div className="flex items-center gap-2 mt-1">
                               {membro.member_role && (
-                                <span className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md ${membro.member_role === 'Líder' ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-600'}`}>
+                                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-sm ${membro.member_role === 'Líder' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-muted text-muted-foreground border border-border/50'}`}>
                                   {membro.member_role}
                                 </span>
                               )}
                               {membro.leader && (
-                                <span className="text-[10px] text-muted-foreground italic">
+                                <span className="text-[10px] text-muted-foreground opacity-80">
                                   Líder: {(membro.leader as any).full_name}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground truncate mt-1">{membro.phone}</p>
+                            <p className="text-[11px] text-muted-foreground truncate flex items-center gap-1 mt-1 opacity-80"><Phone className="h-3 w-3" /> {membro.phone}</p>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
                         {membro.conversion_date && (
-                          <Badge className="bg-emerald-600 hover:bg-emerald-700 border-0 text-white whitespace-nowrap">
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider text-emerald-600 border-emerald-600/30 bg-emerald-50 whitespace-nowrap rounded-sm shadow-none">
                             Novo Convertido
                           </Badge>
                         )}
-                        <Badge variant={membro.baptized_water ? 'default' : 'outline'} className="whitespace-nowrap">
+                        <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider whitespace-nowrap rounded-sm shadow-none ${membro.baptized_water ? 'bg-muted/30 border-border/60 text-foreground/80' : 'bg-transparent border-dashed text-muted-foreground'}`}>
                           {membro.baptized_water ? 'Batizado' : 'Não Batizado'}
                         </Badge>
                         {membro.member_has_served && (
-                          <Badge variant="secondary" className="whitespace-nowrap">Servindo</Badge>
+                          <Badge variant="secondary" className="text-[10px] uppercase font-bold tracking-wider bg-secondary/20 hover:bg-secondary/30 text-secondary-foreground whitespace-nowrap rounded-sm shadow-none">Servindo</Badge>
                         )}
                         {membro.has_ministry && membro.ministries && membro.ministries.length > 0 && (
-                          <Badge variant="outline" className="whitespace-nowrap">{membro.ministries.length} ministério(s)</Badge>
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider border-border/50 bg-background/50 whitespace-nowrap rounded-sm shadow-none">{membro.ministries.length} ministério(s)</Badge>
                         )}
-                        <div className="ml-auto sm:ml-2">
+                        <div className="ml-auto sm:ml-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-background/80 rounded-sm">
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="rounded-sm border-border/50 shadow-md">
                               <DropdownMenuItem onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/acompanhamento?personId=${membro.id}`);
@@ -246,8 +238,8 @@ export default function Membros() {
                 )}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div >
     </DashboardLayout >
   );

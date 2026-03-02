@@ -264,7 +264,7 @@ export default function ParandoPorUm() {
                                 placeholder="Buscar por nome..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-slate-800 border-slate-700 text-white"
+                                className="bg-slate-800 border-slate-700 text-white rounded-sm focus-visible:ring-1 focus-visible:ring-amber-500"
                             />
 
                             <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
@@ -274,7 +274,7 @@ export default function ParandoPorUm() {
                                     .map(member => (
                                         <div
                                             key={member.id}
-                                            className="w-full flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700 transition-all text-left"
+                                            className="w-full flex items-center gap-3 p-3 rounded-sm bg-slate-800/50 border border-slate-700 transition-all text-left"
                                         >
                                             <div className="h-10 w-10 rounded-full bg-slate-700 overflow-hidden">
                                                 <img src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`} alt="" />
@@ -283,10 +283,10 @@ export default function ParandoPorUm() {
                                                 <p className="font-bold text-sm truncate">{member.full_name}</p>
                                                 <p className="text-[10px] text-slate-500">{member.phone || 'Sem telefone'}</p>
                                             </div>
-                                            <div className="flex gap-1">
+                                            <div className="flex gap-1 items-center">
                                                 <Button
                                                     size="sm"
-                                                    className="h-7 px-2 text-[10px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold"
+                                                    className="h-7 px-3 text-[10px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-sm uppercase tracking-widest"
                                                     onClick={() => handleAssignMember(member, 'lider')}
                                                 >
                                                     Líder
@@ -294,7 +294,7 @@ export default function ParandoPorUm() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    className="h-7 px-2 text-[10px] border-slate-600 hover:bg-slate-700 text-white font-bold"
+                                                    className="h-7 px-3 text-[10px] border-slate-600 hover:bg-slate-700 text-white font-bold rounded-sm uppercase tracking-widest"
                                                     onClick={() => handleAssignMember(member, 'liderado')}
                                                 >
                                                     Liderado
@@ -334,7 +334,7 @@ export default function ParandoPorUm() {
                             <Button
                                 variant="outline"
                                 onClick={() => setIsWelcomeModalOpen(false)}
-                                className="rounded-xl border-slate-700 hover:bg-slate-800"
+                                className="rounded-sm border-slate-700 hover:bg-slate-800 uppercase tracking-widest text-xs h-10 px-6 font-bold"
                             >
                                 Voltar
                             </Button>
@@ -343,7 +343,7 @@ export default function ParandoPorUm() {
                                     setIsWelcomeModalOpen(false);
                                     navigate('/cadastro?tipo=membro');
                                 }}
-                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl"
+                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-sm uppercase tracking-widest text-xs h-10 px-6"
                             >
                                 Prosseguir para Cadastro
                             </Button>

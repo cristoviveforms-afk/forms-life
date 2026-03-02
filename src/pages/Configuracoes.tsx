@@ -107,106 +107,109 @@ export default function Configuracoes() {
     <DashboardLayout title="Configurações">
       <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
         {/* Perfil */}
-        <Card>
-          <CardHeader>
+        <div className="bg-card border rounded-sm overflow-hidden mb-6">
+          <div className="p-6 border-b bg-card/50">
             <div className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              <CardTitle>Perfil</CardTitle>
+              <User className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-bold tracking-tight">Perfil</h3>
             </div>
-            <CardDescription>Gerencie suas informações pessoais</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground mt-1">Gerencie suas informações pessoais</p>
+          </div>
+          <div className="p-6 space-y-4 bg-card/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nome">Nome</Label>
+                <Label htmlFor="nome" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Nome</Label>
                 <Input
                   id="nome"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} disabled className="bg-muted" />
+                <Label htmlFor="email" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Email</Label>
+                <Input id="email" type="email" value={email} disabled className="bg-muted rounded-sm" />
               </div>
             </div>
-            <Button onClick={handleUpdateProfile} disabled={loadingProfile}>
+            <Button onClick={handleUpdateProfile} disabled={loadingProfile} className="rounded-sm font-bold uppercase tracking-widest text-xs h-10 px-6 mt-4">
               {loadingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar Alterações
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Segurança */}
-        <Card>
-          <CardHeader>
+        <div className="bg-card border rounded-sm overflow-hidden mb-6">
+          <div className="p-6 border-b bg-card/50">
             <div className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              <CardTitle>Segurança</CardTitle>
+              <Lock className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-bold tracking-tight">Segurança</h3>
             </div>
-            <CardDescription>Altere sua senha de acesso</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground mt-1">Altere sua senha de acesso</p>
+          </div>
+          <div className="p-6 space-y-4 bg-card/30">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="nova_senha">Nova Senha</Label>
+                <Label htmlFor="nova_senha" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Nova Senha</Label>
                 <Input
                   id="nova_senha"
                   type="password"
                   value={passwords.new}
                   onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                  className="rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmar_senha">Confirmar Nova Senha</Label>
+                <Label htmlFor="confirmar_senha" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Confirmar Nova Senha</Label>
                 <Input
                   id="confirmar_senha"
                   type="password"
                   value={passwords.confirm}
                   onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                  className="rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
             </div>
-            <Button onClick={handleUpdatePassword} disabled={loadingPassword}>
+            <Button onClick={handleUpdatePassword} disabled={loadingPassword} className="rounded-sm font-bold uppercase tracking-widest text-xs h-10 px-6 mt-4">
               {loadingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Alterar Senha
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Dados */}
-        <Card>
-          <CardHeader>
+        <div className="bg-card border rounded-sm overflow-hidden mb-6">
+          <div className="p-6 border-b bg-card/50">
             <div className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              <CardTitle>Dados</CardTitle>
+              <Database className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-bold tracking-tight">Dados</h3>
             </div>
-            <CardDescription>Exporte os dados do sistema</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground mt-1">Exporte os dados do sistema</p>
+          </div>
+          <div className="p-6 space-y-4 bg-card/30">
             <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => handleExport('membro')}>
+              <Button variant="outline" onClick={() => handleExport('membro')} className="rounded-sm font-bold uppercase tracking-widest text-xs h-10 px-4">
                 <Download className="mr-2 h-4 w-4" />
                 Exportar Membros (CSV)
               </Button>
-              <Button variant="outline" onClick={() => handleExport('visitante')}>
+              <Button variant="outline" onClick={() => handleExport('visitante')} className="rounded-sm font-bold uppercase tracking-widest text-xs h-10 px-4">
                 <Download className="mr-2 h-4 w-4" />
                 Exportar Visitantes (CSV)
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Notificações (Placeholder) */}
-        <Card className="opacity-60">
-          <CardHeader>
+        <div className="bg-card border rounded-sm overflow-hidden opacity-60">
+          <div className="p-6 bg-card/50">
             <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              <CardTitle>Notificações</CardTitle>
+              <Bell className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-bold tracking-tight">Notificações</h3>
             </div>
-            <CardDescription>Em breve</CardDescription>
-          </CardHeader>
-        </Card>
+            <p className="text-sm text-muted-foreground mt-1">Em breve</p>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

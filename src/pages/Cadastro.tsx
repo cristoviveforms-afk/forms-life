@@ -770,7 +770,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
         <Button
           variant="outline"
           onClick={() => window.location.reload()}
-          className="rounded-2xl h-14 px-10 font-bold border-emerald-500/20 hover:bg-emerald-500/5 text-emerald-600 transition-all hover:scale-105 active:scale-95"
+          className="rounded-sm h-14 px-10 font-bold border-emerald-500/20 hover:bg-emerald-500/5 text-emerald-600 transition-all hover:scale-105 active:scale-95"
         >
           Fazer novo cadastro
         </Button>
@@ -792,11 +792,11 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
       )}
 
       {isPublic && submitted ? (
-        <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl overflow-hidden rounded-[2rem] border border-white/10 mt-10">
-          <CardContent className="pt-10 pb-8 px-8">
+        <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 border-none  bg-card/60 backdrop-blur-xl overflow-hidden rounded-sm border border-white/10 mt-10">
+          <div className="pt-10 pb-8 px-8">
             {renderSuccess()}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8 pb-12">
           {isPublic && (
@@ -820,11 +820,11 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
           {/* Tipo de Cadastro - Hidden if Public (defaults to Membro) */}
           {mode === 'completo' && !isPublic && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Tipo de Cadastro</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6">
+              <div className="mb-4 ">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Tipo de Cadastro</h3>
+              </div>
+              <div className="">
                 <div className="flex flex-wrap gap-2 md:gap-4 justify-center md:justify-start">
                   {(['membro', 'visitante'] as PersonType[]).map((tipo) => (
                     <Button
@@ -845,8 +845,8 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                     </Button>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* ... Rest of the form remains same ... */}
@@ -855,11 +855,11 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
           {/* Pergunta Inicial para Visitante - Only in Boas-Vindas */}
           {tipoPessoa === 'visitante' && mode === 'boas-vindas' && !visitorQuestionAnswered && !isReturningVisitor && (
-            <Card className="mb-6 animate-in fade-in slide-in-from-bottom-4">
-              <CardHeader>
-                <CardTitle className="text-center text-xl">É sua primeira vez ou está retornando?</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 animate-in fade-in slide-in-from-bottom-4">
+              <div className="mb-4 ">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2  ">É sua primeira vez ou está retornando?</h3>
+              </div>
+              <div className="">
                 <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-6">
                   <Button
                     type="button"
@@ -884,32 +884,32 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                     Retornando
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Busca de Visitante Retornante - Only in Boas-Vindas */}
           {isReturningVisitor && mode === 'boas-vindas' && !visitorQuestionAnswered && (
-            <Card className="mb-6 animate-in zoom-in-95">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 animate-in zoom-in-95">
+              <div className="mb-4 ">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary" />
                   Pesquisar Cadastro Existente
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="space-y-4">
                 <div className="flex gap-2">
                   <Input
                     placeholder="Busque pelo telefone (Ex: 11999999999)"
                     value={searchPhone}
                     onChange={(e) => setSearchPhone(e.target.value.replace(/\D/g, ''))}
-                    className="h-12 rounded-xl"
+                    className="h-12 rounded-sm"
                   />
                   <Button
                     type="button"
                     onClick={() => handleSearchVisitor()}
                     disabled={loading || !searchPhone}
-                    className="h-12 px-6 rounded-xl font-bold"
+                    className="h-12 px-6 rounded-sm font-bold"
                   >
                     {loading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Pesquisar'}
                   </Button>
@@ -925,14 +925,14 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                 >
                   Voltar
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Seleção por Calendário para Conexão */}
           {mode === 'conexao' && !personId && (
             <div className="space-y-6 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
-              <div className="text-center space-y-3 py-6 relative overflow-hidden rounded-[3rem] bg-gradient-to-b from-primary/5 to-transparent border border-primary/10 mb-2">
+              <div className="text-center space-y-3 py-6 relative overflow-hidden rounded-sm bg-gradient-to-b from-primary/5 to-transparent border border-primary/10 mb-2">
                 <div className="absolute inset-0 bg-grid-slate-100/[0.03] bg-[size:20px_20px]" />
                 <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary animate-in fade-in zoom-in duration-1000">
                   <HeartHandshake className="h-4 w-4 animate-pulse" />
@@ -946,7 +946,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
               <div className="grid grid-cols-1 gap-3">
                 {loadingDateVisitors ? (
-                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
+                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-sm border-2 border-dashed border-slate-200 dark:border-slate-800 space-y-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="text-sm font-medium text-slate-500">Buscando registros...</p>
                   </div>
@@ -957,9 +957,9 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                         key={v.id}
                         type="button"
                         onClick={() => navigate(`/cadastro?id=${v.id}&mode=conexao&tipo=visitante`)}
-                        className="flex items-center gap-4 p-5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-[2rem] border-2 border-slate-100/50 dark:border-slate-800/50 hover:border-primary/50 hover:bg-primary/[0.04] transition-all text-left shadow-lg group"
+                        className="flex items-center gap-4 p-5 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md rounded-sm border-2 border-slate-100/50 dark:border-slate-800/50 hover:border-primary/50 hover:bg-primary/[0.04] transition-all text-left shadow-lg group"
                       >
-                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-primary font-black group-hover:scale-105 group-hover:shadow-lg transition-all">
+                        <div className="h-14 w-14 rounded-sm bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center text-primary font-black group-hover:scale-105 group-hover:shadow-lg transition-all">
                           {v.full_name ? v.full_name.charAt(0).toUpperCase() : '?'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -978,7 +978,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
+                  <div className="flex flex-col items-center justify-center p-12 bg-white/50 dark:bg-slate-900/50 rounded-sm border-2 border-dashed border-slate-200 dark:border-slate-800 text-center space-y-2">
                     <Users className="h-8 w-8 text-slate-300" />
                     <p className="text-sm font-medium text-slate-500">Nenhum visitante encontrado nesta data.</p>
                   </div>
@@ -989,11 +989,11 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
           {/* Header de Dados Gerais (Resumo) - visível em ambos os modos se estiver editando */}
           {personId && (
-            <Card className="mb-8 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative shadow-2xl backdrop-blur-xl rounded-[2.5rem] animate-in slide-in-from-top-4">
+            <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-8  from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden relative  backdrop-blur-xl rounded-sm animate-in slide-in-from-top-4">
               <div className="absolute right-0 top-0 h-full w-48 bg-primary/10 -skew-x-12 translate-x-24 blur-3xl" />
-              <CardContent className="p-6">
+              <div className="p-6">
                 <div className="flex items-center gap-4 relative">
-                  <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shadow-inner">
+                  <div className="h-16 w-16 rounded-sm bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shadow-inner">
                     {nome ? nome.charAt(0).toUpperCase() : '?'}
                   </div>
                   <div className="space-y-1">
@@ -1014,8 +1014,8 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Dados Pessoais e Restante do Formulário - Hidden in Conexão if no person selected */}
@@ -1026,23 +1026,23 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                 <div className="space-y-6">
                   {/* Bloco 1: Boas Vindas (Dados Pessoais) - Sempre visível em Boas-Vindas ou Completo */}
                   {(mode === 'boas-vindas' || mode === 'completo') && (
-                    <Card className="mb-6 border-l-4 border-l-primary/50 shadow-lg">
-                      <CardHeader className="pb-4">
+                    <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 border-l-4 border-l-primary/50">
+                      <div className="mb-4 pb-4">
                         <div className="flex items-center gap-3">
-                          <div className="bg-primary/10 p-2 rounded-xl text-primary">
+                          <div className="bg-primary/10 p-2 rounded-sm text-primary">
                             <HeartHandshake className="h-5 w-5" />
                           </div>
-                          <CardTitle>Boas Vindas - Dados Pessoais</CardTitle>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Boas Vindas - Dados Pessoais</h3>
                         </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
+                      </div>
+                      <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="nome" className="font-bold">Nome Completo *</Label>
                           <Input
                             id="nome"
                             placeholder="Nome completo do visitante"
                             required
-                            className="h-12 rounded-xl"
+                            className="h-12 rounded-sm"
                             value={nome}
                             onChange={e => setNome(e.target.value)}
                           />
@@ -1055,7 +1055,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               id="telefone"
                               placeholder="(00) 00000-0000"
                               required
-                              className="h-12 rounded-xl font-medium"
+                              className="h-12 rounded-sm font-medium"
                               value={telefone}
                               onChange={e => {
                                 const val = e.target.value.replace(/\D/g, '');
@@ -1069,7 +1069,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           <div className="space-y-2">
                             <Label htmlFor="sexo" className="font-bold">Sexo</Label>
                             <Select value={sexo} onValueChange={setSexo}>
-                              <SelectTrigger className="h-12 rounded-xl">
+                              <SelectTrigger className="h-12 rounded-sm">
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1084,33 +1084,33 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Input
                               id="quem_convidou"
                               placeholder="Nome de quem o convidou"
-                              className="h-12 rounded-xl"
+                              className="h-12 rounded-sm"
                               value={quemConvidou}
                               onChange={e => setQuemConvidou(e.target.value)}
                             />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   )}
 
                   {/* Bloco de Família - Independente do modo para Visitantes */}
                   {(mode === 'boas-vindas' || mode === 'conexao' || mode === 'completo') && (
-                    <Card className="mb-6 border-l-4 border-l-slate-400 shadow-md">
-                      <CardHeader className="pb-4">
+                    <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 border-l-4 border-l-slate-400">
+                      <div className="mb-4 pb-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="bg-slate-100 p-2 rounded-xl text-slate-600">
+                            <div className="bg-slate-100 p-2 rounded-sm text-slate-600">
                               <Users className="h-5 w-5" />
                             </div>
-                            <CardTitle>Família / Acompanhantes</CardTitle>
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Família / Acompanhantes</h3>
                           </div>
                           <div className="flex gap-2">
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="rounded-xl h-9 text-xs font-bold"
+                              className="rounded-sm h-9 text-xs font-bold"
                               onClick={() => addFamilyMember('conjuge')}
                             >
                               <Plus className="h-3.5 w-3.5 mr-1.5" /> Cônjuge/Noivo
@@ -1119,24 +1119,24 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="rounded-xl h-9 text-xs font-bold"
+                              className="rounded-sm h-9 text-xs font-bold"
                               onClick={() => addFamilyMember('filho')}
                             >
                               <Plus className="h-3.5 w-3.5 mr-1.5" /> Filho
                             </Button>
                           </div>
                         </div>
-                      </CardHeader>
-                      <CardContent>
+                      </div>
+                      <div className="">
                         {familyMembers.length > 0 ? (
                           <div className="space-y-4">
                             {familyMembers.map((member, index) => (
-                              <div key={index} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-3 relative group/member animate-in fade-in slide-in-from-top-2">
+                              <div key={index} className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-sm border border-slate-100 dark:border-slate-800 space-y-3 relative group/member animate-in fade-in slide-in-from-top-2">
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  className="absolute top-2 right-2 h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
+                                  className="absolute top-2 right-2 h-8 w-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50 rounded-sm"
                                   onClick={() => removeFamilyMember(index)}
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1147,7 +1147,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                     <Label className="text-[10px] font-black uppercase text-slate-400 px-1">Nome Completo</Label>
                                     <Input
                                       placeholder="Nome do familiar"
-                                      className="h-10 rounded-xl bg-white dark:bg-slate-900"
+                                      className="h-10 rounded-sm bg-white dark:bg-slate-900"
                                       value={member.nome}
                                       onChange={e => {
                                         const newMembers = [...familyMembers];
@@ -1166,7 +1166,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                         setFamilyMembers(newMembers);
                                       }}
                                     >
-                                      <SelectTrigger className="h-10 rounded-xl bg-white dark:bg-slate-900">
+                                      <SelectTrigger className="h-10 rounded-sm bg-white dark:bg-slate-900">
                                         <SelectValue />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -1187,7 +1187,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                     <Label className="text-[10px] font-black uppercase text-slate-400 px-1">Idade/Observação</Label>
                                     <Input
                                       placeholder="Ex: 5 anos"
-                                      className="h-10 rounded-xl bg-white dark:bg-slate-900"
+                                      className="h-10 rounded-sm bg-white dark:bg-slate-900"
                                       value={member.idade}
                                       onChange={e => {
                                         const newMembers = [...familyMembers];
@@ -1201,34 +1201,34 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             ))}
                           </div>
                         ) : (
-                          <div className="text-center py-8 border-2 border-dashed rounded-2xl border-slate-100 dark:border-slate-800">
+                          <div className="text-center py-8 border-2 border-dashed rounded-sm border-slate-100 dark:border-slate-800">
                             <p className="text-xs text-slate-400 font-medium italic">Nenhum familiar cadastrado junto.</p>
                           </div>
                         )}
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   )}
 
                   {/* Bloco 2: Conexão (Dados de Contato e Endereço) - Sempre visível em Conexão ou Completo */}
                   {(mode === 'conexao' || mode === 'completo') && (
                     <div className="space-y-6">
-                      <Card className="mb-6 border-l-4 border-l-indigo-500 shadow-md">
-                        <CardHeader className="pb-4">
+                      <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 border-l-4 border-l-indigo-500">
+                        <div className="mb-4 pb-4">
                           <div className="flex items-center gap-3">
-                            <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600">
+                            <div className="bg-indigo-100 p-2 rounded-sm text-indigo-600">
                               <Puzzle className="h-5 w-5" />
                             </div>
-                            <CardTitle>Conexão - Dados de Contato e Endereço</CardTitle>
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Conexão - Dados de Contato e Endereço</h3>
                           </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                        </div>
+                        <div className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <Label htmlFor="nascimento">Data de Nascimento</Label>
                               <Input
                                 id="nascimento"
                                 type="date"
-                                className="h-12 rounded-xl"
+                                className="h-12 rounded-sm"
                                 value={nascimento}
                                 onChange={e => setNascimento(e.target.value)}
                               />
@@ -1237,7 +1237,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <div className="space-y-2">
                               <Label htmlFor="estado_civil">Estado Civil</Label>
                               <Select value={estadoCivil} onValueChange={setEstadoCivil}>
-                                <SelectTrigger className="h-12 rounded-xl">
+                                <SelectTrigger className="h-12 rounded-sm">
                                   <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1255,7 +1255,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                 <Input
                                   id="conjuge"
                                   placeholder="Nome do cônjuge"
-                                  className="h-12 rounded-xl"
+                                  className="h-12 rounded-sm"
                                   value={conjuge}
                                   onChange={e => setConjuge(e.target.value)}
                                 />
@@ -1268,7 +1268,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                 id="email_visitante"
                                 type="email"
                                 placeholder="email@exemplo.com"
-                                className="h-12 rounded-xl"
+                                className="h-12 rounded-sm"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
                               />
@@ -1277,7 +1277,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <div className="space-y-2">
                               <Label htmlFor="como_conheceu">Como conheceu a igreja?</Label>
                               <Select value={comoConheceu} onValueChange={setComoConheceu}>
-                                <SelectTrigger className="h-12 rounded-xl">
+                                <SelectTrigger className="h-12 rounded-sm">
                                   <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -1295,20 +1295,20 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               <Textarea
                                 id="endereco_visitante"
                                 placeholder="Rua, número, bairro, cidade - UF"
-                                className="rounded-xl min-h-[80px]"
+                                className="rounded-sm min-h-[80px]"
                                 value={endereco}
                                 onChange={e => setEndereco(e.target.value)}
                               />
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
 
-                      <Card className="mb-6 border-l-4 border-l-blue-400 shadow-md">
-                        <CardHeader>
-                          <CardTitle>Informações Espirituais</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
+                      <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 border-l-4 border-l-blue-400">
+                        <div className="mb-4 ">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Informações Espirituais</h3>
+                        </div>
+                        <div className="space-y-4">
                           <div className="flex items-center space-x-2 py-4 md:col-span-2">
                             <Checkbox
                               id="accepted_jesus_final"
@@ -1335,7 +1335,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               <Input
                                 id="data_batismo_v"
                                 type="date"
-                                className="h-12 rounded-xl"
+                                className="h-12 rounded-sm"
                                 value={dataBatismo}
                                 onChange={e => setDataBatismo(e.target.value)}
                               />
@@ -1350,21 +1350,21 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               <Label htmlFor="batizado_espirito_v">Batizado com Espírito Santo?</Label>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
 
                       {/* Ministries for Follow-Up */}
-                      <Card className="mb-6 border-blue-200 bg-blue-50/20 shadow-sm">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
+                      <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6 border-blue-200 bg-blue-50/20">
+                        <div className="mb-4 ">
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 flex items-center gap-2">
                             Ministérios para Acompanhamento
                             <span className="text-[10px] font-black uppercase text-slate-400 ml-2 tracking-tighter">Sugeridos pelo perfil</span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
+                          </h3>
+                        </div>
+                        <div className="">
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                             {FOLLOWUP_MINISTRIES.map((ministry) => (
-                              <div key={ministry} className="flex items-center space-x-2 p-2 rounded-xl hover:bg-white/60 transition-colors">
+                              <div key={ministry} className="flex items-center space-x-2 p-2 rounded-sm hover:bg-white/60 transition-colors">
                                 <Checkbox
                                   id={`followup-${ministry}`}
                                   checked={ministeriosAcompanhamento.includes(ministry)}
@@ -1376,23 +1376,23 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                               </div>
                             ))}
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
               ) : (
                 /* LAYOUT PADRÃO (MEMBROS E OUTROS) */
                 <div className="space-y-6">
-                  <Card className="mb-6 shadow-md border-t-4 border-t-primary">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6  border-t-4 border-t-primary">
+                    <div className="mb-4 pb-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2  flex items-center gap-2">
                         <Users className="h-5 w-5 text-primary" />
                         Informações Básicas e Contato
-                      </CardTitle>
-                      <CardDescription>Dados essenciais para identificação e comunicação.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6 pt-4">
+                      </h3>
+                      <p className="text-xs text-muted-foreground opacity-80 mt-1 ">Dados essenciais para identificação e comunicação.</p>
+                    </div>
+                    <div className="space-y-6 pt-4">
 
 
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-2">
@@ -1402,7 +1402,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             id="nome_membro"
                             placeholder="Ex: João Silva da Costa"
                             required
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={nome}
                             onChange={e => setNome(e.target.value)}
                           />
@@ -1413,7 +1413,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             id="contato_membro"
                             placeholder="(00) 00000-0000"
                             required
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={telefone}
                             onChange={e => {
                               const val = e.target.value.replace(/\D/g, '');
@@ -1427,7 +1427,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                         <div className="md:col-span-3 space-y-2">
                           <Label htmlFor="sexo_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Sexo</Label>
                           <Select value={sexo} onValueChange={setSexo}>
-                            <SelectTrigger id="sexo_membro" className="h-11 rounded-xl">
+                            <SelectTrigger id="sexo_membro" className="h-11 rounded-sm">
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1442,7 +1442,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           <Input
                             id="nascimento_membro"
                             type="date"
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={nascimento}
                             onChange={e => setNascimento(e.target.value)}
                           />
@@ -1454,7 +1454,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             id="email_membro"
                             type="email"
                             placeholder="exemplo@igreja.com"
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                           />
@@ -1477,7 +1477,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           {possuiFilhos && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
                               {filhos.map((filho, index) => (
-                                <div key={index} className="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 relative group">
+                                <div key={index} className="p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-sm border border-slate-200 dark:border-slate-800 relative group">
                                   <Button
                                     type="button"
                                     variant="ghost"
@@ -1532,7 +1532,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                   </div>
                                 </div>
                               ))}
-                              <Button type="button" variant="outline" size="sm" onClick={addFilho} className="rounded-xl border-dashed border-2 md:col-span-2 py-6 hover:bg-slate-50 transition-colors">
+                              <Button type="button" variant="outline" size="sm" onClick={addFilho} className="rounded-sm border-dashed border-2 md:col-span-2 py-6 hover:bg-slate-50 transition-colors">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Adicionar Dependente / Filho
                               </Button>
@@ -1546,7 +1546,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           <Input
                             id="endereco_membro"
                             placeholder="Rua, número, bairro, cidade - UF"
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={endereco}
                             onChange={e => setEndereco(e.target.value)}
                           />
@@ -1555,7 +1555,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                         <div className="md:col-span-6 space-y-2">
                           <Label htmlFor="como_conheceu_membro" className="text-xs font-bold uppercase tracking-wider text-slate-500">Como conheceu a Vida?</Label>
                           <Select value={comoConheceu} onValueChange={setComoConheceu}>
-                            <SelectTrigger id="como_conheceu_membro" className="h-11 rounded-xl">
+                            <SelectTrigger id="como_conheceu_membro" className="h-11 rounded-sm">
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                             <SelectContent>
@@ -1573,7 +1573,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           <Input
                             id="quem_convidou_membro"
                             placeholder="Nome de quem o trouxe"
-                            className="h-11 rounded-xl"
+                            className="h-11 rounded-sm"
                             value={quemConvidou}
                             onChange={e => setQuemConvidou(e.target.value)}
                           />
@@ -1584,9 +1584,9 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2 mb-2">
                               Foto de Perfil
                             </Label>
-                            <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-[2rem] bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/80 group">
+                            <div className="flex flex-col md:flex-row items-center gap-6 p-6 rounded-sm bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all hover:bg-slate-100/50 dark:hover:bg-slate-900/80 group">
                               <div className="relative">
-                                <div className="h-24 w-24 rounded-3xl bg-white dark:bg-slate-800 flex items-center justify-center border-2 border-slate-100 dark:border-slate-700 overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-500">
+                                <div className="h-24 w-24 rounded-sm bg-white dark:bg-slate-800 flex items-center justify-center border-2 border-slate-100 dark:border-slate-700 overflow-hidden shadow-inner group-hover:scale-105 transition-transform duration-500">
                                   {avatarUrl ? (
                                     <img src={avatarUrl} alt="Preview" className="h-full w-full object-cover" />
                                   ) : (
@@ -1629,7 +1629,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                       type="button"
                                       variant="outline"
                                       size="sm"
-                                      className="rounded-xl h-10 px-4 font-bold border-primary/20 hover:bg-primary/5 text-primary"
+                                      className="rounded-sm h-10 px-4 font-bold border-primary/20 hover:bg-primary/5 text-primary"
                                       disabled={uploadingAvatar}
                                     >
                                       <Upload className="h-4 w-4 mr-2" />
@@ -1637,7 +1637,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                     </Button>
                                   </div>
                                   {avatarUrl && (
-                                    <Badge variant="outline" className="h-10 px-4 rounded-xl border-emerald-500/20 bg-emerald-500/5 text-emerald-600 font-bold">
+                                    <Badge variant="outline" className="h-10 px-4 rounded-sm border-emerald-500/20 bg-emerald-500/5 text-emerald-600 font-bold">
                                       URL vinculada
                                     </Badge>
                                   )}
@@ -1654,27 +1654,27 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                       </div>
 
 
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
                   {/* Informações Espirituais para Membros */}
                   {tipoPessoa === 'membro' && (
-                    <Card className="mb-6 shadow-md border-t-4 border-t-blue-500 overflow-hidden">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 mb-6  border-t-4 border-t-blue-500 overflow-hidden">
+                      <div className="mb-4 pb-2">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2  flex items-center gap-2">
                           <Sparkles className="h-5 w-5 text-blue-500" />
                           Vida Espiritual e Comissionamento
-                        </CardTitle>
-                        <CardDescription>Informações sobre sua jornada de fé e serviço na igreja.</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6 pt-4">
+                        </h3>
+                        <p className="text-xs text-muted-foreground opacity-80 mt-1 ">Informações sobre sua jornada de fé e serviço na igreja.</p>
+                      </div>
+                      <div className="space-y-6 pt-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="data_conversao" className="text-xs font-bold uppercase tracking-wider text-slate-500">Data da Conversão</Label>
                             <Input
                               id="data_conversao"
                               type="date"
-                              className="h-11 rounded-xl"
+                              className="h-11 rounded-sm"
                               value={dataConversao}
                               onChange={e => setDataConversao(e.target.value)}
                             />
@@ -1685,7 +1685,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Input
                               id="data_batismo"
                               type="date"
-                              className="h-11 rounded-xl"
+                              className="h-11 rounded-sm"
                               value={dataBatismo}
                               onChange={e => setDataBatismo(e.target.value)}
                             />
@@ -1694,7 +1694,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                           <div className="space-y-2">
                             <Label htmlFor="member_role" className="text-xs font-bold uppercase tracking-wider text-slate-500">Posição Ministerial</Label>
                             <Select value={memberRole} onValueChange={(val: any) => setMemberRole(val)}>
-                              <SelectTrigger id="member_role" className="h-11 rounded-xl">
+                              <SelectTrigger id="member_role" className="h-11 rounded-sm">
                                 <SelectValue placeholder="Selecione" />
                               </SelectTrigger>
                               <SelectContent>
@@ -1706,7 +1706,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-y border-slate-100 dark:border-slate-800">
-                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center space-x-3 p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
                             <Checkbox
                               id="batizado_aguas"
                               checked={batizadoAguas}
@@ -1716,7 +1716,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Label htmlFor="batizado_aguas" className="text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer">Batizado nas águas</Label>
                           </div>
 
-                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
+                          <div className="flex items-center space-x-3 p-4 rounded-sm bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all border border-slate-100 dark:border-slate-800">
                             <Checkbox
                               id="batizado_espirito"
                               checked={batizadoEspirito}
@@ -1726,7 +1726,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Label htmlFor="batizado_espirito" className="text-sm font-semibold text-slate-700 dark:text-slate-200 cursor-pointer">Batizado c/ Espírito Santo</Label>
                           </div>
 
-                          <div className="flex items-center space-x-3 p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-all border border-blue-100/50 dark:border-blue-800/50">
+                          <div className="flex items-center space-x-3 p-4 rounded-sm bg-blue-50/50 dark:bg-blue-900/20 hover:bg-blue-100/50 dark:hover:bg-blue-900/30 transition-all border border-blue-100/50 dark:border-blue-800/50">
                             <Checkbox
                               id="participa_ministerio"
                               checked={participaMinisterio}
@@ -1743,7 +1743,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                         {participaMinisterio && (
                           <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
                             {/* Ecosystem Panel Refined */}
-                            <div className="rounded-3xl bg-[#0a192f] text-white p-6 shadow-2xl relative overflow-hidden border border-amber-500/20">
+                            <div className="rounded-sm bg-[#0a192f] text-white p-6 shadow-2xl relative overflow-hidden border border-amber-500/20">
                               <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12">
                                 <Sparkles className="h-32 w-32 text-amber-500" />
                               </div>
@@ -1751,7 +1751,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
 
                               <div className="flex items-center justify-between mb-6 relative z-10">
                                 <div className="flex items-center gap-3">
-                                  <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+                                  <div className="h-10 w-10 rounded-sm bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
                                     <Sparkles className="h-5 w-5 text-amber-500" />
                                   </div>
                                   <div>
@@ -1766,7 +1766,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                 <div className="space-y-3">
                                   <Label className="text-xs font-bold text-slate-200 uppercase tracking-wider">Sua Posição</Label>
                                   <Select value={memberRole} onValueChange={setMemberRole}>
-                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-2xl focus:ring-amber-500/50">
+                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-sm focus:ring-amber-500/50">
                                       <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#0a192f] text-white border-white/10">
@@ -1782,7 +1782,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                     value={discipuladoLeaderId || "none"}
                                     onValueChange={(val) => setDiscipuladoLeaderId(val === "none" ? null : val)}
                                   >
-                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-2xl focus:ring-amber-500/50">
+                                    <SelectTrigger className="bg-white/5 border-white/10 h-12 rounded-sm focus:ring-amber-500/50">
                                       <SelectValue placeholder="Selecione o Líder" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#0a192f] text-white border-white/10 max-h-[250px]">
@@ -1810,7 +1810,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                 {MINISTERIOS_LIST.map((ministerio) => (
                                   <div
                                     key={ministerio}
-                                    className={`relative p-4 rounded-2xl border-2 transition-all duration-300 group ${ministeriosServindo.includes(ministerio)
+                                    className={`relative p-4 rounded-sm border-2 transition-all duration-300 group ${ministeriosServindo.includes(ministerio)
                                       ? 'border-emerald-500 bg-emerald-50/80 dark:bg-emerald-950/30 shadow-md ring-2 ring-emerald-500/10'
                                       : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 hover:border-slate-300 hover:shadow-sm'
                                       }`}
@@ -1837,7 +1837,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                                             value={ministryRoles[ministerio] || 'liderado'}
                                             onValueChange={(value) => handleMinistryRoleChange(ministerio, value)}
                                           >
-                                            <SelectTrigger className="h-9 text-xs bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-800 rounded-xl">
+                                            <SelectTrigger className="h-9 text-xs bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-800 rounded-sm">
                                               <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -1861,7 +1861,7 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Textarea
                               id="dons_naturais"
                               placeholder="Habilidades técnicas ou manuais (ex: música, design, culinária)"
-                              className="rounded-xl resize-none text-sm min-h-[100px]"
+                              className="rounded-sm resize-none text-sm min-h-[100px]"
                               value={donsNaturais}
                               onChange={e => setDonsNaturais(e.target.value)}
                             />
@@ -1872,14 +1872,14 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                             <Textarea
                               id="dons_espirituais"
                               placeholder="Dons recebidos pelo Espírito (ex: profecia, serviço, ensino)"
-                              className="rounded-xl resize-none text-sm min-h-[100px]"
+                              className="rounded-sm resize-none text-sm min-h-[100px]"
                               value={donsEspirituais}
                               onChange={e => setDonsEspirituais(e.target.value)}
                             />
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </div>
                   )}
 
 
@@ -1893,14 +1893,14 @@ export default function Cadastro({ isPublic = false }: CadastroProps) {
                   variant="outline"
                   onClick={() => navigate(-1)}
                   disabled={loading}
-                  className="w-full md:w-auto h-12 rounded-xl px-10"
+                  className="w-full md:w-auto h-12 rounded-sm px-10"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full md:w-auto h-12 rounded-xl px-12 font-bold shadow-lg"
+                  className="w-full md:w-auto h-12 rounded-sm px-12 font-bold shadow-lg"
                 >
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {loading ? 'Salvando...' : (personId ? 'Atualizar Cadastro' : 'Salvar Cadastro')}

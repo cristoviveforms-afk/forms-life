@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, Heart, Sparkles, ChevronLeft, Star, MessageSquare, Quote, TrendingUp, Users, PieChart as PieChartIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import {
     BarChart,
@@ -114,7 +115,7 @@ const ResultadosAvaliacao: React.FC = () => {
         <DashboardLayout title="Dashboard de Reação">
             <div className="space-y-8 p-4 md:p-6 animate-fade-in bg-gradient-to-br from-background via-background to-primary/5 min-h-full">
                 <div className="flex items-center justify-between">
-                    <Button variant="ghost" onClick={() => navigate('/pastoral')} className="rounded-xl flex items-center gap-2">
+                    <Button variant="ghost" onClick={() => navigate('/pastoral')} className="rounded-sm flex items-center gap-2">
                         <ChevronLeft size={18} /> Voltar para Pastoral
                     </Button>
                     <div className="flex items-center gap-2 text-primary font-bold">
@@ -124,80 +125,80 @@ const ResultadosAvaliacao: React.FC = () => {
 
                 {/* Global Stats Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <Card className="border-none shadow-xl bg-card/40 backdrop-blur-md relative overflow-hidden group">
+                    <div className="bg-card border rounded-sm relative overflow-hidden group hover:shadow-md transition-all">
                         <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
-                        <CardContent className="pt-8 flex items-center justify-between">
+                        <div className="p-6 pt-8 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total de Respostas</p>
-                                <div className="text-4xl font-black mt-1">{stats.totalResponses}</div>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Total de Respostas</p>
+                                <div className="text-4xl font-light mt-2">{stats.totalResponses}</div>
                             </div>
-                            <div className="bg-primary/10 p-4 rounded-2xl group-hover:scale-110 transition-transform">
-                                <Users size={32} className="text-primary" />
+                            <div className="bg-primary/10 p-4 rounded-sm text-primary group-hover:scale-110 transition-transform">
+                                <Users size={32} />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="border-none shadow-xl bg-card/40 backdrop-blur-md relative overflow-hidden group">
+                    <div className="bg-card border rounded-sm relative overflow-hidden group hover:shadow-md transition-all">
                         <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
-                        <CardContent className="pt-8 flex items-center justify-between">
+                        <div className="p-6 pt-8 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">NPS Global</p>
-                                <div className="text-4xl font-black mt-1 text-emerald-600">{stats.avgNps}</div>
-                                <p className="text-[10px] mt-1 text-muted-foreground font-medium">De -100 a +100</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">NPS Global</p>
+                                <div className="text-4xl font-light mt-2 text-emerald-600">{stats.avgNps}</div>
+                                <p className="text-[10px] mt-1 text-muted-foreground font-medium uppercase tracking-widest">De -100 a +100</p>
                             </div>
-                            <div className="bg-emerald-500/10 p-4 rounded-2xl group-hover:scale-110 transition-transform">
-                                <TrendingUp size={32} className="text-emerald-500" />
+                            <div className="bg-emerald-500/10 p-4 rounded-sm text-emerald-500 group-hover:scale-110 transition-transform">
+                                <TrendingUp size={32} />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="border-none shadow-xl bg-card/40 backdrop-blur-md relative overflow-hidden group">
+                    <div className="bg-card border rounded-sm relative overflow-hidden group hover:shadow-md transition-all">
                         <div className="absolute top-0 left-0 w-full h-1 bg-blue-500" />
-                        <CardContent className="pt-8 flex items-center justify-between">
+                        <div className="p-6 pt-8 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-bold text-muted-foreground uppercase tracking-wider">% Promotores</p>
-                                <div className="text-4xl font-black mt-1 text-blue-600">{stats.satisfactionRate}%</div>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">% Promotores</p>
+                                <div className="text-4xl font-light mt-2 text-blue-600">{stats.satisfactionRate}%</div>
                             </div>
-                            <div className="bg-blue-500/10 p-4 rounded-2xl group-hover:scale-110 transition-transform">
-                                <Heart size={32} className="text-blue-500" />
+                            <div className="bg-blue-500/10 p-4 rounded-sm text-blue-500 group-hover:scale-110 transition-transform">
+                                <Heart size={32} />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Category Ratings Chart */}
-                    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="border-b bg-primary/5 pb-6">
-                            <CardTitle className="text-xl font-black flex items-center gap-2">
-                                <Star size={20} className="text-yellow-500 fill-yellow-500" /> Satisfação por Categoria
-                            </CardTitle>
-                            <CardDescription>Média de estrelas dadas pelos visitantes</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-8 h-[350px]">
+                    <div className="bg-card border rounded-sm flex flex-col h-[450px]">
+                        <div className="p-6 border-b">
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <Star size={16} className="text-yellow-500 fill-yellow-500" /> Satisfação por Categoria
+                            </h2>
+                            <p className="text-xs text-muted-foreground mt-2">Média de estrelas dadas pelos visitantes</p>
+                        </div>
+                        <div className="p-6 flex-1 bg-card/30">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={stats.categories} layout="vertical" margin={{ left: 20, right: 20 }}>
                                     <XAxis type="number" domain={[0, 5]} hide />
                                     <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12, fontWeight: 'bold' }} />
                                     <Tooltip
                                         cursor={{ fill: 'rgba(var(--primary), 0.05)' }}
-                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     />
-                                    <Bar dataKey="val" fill="hsl(var(--primary))" radius={[0, 8, 8, 0]} barSize={32} />
+                                    <Bar dataKey="val" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={24} />
                                 </BarChart>
                             </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* NPS Pie Chart */}
-                    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="border-b bg-primary/5 pb-6">
-                            <CardTitle className="text-xl font-black flex items-center gap-2">
-                                <PieChartIcon size={20} className="text-primary" /> Distribuição NPS
-                            </CardTitle>
-                            <CardDescription>Perfil de recomendação dos visitantes</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-8 h-[350px]">
+                    <div className="bg-card border rounded-sm flex flex-col h-[450px]">
+                        <div className="p-6 border-b">
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <PieChartIcon size={16} className="text-primary" /> Distribuição NPS
+                            </h2>
+                            <p className="text-xs text-muted-foreground mt-2">Perfil de recomendação dos visitantes</p>
+                        </div>
+                        <div className="p-6 flex-1 flex flex-col justify-center bg-card/30">
                             <ResponsiveContainer width="100%" height="100%">
                                 <PieChart>
                                     <Pie
@@ -214,66 +215,68 @@ const ResultadosAvaliacao: React.FC = () => {
                                         ))}
                                     </Pie>
                                     <Tooltip
-                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     />
                                     <Legend verticalAlign="bottom" iconType="circle" />
                                 </PieChart>
                             </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Testimonies & Suggestions Feed */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="border-b bg-emerald-500/5 pb-6">
-                            <CardTitle className="text-xl font-black flex items-center gap-2">
-                                <Quote size={20} className="text-emerald-500" /> Testemunhos e Orações
-                            </CardTitle>
-                        </CardHeader>
-                        <ScrollArea className="h-[400px]">
-                            <CardContent className="pt-6 space-y-4 px-6">
+                    <div className="bg-card border rounded-sm flex flex-col h-[500px]">
+                        <div className="p-6 border-b relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <Quote size={16} className="text-emerald-500" /> Testemunhos e Orações
+                            </h2>
+                        </div>
+                        <ScrollArea className="flex-1 bg-card/30">
+                            <div className="p-6 space-y-4">
                                 {data.filter(s => s.testimony_prayer).map((survey) => (
-                                    <div key={survey.id} className="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 italic text-sm text-foreground relative">
+                                    <div key={survey.id} className="p-4 bg-emerald-500/5 rounded-sm border-l-2 border-emerald-500 italic text-sm text-foreground relative">
                                         "{survey.testimony_prayer}"
-                                        <div className="mt-2 text-[10px] font-bold opacity-40 uppercase text-right">
-                                            {new Date(survey.created_at).toLocaleDateString()}
+                                        <div className="mt-3 text-[10px] font-bold opacity-40 uppercase tracking-widest text-right">
+                                            {format(new Date(survey.created_at), 'dd/MM/yyyy')}
                                         </div>
                                     </div>
                                 ))}
                                 {data.filter(s => s.testimony_prayer).length === 0 && (
-                                    <div className="text-center py-12 text-muted-foreground opacity-50">
-                                        Nenhum testemunho registrado ainda.
+                                    <div className="text-center py-12 text-muted-foreground opacity-50 uppercase tracking-widest text-xs font-bold">
+                                        Nenhum testemunho.
                                     </div>
                                 )}
-                            </CardContent>
+                            </div>
                         </ScrollArea>
-                    </Card>
+                    </div>
 
-                    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-                        <CardHeader className="border-b bg-purple-500/5 pb-6">
-                            <CardTitle className="text-xl font-black flex items-center gap-2">
-                                <MessageSquare size={20} className="text-purple-500" /> Sugestões de Melhoria
-                            </CardTitle>
-                        </CardHeader>
-                        <ScrollArea className="h-[400px]">
-                            <CardContent className="pt-6 space-y-4 px-6">
+                    <div className="bg-card border rounded-sm flex flex-col h-[500px]">
+                        <div className="p-6 border-b relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <MessageSquare size={16} className="text-purple-500" /> Sugestões de Melhoria
+                            </h2>
+                        </div>
+                        <ScrollArea className="flex-1 bg-card/30">
+                            <div className="p-6 space-y-4">
                                 {data.filter(s => s.suggestions).map((survey) => (
-                                    <div key={survey.id} className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10 text-sm text-foreground">
+                                    <div key={survey.id} className="p-4 bg-purple-500/5 rounded-sm border-l-2 border-purple-500 text-sm text-foreground">
                                         {survey.suggestions}
-                                        <div className="mt-2 text-[10px] font-bold opacity-40 uppercase text-right">
-                                            {new Date(survey.created_at).toLocaleDateString()}
+                                        <div className="mt-3 text-[10px] font-bold opacity-40 uppercase tracking-widest text-right">
+                                            {format(new Date(survey.created_at), 'dd/MM/yyyy')}
                                         </div>
                                     </div>
                                 ))}
                                 {data.filter(s => s.suggestions).length === 0 && (
-                                    <div className="text-center py-12 text-muted-foreground opacity-50">
-                                        Nenhuma sugestão registrada ainda.
+                                    <div className="text-center py-12 text-muted-foreground opacity-50 uppercase tracking-widest text-xs font-bold">
+                                        Nenhuma sugestão.
                                     </div>
                                 )}
-                            </CardContent>
+                            </div>
                         </ScrollArea>
-                    </Card>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

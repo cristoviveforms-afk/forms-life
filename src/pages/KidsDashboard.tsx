@@ -366,105 +366,97 @@ export default function KidsDashboard() {
             <div className="space-y-8 p-1 animate-fade-in">
 
                 {/* Header Summary with Premium Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Card className="relative overflow-hidden border-none bg-gradient-to-br from-indigo-600 to-violet-700 text-white shadow-xl shadow-indigo-500/20">
-                        <CardContent className="pt-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-indigo-100 text-xs font-black uppercase tracking-widest mb-1">Presentes Agora</p>
-                                    <p className="text-4xl font-black">{stats.total}</p>
-                                </div>
-                                <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
-                                    <Baby className="h-6 w-6" />
-                                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="relative overflow-hidden border bg-card p-6 rounded-sm">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1">Presentes Agora</p>
+                                <p className="text-4xl font-black">{stats.total}</p>
                             </div>
-                            <div className="mt-4 flex items-center gap-2 text-xs text-indigo-100/80">
-                                <Zap className="h-3 w-3 fill-current" />
-                                <span>Capacidade de {capacityLimit} crianças</span>
+                            <div className="bg-primary/10 p-3 rounded-sm">
+                                <Baby className="h-6 w-6 text-primary" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground font-bold">
+                            <Zap className="h-3 w-3" />
+                            <span>Capacidade de {capacityLimit} crianças</span>
+                        </div>
+                    </div>
 
-                    <Card className="relative overflow-hidden border-none bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-500/20">
-                        <CardContent className="pt-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-emerald-100 text-xs font-black uppercase tracking-widest mb-1">Visitantes hoje</p>
-                                    <p className="text-4xl font-black">{stats.visitantes}</p>
-                                </div>
-                                <div className="bg-white/20 p-3 rounded-2xl backdrop-blur-sm">
-                                    <UserPlus className="h-6 w-6" />
-                                </div>
+                    <div className="relative overflow-hidden border bg-card p-6 rounded-sm">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1">Visitantes hoje</p>
+                                <p className="text-4xl font-black">{stats.visitantes}</p>
                             </div>
-                            <div className="mt-4 flex items-center gap-2 text-xs text-emerald-100/80">
-                                <Star className="h-3 w-3 fill-current" />
-                                <span>Novas conexões hoje</span>
+                            <div className="bg-primary/10 p-3 rounded-sm">
+                                <UserPlus className="h-6 w-6 text-primary" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground font-bold">
+                            <Star className="h-3 w-3" />
+                            <span>Novas conexões hoje</span>
+                        </div>
+                    </div>
 
-                    <Card className="relative overflow-hidden border-none bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl">
-                        <CardContent className="pt-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest mb-1">Capacidade</p>
-                                    <p className="text-4xl font-black text-slate-800 dark:text-white">{capacityPercent}%</p>
-                                </div>
-                                <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-2xl">
-                                    <Users className="h-6 w-6 text-slate-600 dark:text-slate-400" />
-                                </div>
+                    <div className="relative overflow-hidden border bg-card p-6 rounded-sm">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1">Capacidade</p>
+                                <p className="text-4xl font-black">{capacityPercent}%</p>
                             </div>
-                            <div className="mt-4 w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                                <div
-                                    className={`h-full rounded-full transition-all duration-1000 ${capacityPercent > 90 ? 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]' : 'bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]'}`}
-                                    style={{ width: `${capacityPercent}%` }}
-                                />
+                            <div className="bg-primary/10 p-3 rounded-sm">
+                                <Users className="h-6 w-6 text-primary" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="mt-4 w-full bg-muted h-1.5 rounded-sm overflow-hidden">
+                            <div
+                                className={`h-full transition-all duration-1000 ${capacityPercent > 90 ? 'bg-destructive' : 'bg-primary'}`}
+                                style={{ width: `${capacityPercent}%` }}
+                            />
+                        </div>
+                    </div>
 
-                    <Card className={`relative overflow-hidden border-none shadow-xl ${stats.alertas > 0 ? 'bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-rose-500/20' : 'bg-slate-50 text-slate-400'}`}>
-                        <CardContent className="pt-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className={`${stats.alertas > 0 ? 'text-rose-100' : 'text-slate-500'} text-xs font-black uppercase tracking-widest mb-1`}>Restrições e Alergias</p>
-                                    <p className="text-4xl font-black">{stats.alertas}</p>
-                                </div>
-                                <div className={`${stats.alertas > 0 ? 'bg-white/20' : 'bg-slate-200'} p-3 rounded-2xl backdrop-blur-sm`}>
-                                    <AlertCircle className="h-6 w-6" />
-                                </div>
+                    <div className="relative overflow-hidden border bg-card p-6 rounded-sm">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest mb-1">Restrições e Alergias</p>
+                                <p className="text-4xl font-black">{stats.alertas}</p>
                             </div>
-                            <div className="mt-4 flex items-center gap-2 text-xs">
-                                {stats.alertas > 0 ? '⚠️ Atenção necessária' : 'Nenhuma restrição registrada'}
+                            <div className="bg-primary/10 p-3 rounded-sm">
+                                <AlertCircle className="h-6 w-6 text-primary" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground font-bold">
+                            {stats.alertas > 0 ? '⚠️ Atenção necessária' : 'Nenhuma restrição'}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Main Attendance List */}
-                <Card className="border-none shadow-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-10 pt-8 px-8">
+                <div className="border border-border/50 bg-card rounded-sm mb-6 mt-6">
+                    <div className="flex flex-row items-center justify-between space-y-0 p-6 border-b border-border/50">
                         <div>
-                            <CardTitle className="text-2xl font-black tracking-tight">Lista de Presença Digital</CardTitle>
-                            <CardDescription className="text-base">Monitoramento contínuo do fluxo de entrada e saída</CardDescription>
+                            <h3 className="text-lg font-bold tracking-tight">Lista de Presença Digital</h3>
+                            <p className="text-sm text-muted-foreground mt-1">Monitoramento contínuo correndo</p>
                         </div>
                         <div className="flex gap-3">
                             <div className="relative group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <Input
                                     placeholder="Pesquisar..."
-                                    className="pl-11 w-[300px] h-12 rounded-2xl bg-white/80 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 shadow-sm focus:ring-primary/20"
+                                    className="pl-11 w-[300px] h-10 rounded-sm bg-background border focus-visible:ring-1 focus-visible:ring-primary/20"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
-                            <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl" onClick={fetchActiveCheckins}>
+                            <Button variant="outline" size="icon" className="h-10 w-10 rounded-sm" onClick={fetchActiveCheckins}>
                                 <Clock className="h-5 w-5" />
                             </Button>
                         </div>
-                    </CardHeader>
-                    <CardContent className="px-8 pb-8">
-                        <div className="rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm">
+                    </div>
+                    <div className="p-0">
+                        <div className="overflow-hidden">
                             <Table>
                                 <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm">
                                     <TableRow className="border-b border-slate-100 dark:border-slate-800">
@@ -622,32 +614,32 @@ export default function KidsDashboard() {
                                 </TableBody>
                             </Table>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
                 {/* Photo Upload Dialog */}
                 <Dialog open={photoUploadDialogOpen} onOpenChange={setPhotoUploadDialogOpen}>
-                    <DialogContent className="max-w-2xl rounded-[40px] p-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-900">
-                        <DialogHeader className="p-8 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                    <DialogContent className="max-w-2xl rounded-sm p-0 overflow-hidden border shadow-lg bg-card flex flex-col max-h-[90vh]">
+                        <div className="p-6 bg-muted/30 border-b shrink-0">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 p-3 rounded-2xl">
+                                    <div className="bg-primary/10 p-3 rounded-sm">
                                         <Camera className="h-6 w-6 text-primary" />
                                     </div>
                                     <div>
-                                        <DialogTitle className="text-2xl font-black">Fotos da Atividade</DialogTitle>
-                                        <DialogDescription className="text-sm font-medium">
-                                            Compartilhe momentos de <span className="text-slate-900 dark:text-slate-100 font-bold">{selectedRecord?.children.full_name}</span> com os pais hoje.
+                                        <DialogTitle className="text-xl font-bold uppercase tracking-widest">Fotos</DialogTitle>
+                                        <DialogDescription className="text-xs font-bold uppercase tracking-widest mt-1">
+                                            Compartilhe momentos de <span className="text-foreground">{selectedRecord?.children.full_name}</span> com os pais hoje.
                                         </DialogDescription>
                                     </div>
                                 </div>
-                                <Badge variant="outline" className="h-8 px-4 rounded-full font-black text-xs uppercase tracking-tight border-primary/20 bg-primary/5 text-primary">
-                                    {selectedRecord?.photos?.length || 0} / 5 Fotos
+                                <Badge variant="outline" className="h-8 px-4 rounded-sm font-bold text-xs uppercase tracking-widest">
+                                    {selectedRecord?.photos?.length || 0} / 5
                                 </Badge>
                             </div>
-                        </DialogHeader>
+                        </div>
 
-                        <div className="p-8 space-y-8">
+                        <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                             {/* Upload Area */}
                             {(selectedRecord?.photos?.length || 0) < 5 && (
                                 <div className="relative group/upload">
@@ -663,23 +655,23 @@ export default function KidsDashboard() {
                                         }}
                                         disabled={uploading}
                                     />
-                                    <div className={`h-40 border-4 border-dashed rounded-[32px] flex flex-col items-center justify-center gap-3 transition-all ${uploading
-                                        ? "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700"
-                                        : "bg-primary/5 border-primary/20 group-hover/upload:border-primary group-hover/upload:bg-primary/10"
+                                    <div className={`h-40 border-2 border-dashed rounded-sm flex flex-col items-center justify-center gap-3 transition-all ${uploading
+                                        ? "bg-muted border-border"
+                                        : "bg-primary/5 border-primary/20 hover:border-primary hover:bg-primary/10"
                                         }`}>
                                         {uploading ? (
                                             <>
                                                 <div className="animate-spin h-10 w-10 border-4 border-primary border-t-transparent rounded-full" />
-                                                <p className="text-sm font-black text-primary uppercase tracking-widest">Enviando fotos...</p>
+                                                <p className="text-sm font-bold text-primary uppercase tracking-widest">Enviando fotos...</p>
                                             </>
                                         ) : (
                                             <>
-                                                <div className="bg-primary/10 p-4 rounded-full group-hover/upload:scale-110 transition-transform">
+                                                <div className="bg-primary/10 p-4 rounded-sm">
                                                     <Upload className="h-8 w-8 text-primary" />
                                                 </div>
                                                 <div className="text-center">
-                                                    <p className="font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Clique ou arraste fotos aqui</p>
-                                                    <p className="text-xs text-slate-500 font-medium">JPG ou PNG (Máx 5MB)</p>
+                                                    <p className="font-bold uppercase tracking-tight text-foreground">Clique ou arraste fotos aqui</p>
+                                                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">JPG ou PNG (Máx 5MB)</p>
                                                 </div>
                                             </>
                                         )}
@@ -691,80 +683,75 @@ export default function KidsDashboard() {
                             {selectedRecord?.photos && selectedRecord.photos.length > 0 ? (
                                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                     {selectedRecord.photos.map((photo, idx) => (
-                                        <div key={idx} className="relative aspect-square rounded-3xl overflow-hidden group/photo border-2 border-slate-100 dark:border-slate-800 shadow-sm">
+                                        <div key={idx} className="relative aspect-square rounded-sm overflow-hidden group/photo border bg-muted">
                                             <img
                                                 src={photo}
                                                 alt={`Momento ${idx + 1}`}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-110"
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-105"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover/photo:opacity-100 transition-opacity" />
                                             <button
                                                 onClick={() => handleDeletePhoto(photo)}
-                                                className="absolute top-2 right-2 h-8 w-8 bg-black/50 hover:bg-rose-600 text-white rounded-xl backdrop-blur-md flex items-center justify-center transition-colors opacity-0 group-hover/photo:opacity-100"
+                                                className="absolute top-2 right-2 h-8 w-8 bg-black/50 hover:bg-destructive text-white rounded-sm backdrop-blur-md flex items-center justify-center transition-colors opacity-0 group-hover/photo:opacity-100"
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
                                             <div className="absolute bottom-3 left-3 opacity-0 group-hover/photo:opacity-100 transition-opacity">
-                                                <p className="text-[10px] font-black text-white uppercase tracking-widest">Foto {idx + 1}</p>
+                                                <p className="text-[10px] font-bold text-white uppercase tracking-widest">Foto {idx + 1}</p>
                                             </div>
-                                        </div>
-                                    ))}
-                                    {[...Array(5 - selectedRecord.photos.length)].map((_, i) => (
-                                        <div key={`empty-${i}`} className="aspect-square rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
-                                            <ImageIcon className="h-8 w-8 text-slate-200 dark:text-slate-800" />
                                         </div>
                                     ))}
                                 </div>
                             ) : !uploading && (
-                                <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-[32px]">
-                                    <div className="bg-slate-50 dark:bg-slate-800 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <ImageIcon className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+                                <div className="text-center py-12 border border-dashed rounded-sm">
+                                    <div className="bg-muted h-16 w-16 rounded-sm flex items-center justify-center mx-auto mb-4">
+                                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
                                     </div>
-                                    <p className="text-slate-400 text-sm font-medium italic">Nenhuma foto enviada ainda hoje.</p>
+                                    <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">Nenhuma foto enviada ainda.</p>
                                 </div>
                             )}
                         </div>
 
-                        <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+                        <div className="p-6 border-t bg-muted/30 shrink-0">
                             <Button
-                                className="w-full h-16 text-lg font-black rounded-2xl shadow-xl shadow-primary/20 active:scale-95 transition-all uppercase tracking-tight"
+                                className="w-full h-12 text-xs font-bold uppercase tracking-widest rounded-sm transition-colors"
                                 onClick={() => setPhotoUploadDialogOpen(false)}
                             >
                                 Concluído
                             </Button>
-                        </DialogFooter>
+                        </div>
                     </DialogContent>
                 </Dialog>
 
                 {/* Checkout Verification Dialog */}
                 <Dialog open={checkoutDialogOpen} onOpenChange={setCheckoutDialogOpen}>
-                    <DialogContent className="max-w-md rounded-3xl p-8 border-none outline-none shadow-2xl">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-black">Validar Saída</DialogTitle>
-                            <DialogDescription className="text-base pt-2">
-                                Confirme o código da etiqueta do responsável para liberar a criança.
-                            </DialogDescription>
-                        </DialogHeader>
+                    <DialogContent className="max-w-md rounded-sm p-0 overflow-hidden border shadow-lg bg-card">
+                        <div className="p-6 border-b bg-muted/30 shrink-0">
+                            <DialogHeader>
+                                <DialogTitle className="text-xl font-bold uppercase tracking-widest">Validar Saída</DialogTitle>
+                                <DialogDescription className="text-[10px] font-bold uppercase tracking-widest mt-1">
+                                    Confirme o código da etiqueta.
+                                </DialogDescription>
+                            </DialogHeader>
+                        </div>
 
                         {selectedRecord && (
-                            <div className="space-y-6 pt-4">
-                                <div className="bg-slate-50 dark:bg-slate-900 p-6 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-primary/10 p-3 rounded-2xl">
-                                            <Baby className="h-8 w-8 text-primary" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-black uppercase tracking-widest text-slate-500">Criança</p>
-                                            <p className="text-xl font-bold">{selectedRecord.children.full_name}</p>
-                                        </div>
+                            <div className="p-6 space-y-6">
+                                <div className="bg-muted/30 p-6 rounded-sm border border-dashed flex items-center gap-4">
+                                    <div className="bg-primary/10 p-3 rounded-sm">
+                                        <Baby className="h-8 w-8 text-primary" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Criança</p>
+                                        <p className="text-lg font-bold uppercase tracking-tight">{selectedRecord.children.full_name}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-sm font-bold ml-1">Digite o Código de Segurança</label>
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Código de Segurança</label>
                                     <Input
                                         placeholder="Ex: A1B2"
-                                        className="h-16 text-center text-3xl font-black uppercase tracking-[0.5em] rounded-2xl border-2 focus:border-primary shadow-inner"
+                                        className="h-12 text-center text-xl font-black uppercase tracking-[0.5em] rounded-sm border focus-visible:ring-1 focus-visible:ring-primary/20 bg-background"
                                         maxLength={4}
                                         value={confirmCode}
                                         onChange={(e) => setConfirmCode(e.target.value.toUpperCase())}
@@ -773,14 +760,14 @@ export default function KidsDashboard() {
                             </div>
                         )}
 
-                        <DialogFooter className="pt-6 gap-3">
-                            <Button variant="outline" className="h-14 flex-1 rounded-2xl font-bold" onClick={() => setCheckoutDialogOpen(false)}>
+                        <div className="p-6 border-t bg-muted/30 flex gap-3 shrink-0">
+                            <Button variant="outline" className="h-12 flex-1 rounded-sm text-[10px] font-bold uppercase tracking-widest" onClick={() => setCheckoutDialogOpen(false)}>
                                 Cancelar
                             </Button>
-                            <Button className="h-14 flex-1 rounded-2xl font-black text-lg bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20" onClick={handleCheckout}>
+                            <Button className="h-12 flex-1 rounded-sm text-[10px] font-bold uppercase tracking-widest shadow-none" onClick={handleCheckout}>
                                 Confirmar Saída
                             </Button>
-                        </DialogFooter>
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>

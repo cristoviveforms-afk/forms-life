@@ -108,7 +108,7 @@ export default function Aniversariantes() {
                             placeholder="Buscar aniversariante..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
+                            className="pl-9 h-11 rounded-sm border focus-visible:ring-1 focus-visible:ring-primary/20"
                         />
                     </div>
                 </div>
@@ -125,39 +125,39 @@ export default function Aniversariantes() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredParticipants.length === 0 ? (
-                            <div className="col-span-full bg-muted/30 border-2 border-dashed rounded-3xl p-12 text-center">
-                                <div className="bg-muted rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                                    <Calendar className="h-8 w-8 text-muted-foreground" />
+                            <div className="col-span-full bg-card border rounded-sm p-12 text-center flex flex-col items-center justify-center">
+                                <div className="bg-primary/5 rounded-sm w-16 h-16 flex items-center justify-center mx-auto mb-4 border text-primary">
+                                    <Calendar className="h-8 w-8" />
                                 </div>
-                                <h3 className="text-xl font-bold">Nenhum aniversariante</h3>
-                                <p className="text-muted-foreground">Não encontramos aniversariantes para este mês ou com este nome.</p>
+                                <h3 className="text-lg font-bold uppercase tracking-widest text-muted-foreground">Nenhum aniversariante</h3>
+                                <p className="text-xs text-muted-foreground mt-2 max-w-sm">Não encontramos aniversariantes para este mês ou com este nome.</p>
                             </div>
                         ) : (
                             filteredParticipants.map((person) => (
-                                <Card key={person.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-primary/10">
-                                    <CardHeader className="p-0">
-                                        <div className="h-24 bg-gradient-to-r from-primary/20 via-primary/10 to-transparent flex items-center px-6 relative overflow-hidden">
-                                            <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-150 transition-transform duration-500">
+                                <div key={person.id} className="bg-card border rounded-sm overflow-hidden group hover:shadow-md transition-all">
+                                    <div className="p-0">
+                                        <div className="h-24 bg-card border-b flex items-center px-6 relative overflow-hidden">
+                                            <div className="absolute right-0 top-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
                                                 <Cake className="h-20 w-20" />
                                             </div>
-                                            <div className="flex items-center gap-4 z-10">
-                                                <div className="h-16 w-16 rounded-2xl bg-primary flex flex-col items-center justify-center text-primary-foreground shadow-lg group-hover:scale-110 transition-transform duration-300">
-                                                    <span className="text-xs font-bold uppercase tracking-widest leading-none mb-1">Dia</span>
+                                            <div className="flex items-center gap-4 z-10 w-full">
+                                                <div className="h-16 w-16 rounded-sm bg-primary/10 flex flex-col items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest leading-none mb-1">Dia</span>
                                                     <span className="text-2xl font-black leading-none">{getDay(person.birth_date!)}</span>
                                                 </div>
-                                                <div>
-                                                    <Badge variant="secondary" className="mb-1 uppercase text-[10px] font-bold tracking-wider">
+                                                <div className="flex-[1] min-w-0">
+                                                    <Badge variant="secondary" className="mb-1 uppercase text-[10px] font-bold tracking-widest rounded-sm bg-muted text-muted-foreground">
                                                         {person.type === 'membro' ? 'Membro' : 'Visitante'}
                                                     </Badge>
-                                                    <CardTitle className="text-lg leading-tight line-clamp-1">{person.full_name}</CardTitle>
+                                                    <h3 className="text-lg font-bold truncate">{person.full_name}</h3>
                                                 </div>
                                             </div>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent className="p-6">
+                                    </div>
+                                    <div className="p-6 bg-card/30">
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-3 text-muted-foreground">
-                                                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center">
+                                                <div className="h-8 w-8 rounded-sm bg-muted flex items-center justify-center">
                                                     <Phone className="h-4 w-4" />
                                                 </div>
                                                 <span className="text-sm font-medium">{person.phone || 'Sem telefone'}</span>
@@ -165,24 +165,24 @@ export default function Aniversariantes() {
 
                                             <div className="flex gap-2">
                                                 <Button
-                                                    className="flex-1 rounded-xl h-11 font-bold bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 group/btn"
+                                                    className="flex-1 rounded-sm h-10 flex items-center justify-center gap-2 font-bold bg-emerald-500 hover:bg-emerald-600 text-white transition-colors"
                                                     onClick={() => handleWhatsApp(person.phone)}
                                                 >
-                                                    <MessageCircle className="mr-2 h-4 w-4 group-hover/btn:rotate-12 transition-transform" />
-                                                    Parabenizar
+                                                    <MessageCircle className="h-4 w-4" />
+                                                    <span className="uppercase tracking-widest text-[10px]">Parabenizar</span>
                                                 </Button>
                                                 <Button
                                                     variant="outline"
                                                     size="icon"
-                                                    className="h-11 w-11 rounded-xl hover:bg-primary/5 hover:text-primary transition-colors"
+                                                    className="h-10 w-10 rounded-sm hover:bg-muted/50 transition-colors"
                                                     onClick={() => window.location.href = `/acompanhamento?personId=${person.id}`}
                                                 >
                                                     <User className="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                </div>
                             ))
                         )}
                     </div>

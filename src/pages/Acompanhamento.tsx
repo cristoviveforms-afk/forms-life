@@ -116,12 +116,12 @@ interface PipelineCardProps {
 }
 
 const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUpdateStage }: PipelineCardProps) => (
-  <Card
-    className="mb-3 hover:shadow-lg transition-all duration-300 cursor-pointer border-l-4 group relative overflow-hidden"
+  <div
+    className="mb-3 p-3 bg-card rounded-sm border hover:border-primary/50 transition-all duration-300 cursor-pointer border-l-4 group relative overflow-hidden"
     style={{ borderLeftColor: getStageColorCode(person.journey_stage) }}
     onClick={() => onViewDetails(person)}
   >
-    <CardContent className="p-3">
+    <div>
       <div className="flex justify-between items-start mb-2">
         <div className="flex-1">
           <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">{person.full_name}</p>
@@ -131,7 +131,7 @@ const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUp
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-full hover:bg-primary/10"
+            className="h-8 w-8 rounded-sm hover:bg-primary/10"
             onClick={(e) => {
               e.stopPropagation();
               onAddNote(person);
@@ -143,7 +143,7 @@ const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUp
       </div>
 
       <div className="flex items-center justify-between mt-3">
-        <Badge variant="outline" className="text-[10px] px-2 h-5 bg-background/50 backdrop-blur-sm">
+        <Badge variant="outline" className="text-[10px] px-2 h-5 bg-background/50 rounded-sm">
           {person.created_at ? new Date(person.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
         </Badge>
 
@@ -152,7 +152,7 @@ const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUp
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full hover:bg-green-500/10 text-green-600"
+              className="h-8 w-8 rounded-sm hover:bg-green-500/10 text-green-600"
               title="Conversar no WhatsApp"
               onClick={(e) => {
                 e.stopPropagation();
@@ -168,7 +168,7 @@ const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUp
             <Button
               variant="default"
               size="icon"
-              className="h-8 w-8 rounded-full shadow-lg shadow-primary/20 hover:scale-110 active:scale-95 transition-all"
+              className="h-8 w-8 rounded-sm hover:scale-105 transition-all shadow-none"
               title="Avançar Fase"
               onClick={(e) => {
                 e.stopPropagation();
@@ -181,15 +181,15 @@ const PipelineCard = ({ person, hasActiveCheckin, onViewDetails, onAddNote, onUp
         </div>
       </div>
       {person.accepted_jesus && (
-        <Badge className="mt-2 text-[10px] bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white w-full justify-center py-1">Novo Convertido</Badge>
+        <Badge className="mt-2 text-[10px] bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white w-full justify-center py-1 rounded-sm shadow-none">Novo Convertido</Badge>
       )}
       {hasActiveCheckin && (
-        <Badge className="mt-2 text-[10px] bg-primary text-primary-foreground border-none w-full justify-center py-1 gap-1">
+        <Badge className="mt-2 text-[10px] bg-primary text-primary-foreground border-none w-full justify-center py-1 gap-1 rounded-sm shadow-none">
           <Baby className="h-3 w-3" /> KIDS EM SALA
         </Badge>
       )}
-    </CardContent>
-  </Card>
+    </div>
+  </div>
 );
 
 
@@ -607,13 +607,13 @@ export default function Acompanhamento() {
             <h2 className="text-2xl font-bold tracking-tight">Jornada do Visitante</h2>
             <p className="text-muted-foreground text-sm">Acompanhe o progresso de integração.</p>
           </div>
-          <div className="relative w-full md:w-72">
+          <div className="relative w-full md:w-72 mt-4 md:mt-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar visitante..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-11 rounded-xl bg-background/50 border-border/40"
+              className="pl-9 h-11 rounded-sm bg-muted/10 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/20"
             />
           </div>
         </div>
@@ -638,7 +638,7 @@ export default function Acompanhamento() {
               return (
                 <div key={stageKey} className="w-full md:min-w-[320px] md:max-w-[320px] flex-shrink-0 flex flex-col h-full">
                   {/* Modern Header */}
-                  <div className={`p-4 mb-3 rounded-xl shadow-sm bg-card border flex justify-between items-center group hover:shadow-md transition-all relative overflow-hidden min-h-[5.5rem]`}>
+                  <div className={`p-4 mb-3 rounded-sm bg-card border border-border/40 flex justify-between items-center group hover:bg-accent/5 transition-all relative overflow-hidden min-h-[5.5rem]`}>
                     <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${stageInfo.headerClass.split(' ')[1]}`} /> {/* Extract border color */}
                     <div className="flex flex-col pr-2">
                       <span className="font-bold text-sm text-foreground/90 leading-snug line-clamp-2">{stageInfo.label}</span>
@@ -646,13 +646,13 @@ export default function Acompanhamento() {
                         {stagePeople.length === 1 ? '1 Pessoa' : `${stagePeople.length} Pessoas`}
                       </span>
                     </div>
-                    <div className={`h-9 w-9 min-w-[2.25rem] rounded-full flex items-center justify-center font-bold text-sm shadow-sm ${stageInfo.badgeClass}`}>
+                    <div className={`h-9 w-9 min-w-[2.25rem] rounded-sm flex items-center justify-center font-bold text-sm shadow-none ${stageInfo.badgeClass}`}>
                       {stagePeople.length}
                     </div>
                   </div>
 
                   {/* Column Body */}
-                  <div className="bg-muted/30 p-2 rounded-xl border-dashed border-2 border-muted flex-1 min-h-[200px] md:min-h-[500px]">
+                  <div className="bg-muted/10 p-2 rounded-sm border border-border/20 flex-1 min-h-[200px] md:min-h-[500px]">
                     {stagePeople.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full py-10 text-muted-foreground opacity-50">
                         <div className="bg-muted rounded-full p-3 mb-2">
@@ -763,33 +763,33 @@ export default function Acompanhamento() {
                 <TabsContent value="overview" className="space-y-6 mt-4">
                   {/* Quick Stats */}
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
-                      <span className="block text-2xl font-black text-primary">{personHistory.length}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Contatos</span>
+                    <div className="bg-card border shadow-sm p-4 rounded-sm text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-2xl font-light text-primary tracking-tight">{personHistory.length}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1">Contatos</span>
                     </div>
-                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
-                      <span className="block text-2xl font-black text-primary">{personHistory.filter(h => h.status === 'concluido').length}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Concluídos</span>
+                    <div className="bg-card border shadow-sm p-4 rounded-sm text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-2xl font-light text-primary tracking-tight">{personHistory.filter(h => h.status === 'concluido').length}</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1">Concluídos</span>
                     </div>
-                    <div className="bg-card border shadow-sm p-4 rounded-2xl text-center hover:bg-accent/10 transition-colors">
-                      <span className="block text-2xl font-black text-primary">
+                    <div className="bg-card border shadow-sm p-4 rounded-sm text-center hover:bg-accent/10 transition-colors">
+                      <span className="block text-xl md:text-2xl font-light text-primary tracking-tight">
                         {personHistory[0]?.created_at ? new Date(personHistory[0].created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : '-'}
                       </span>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter leading-none">Último</span>
+                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1">Último</span>
                     </div>
                   </div>
 
                   {/* Contact Info */}
                   <div className="space-y-4">
                     <div
-                      className="flex items-center gap-3 p-4 bg-muted/40 backdrop-blur-sm rounded-2xl border cursor-pointer hover:bg-green-500/10 hover:border-green-500/30 transition-all group"
+                      className="flex items-center gap-3 p-4 bg-muted/10 rounded-sm border cursor-pointer hover:bg-green-500/10 hover:border-green-500/30 transition-all group"
                       onClick={() => {
                         const cleanPhone = selectedPerson.phone?.replace(/\D/g, '');
                         const phoneWithCountry = cleanPhone?.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
                         window.open(`https://wa.me/${phoneWithCountry}`, '_blank');
                       }}
                     >
-                      <div className="bg-primary/10 p-2 rounded-xl group-hover:bg-green-500/20 transition-colors">
+                      <div className="bg-primary/10 p-2 rounded-sm group-hover:bg-green-500/20 transition-colors">
                         <Phone className="h-5 w-5 text-primary group-hover:text-green-600" />
                       </div>
                       <span className="font-bold text-lg tracking-tight group-hover:text-green-600 transition-colors">{selectedPerson.phone}</span>
@@ -801,7 +801,7 @@ export default function Acompanhamento() {
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
-                        className="flex-1 h-12"
+                        className="flex-1 h-12 rounded-sm"
                         onClick={() => {
                           const mode = selectedPerson.journey_stage === 'fase1_porta' ? 'boas-vindas' : 'conexao';
                           navigate(`/cadastro?id=${selectedPerson.id}&mode=${mode}&tipo=${selectedPerson.type}`);
@@ -810,21 +810,21 @@ export default function Acompanhamento() {
                         <span className="mr-2">✏️</span> Editar Cadastro
                       </Button>
                       <Button
-                        className="flex-1 h-12"
+                        className="flex-1 h-12 rounded-sm"
                         onClick={() => {
                           setNoteContent('');
                           setContactType('Acompanhamento');
                           setIsNoteDialogOpen(true);
                         }}
                       >
-                        <Plus className="mr-2 h-4 w-4" /> Registrar Novo Contato
+                        <Plus className="mr-2 h-4 w-4" /> Registrar Contato
                       </Button>
                     </div>
 
                     <Button
                       variant="secondary"
                       className={cn(
-                        "w-full h-11 font-bold group",
+                        "w-full h-11 font-bold group rounded-sm",
                         selectedPerson.type === 'visitante'
                           ? "bg-green-500/10 text-green-600 hover:bg-green-500/20"
                           : "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20"

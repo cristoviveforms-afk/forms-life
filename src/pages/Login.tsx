@@ -46,8 +46,8 @@ export default function Login() {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md animate-fade-in border-border/50 shadow-lg">
-          <CardHeader className="text-center space-y-4 pb-2">
+        <div className="w-full max-w-md animate-fade-in bg-card border rounded-sm p-8 shadow-sm">
+          <div className="text-center space-y-4 pb-8">
             <div className="mx-auto">
               <img
                 src={logo}
@@ -56,17 +56,17 @@ export default function Login() {
               />
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold tracking-tight">Forms Cristo Vive</h1>
-              <p className="text-sm text-muted-foreground">
-                Sistema de Gestão de Membros
+              <h1 className="text-2xl font-bold tracking-tight uppercase">Forms Cristo Vive</h1>
+              <p className="text-[10px] font-bold tracking-widest uppercase text-muted-foreground">
+                Gestão de Membros
               </p>
             </div>
-          </CardHeader>
+          </div>
 
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -74,12 +74,12 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password" className="font-bold uppercase tracking-widest text-[10px] text-muted-foreground">Senha</Label>
                 <Input
                   id="password"
                   type="password"
@@ -87,15 +87,15 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="h-11"
+                  className="h-11 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                 />
               </div>
-            </CardContent>
+            </div>
 
-            <CardFooter className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 mt-8">
               <Button
                 type="submit"
-                className="w-full h-11 font-medium"
+                className="w-full h-11 font-bold rounded-sm uppercase tracking-widest text-xs"
                 disabled={isLoading}
               >
                 {isLoading ? 'Entrando...' : 'Entrar'}
@@ -103,20 +103,20 @@ export default function Login() {
 
               <button
                 type="button"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground hover:text-foreground transition-colors"
               >
                 Esqueci minha senha
               </button>
 
-              <div className="text-center text-sm text-muted-foreground mt-2 border-t pt-4 w-full">
+              <div className="text-center text-[10px] uppercase font-bold tracking-widest text-muted-foreground mt-4 border-t pt-6 w-full">
                 Novo por aqui?{' '}
-                <Link to="/signup" className="text-primary hover:underline font-medium">
-                  Criar nova conta
+                <Link to="/signup" className="text-primary hover:underline font-black">
+                  Criar conta
                 </Link>
               </div>
-            </CardFooter>
+            </div>
           </form>
-        </Card>
+        </div>
       </main>
 
 

@@ -187,42 +187,42 @@ const MinistryDashboard = ({
             <ScrollArea className="h-full pr-4 pb-4">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">Aguardando Contato</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900">
+                    <div className="mb-4 pb-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2   -600 dark:-400">Aguardando Contato</h3>
+                    </div>
+                    <div className="">
                       <div className="text-3xl font-bold">{pendingCount}</div>
                       <p className="text-xs text-muted-foreground mt-1">Visitantes precisando de atenção</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-900">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">Em Acompanhamento</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                  </div>
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-900">
+                    <div className="mb-4 pb-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2   -600 dark:-400">Em Acompanhamento</h3>
+                    </div>
+                    <div className="">
                       <div className="text-3xl font-bold">{adoptionCount}</div>
                       <p className="text-xs text-muted-foreground mt-1">Sendo cuidados atualmente</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-green-50/50 dark:bg-green-900/10 border-green-100 dark:border-green-900">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">Próximos Eventos</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                  </div>
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 bg-green-50/50 dark:bg-green-900/10 border-green-100 dark:border-green-900">
+                    <div className="mb-4 pb-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2   -600 dark:-400">Próximos Eventos</h3>
+                    </div>
+                    <div className="">
                       <div className="text-3xl font-bold">{events.filter(e => new Date(e.date) >= new Date()).length}</div>
                       <p className="text-xs text-muted-foreground mt-1">Escalas agendadas</p>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Recent Activity Mini-Feed */}
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-base">Membros Recentes</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 flex-1 overflow-hidden">
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 h-full flex flex-col">
+                    <div className="mb-4 ">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Membros Recentes</h3>
+                    </div>
+                    <div className="p-0 flex-1 overflow-hidden">
                       <ScrollArea className="h-[300px]">
                         <div className="flex flex-col">
                           {members.slice(0, 5).map(member => (
@@ -242,15 +242,15 @@ const MinistryDashboard = ({
                           {members.length === 0 && <p className="p-4 text-sm text-center text-muted-foreground">Nenhum membro encontrado.</p>}
                         </div>
                       </ScrollArea>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
 
                   {/* Upcoming Events Mini-List */}
-                  <Card className="h-full flex flex-col">
-                    <CardHeader>
-                      <CardTitle className="text-base">Próximas Escalas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0 flex-1 overflow-hidden">
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 h-full flex flex-col">
+                    <div className="mb-4 ">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">Próximas Escalas</h3>
+                    </div>
+                    <div className="p-0 flex-1 overflow-hidden">
                       <ScrollArea className="h-[300px]">
                         <div className="flex flex-col">
                           {events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(0, 5).map(event => (
@@ -272,8 +272,8 @@ const MinistryDashboard = ({
                           </div>}
                         </div>
                       </ScrollArea>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
               </div>
             </ScrollArea>
@@ -291,8 +291,8 @@ const MinistryDashboard = ({
                 <ScrollArea className="flex-1 p-2">
                   <div className="space-y-2">
                     {pipeline.filter(p => p.pipeline_status === 'aguardando').map(p => (
-                      <Card key={p.id} onClick={() => navigate(`/acompanhamento?personId=${p.id}`)} className="cursor-pointer hover:border-yellow-400 transition-colors">
-                        <CardContent className="p-3">
+                      <div key={p.id} onClick={() => navigate(`/acompanhamento?personId=${p.id}`)} className="cursor-pointer hover:border-yellow-400 transition-colors bg-card border rounded-sm">
+                        <div className="p-3">
                           <div className="flex justify-between">
                             <div className="font-medium text-sm">{p.full_name}</div>
                             <Badge variant="outline" className="text-[10px]">{p.type}</Badge>
@@ -301,8 +301,8 @@ const MinistryDashboard = ({
                             <Clock className="h-3 w-3" />
                             Visitou: {new Date(p.last_visit_date || p.created_at).toLocaleDateString()}
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                     {pendingCount === 0 && <p className="text-center text-sm text-muted-foreground py-4">Tudo em dia!</p>}
                   </div>
@@ -318,16 +318,16 @@ const MinistryDashboard = ({
                 <ScrollArea className="flex-1 p-2">
                   <div className="space-y-2">
                     {pipeline.filter(p => p.pipeline_status === 'em_andamento').map(p => (
-                      <Card key={p.id} onClick={() => navigate(`/acompanhamento?personId=${p.id}`)} className="cursor-pointer hover:border-blue-400 transition-colors">
-                        <CardContent className="p-3">
+                      <div key={p.id} onClick={() => navigate(`/acompanhamento?personId=${p.id}`)} className="cursor-pointer hover:border-blue-400 transition-colors bg-card border rounded-sm">
+                        <div className="p-3">
                           <div className="flex justify-between">
                             <div className="font-medium text-sm">{p.full_name}</div>
                           </div>
                           <div className="text-xs text-muted-foreground mt-1">
                             Último contato: {p.last_contact ? new Date(p.last_contact).toLocaleDateString() : '-'}
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </ScrollArea>
@@ -363,26 +363,26 @@ const MinistryDashboard = ({
                 </div>
 
                 {events.length === 0 ? (
-                  <Card className="border-dashed flex flex-col items-center justify-center p-10 text-muted-foreground">
+                  <div className="p-6 mb-6 rounded-sm border border-border/40 bg-card/30 border-dashed flex flex-col items-center justify-center p-10 text-muted-foreground">
                     <Calendar className="h-10 w-10 mb-4 opacity-20" />
                     <p>Nenhuma escala ou evento cadastrado.</p>
                     <Button variant="link" onClick={() => setIsEventDialogOpen(true)}>Criar primeiro evento</Button>
-                  </Card>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(event => (
-                      <Card key={event.id} className="group relative hover:shadow-md transition-all">
-                        <CardHeader className="pb-2">
+                      <div key={event.id} className="group relative transition-all bg-card border rounded-sm p-4">
+                        <div className="mb-4 pb-2">
                           <div className="flex justify-between items-start">
                             <Badge variant="outline" className="mb-2">{new Date(event.date).toLocaleDateString()}</Badge>
                             <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive" onClick={() => handleDeleteEvent(event.id)}>
                               <Plus className="h-3 w-3 rotate-45" />
                             </Button>
                           </div>
-                          <CardTitle className="text-base">{event.title}</CardTitle>
-                          <CardDescription>{event.time}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
+                          <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">{event.title}</h3>
+                          <p className="text-xs text-muted-foreground opacity-80 mt-1 ">{event.time}</p>
+                        </div>
+                        <div className="">
                           {event.description && <p className="text-sm text-muted-foreground mb-3 whitespace-pre-wrap">{event.description}</p>}
                           {event.leader_in_charge && (
                             <div className="text-xs font-medium flex items-center gap-1 bg-secondary/50 p-1 px-2 rounded w-fit">
@@ -390,8 +390,8 @@ const MinistryDashboard = ({
                               {event.leader_in_charge}
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -729,10 +729,10 @@ export default function Ministerios() {
                 {/* Integration Panel reuse logic if needed, but skipped to focus on Main Ministry Cards */}
                 {/* New "Ministry Cards" with Dashboard preview */}
                 {filteredMinisterios.map(ministry => (
-                  <Card key={ministry.id} className="hover:shadow-lg transition-all cursor-pointer group border-l-4 border-l-primary/50 hover:border-l-primary" onClick={() => setViewMode(ministry.id)}>
-                    <CardHeader className="pb-2">
+                  <div key={ministry.id} className="transition-all cursor-pointer group border-l-4 border-l-primary/50 hover:border-l-primary p-4 mb-6 rounded-sm border border-border/40 bg-card/30" onClick={() => setViewMode(ministry.id)}>
+                    <div className="mb-4 pb-2">
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-xl">{ministry.name}</CardTitle>
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2 ">{ministry.name}</h3>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -742,9 +742,9 @@ export default function Ministerios() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-                      <CardDescription className="line-clamp-1">{ministry.description || 'Sem descrição'}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
+                      <p className="text-xs text-muted-foreground opacity-80 mt-1 line-clamp-1">{ministry.description || 'Sem descrição'}</p>
+                    </div>
+                    <div className="">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                         <div className="flex items-center gap-1"><Users className="h-4 w-4" /> <span>Membros</span></div>
                         <div className="flex items-center gap-1"><UserPlus className="h-4 w-4" /> <span>{ministry.leader || 'Sem líder'}</span></div>
@@ -754,8 +754,8 @@ export default function Ministerios() {
                           Acessar Dashboard <ArrowRight className="h-3 w-3 ml-1" />
                         </span>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
               </div>
             </ScrollArea>

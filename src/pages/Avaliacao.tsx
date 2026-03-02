@@ -119,7 +119,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
             <Button
                 size="lg"
                 onClick={() => setCurrentStep(1)}
-                className="w-full sm:w-auto px-12 text-lg h-14 rounded-full shadow-lg hover:shadow-xl transition-all"
+                className="w-full sm:w-auto px-12 text-base h-12 rounded-sm shadow-sm hover:shadow-md transition-all font-bold tracking-widest uppercase"
             >
                 Começar <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
@@ -140,7 +140,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                     Que Deus te abençoe grandemente!
                 </p>
             </div>
-            <Button variant="outline" onClick={() => window.location.reload()} className="rounded-full">
+            <Button variant="outline" onClick={() => window.location.reload()} className="rounded-sm font-bold tracking-widest uppercase text-xs h-10 px-6">
                 Enviar Outra Resposta
             </Button>
         </div>
@@ -157,11 +157,11 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 onValueChange={(v) => setFormData({ ...formData, is_first_time: v === 'sim' })}
                                 className="flex gap-4"
                             >
-                                <div className="flex items-center space-x-2 border rounded-xl p-4 flex-1 cursor-pointer hover:bg-accent/50">
+                                <div className="flex items-center space-x-2 border rounded-sm p-4 flex-1 cursor-pointer hover:border-primary/50 transition-colors">
                                     <RadioGroupItem value="sim" id="sim" />
                                     <Label htmlFor="sim" className="flex-1 cursor-pointer">Sim</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-xl p-4 flex-1 cursor-pointer hover:bg-accent/50">
+                                <div className="flex items-center space-x-2 border rounded-sm p-4 flex-1 cursor-pointer hover:border-primary/50 transition-colors">
                                     <RadioGroupItem value="nao" id="nao" />
                                     <Label htmlFor="nao" className="flex-1 cursor-pointer">Não</Label>
                                 </div>
@@ -175,7 +175,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 placeholder="Ex: Redes sociais, convite de amigo..."
                                 value={formData.how_met}
                                 onChange={(e) => setFormData({ ...formData, how_met: e.target.value })}
-                                className="h-12 rounded-xl"
+                                className="h-12 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
                         </div>
                     </div>
@@ -201,13 +201,13 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 onValueChange={(v) => setFormData({ ...formData, use_kids: v === 'sim' })}
                                 className="flex gap-4"
                             >
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="sim" id="kids-sim" />
-                                    <Label htmlFor="kids-sim" className="flex-1">Sim</Label>
+                                    <Label htmlFor="kids-sim" className="flex-1 cursor-pointer">Sim</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="nao" id="kids-nao" />
-                                    <Label htmlFor="kids-nao" className="flex-1">Não</Label>
+                                    <Label htmlFor="kids-nao" className="flex-1 cursor-pointer">Não</Label>
                                 </div>
                             </RadioGroup>
                         </div>
@@ -244,17 +244,17 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 onValueChange={(v) => setFormData({ ...formData, service_flow: v })}
                                 className="grid grid-cols-1 sm:grid-cols-3 gap-2"
                             >
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="adequate" id="flow-ok" />
-                                    <Label htmlFor="flow-ok" className="flex-1 text-xs">Adequado</Label>
+                                    <Label htmlFor="flow-ok" className="flex-1 text-xs cursor-pointer">Adequado</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="too_long" id="flow-long" />
-                                    <Label htmlFor="flow-long" className="flex-1 text-xs">Longo demais</Label>
+                                    <Label htmlFor="flow-long" className="flex-1 text-xs cursor-pointer">Longo demais</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="too_fast" id="flow-short" />
-                                    <Label htmlFor="flow-short" className="flex-1 text-xs">Muito rápido</Label>
+                                    <Label htmlFor="flow-short" className="flex-1 text-xs cursor-pointer">Muito rápido</Label>
                                 </div>
                             </RadioGroup>
                         </div>
@@ -270,17 +270,17 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 onValueChange={(v) => setFormData({ ...formData, well_assisted: v })}
                                 className="grid grid-cols-1 sm:grid-cols-3 gap-2"
                             >
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="sim" id="ast-sim" />
-                                    <Label htmlFor="ast-sim" className="flex-1">Sim</Label>
+                                    <Label htmlFor="ast-sim" className="flex-1 cursor-pointer">Sim</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="nao" id="ast-nao" />
-                                    <Label htmlFor="ast-nao" className="flex-1">Não</Label>
+                                    <Label htmlFor="ast-nao" className="flex-1 cursor-pointer">Não</Label>
                                 </div>
-                                <div className="flex items-center space-x-2 border rounded-lg p-3 flex-1">
+                                <div className="flex items-center space-x-2 border rounded-sm p-3 flex-1 hover:border-primary/50 cursor-pointer transition-colors">
                                     <RadioGroupItem value="nao_precisei" id="ast-np" />
-                                    <Label htmlFor="ast-np" className="flex-1">Não precisei</Label>
+                                    <Label htmlFor="ast-np" className="flex-1 cursor-pointer">Não precisei</Label>
                                 </div>
                             </RadioGroup>
                         </div>
@@ -292,7 +292,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 placeholder="Conte um pouco..."
                                 value={formData.assisted_comment}
                                 onChange={(e) => setFormData({ ...formData, assisted_comment: e.target.value })}
-                                className="min-h-[100px] rounded-xl"
+                                className="min-h-[100px] rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
                         </div>
 
@@ -303,7 +303,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 placeholder="Ex: Me senti em casa!"
                                 value={formData.experience_description}
                                 onChange={(e) => setFormData({ ...formData, experience_description: e.target.value })}
-                                className="h-12 rounded-xl"
+                                className="h-12 rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
                         </div>
                     </div>
@@ -327,7 +327,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                     step="1"
                                     value={formData.nps_score}
                                     onChange={(e) => setFormData({ ...formData, nps_score: parseInt(e.target.value) })}
-                                    className="w-full h-3 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                                    className="w-full h-2 bg-secondary rounded-sm appearance-none cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between mt-2 text-xs text-muted-foreground font-medium">
                                     <span>Pouco provável</span>
@@ -343,7 +343,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 placeholder="Sua sugestão é muito bem-vinda..."
                                 value={formData.suggestions}
                                 onChange={(e) => setFormData({ ...formData, suggestions: e.target.value })}
-                                className="min-h-[100px] rounded-xl"
+                                className="min-h-[100px] rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
                         </div>
 
@@ -354,7 +354,7 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                 placeholder="Estamos aqui para interceder por você..."
                                 value={formData.testimony_prayer}
                                 onChange={(e) => setFormData({ ...formData, testimony_prayer: e.target.value })}
-                                className="min-h-[100px] rounded-xl"
+                                className="min-h-[100px] rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
                         </div>
                     </div>
@@ -368,11 +368,9 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
     const content = (
         <div className={cn("max-w-2xl mx-auto py-12 px-4 sm:px-0", isPublic ? "min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-secondary/20" : "")}>
             {submitted ? (
-                <Card className="border-none shadow-2xl bg-card/50 backdrop-blur-xl animate-scale-in">
-                    <CardContent className="pt-8">
-                        {renderSuccess()}
-                    </CardContent>
-                </Card>
+                <div className="bg-card border rounded-sm shadow-sm p-8 animate-scale-in">
+                    {renderSuccess()}
+                </div>
             ) : (
                 <div className="w-full space-y-8 animate-fade-in">
                     {!isPublic ? (
@@ -415,32 +413,30 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                         </div>
                     </div>
 
-                    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl overflow-hidden rounded-[2rem] border border-white/10">
-                        <CardHeader className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-b border-primary/5 pb-8 pt-10">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="text-2xl font-black flex items-center gap-3">
-                                        <div className="bg-primary text-primary-foreground p-2 rounded-xl">
-                                            {React.createElement(STEPS[currentStep].icon, { size: 20 })}
-                                        </div>
-                                        {STEPS[currentStep].title}
-                                    </CardTitle>
-                                    <CardDescription className="mt-2 font-medium opacity-70">Passo {currentStep + 1} de {STEPS.length}</CardDescription>
-                                </div>
-                                {isPublic && (
-                                    <img src="/logo.png" alt="" className="h-12 w-auto opacity-20 grayscale brightness-200" />
-                                )}
+                    <div className="bg-card border rounded-sm overflow-hidden shadow-sm">
+                        <div className="border-b pb-6 pt-8 px-8 flex items-center justify-between bg-card">
+                            <div>
+                                <h2 className="text-xl font-bold uppercase tracking-widest flex items-center gap-3 text-muted-foreground">
+                                    <div className="bg-primary/10 text-primary p-2 rounded-sm">
+                                        {React.createElement(STEPS[currentStep].icon, { size: 18 })}
+                                    </div>
+                                    {STEPS[currentStep].title}
+                                </h2>
+                                <p className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Passo {currentStep + 1} de {STEPS.length}</p>
                             </div>
-                        </CardHeader>
-                        <CardContent className="pt-10 pb-8 px-8">
+                            {isPublic && (
+                                <img src="/logo.png" alt="" className="h-10 w-auto opacity-20 grayscale brightness-200" />
+                            )}
+                        </div>
+                        <div className="pt-8 pb-8 px-8 bg-card/30">
                             {renderStep()}
-                        </CardContent>
-                        <CardFooter className="flex justify-between items-center border-t border-primary/5 bg-primary/5 p-8">
+                        </div>
+                        <div className="flex justify-between items-center border-t bg-card p-6">
                             <Button
                                 variant="ghost"
                                 onClick={handleBack}
                                 disabled={currentStep === 0 || loading}
-                                className="rounded-2xl h-12 px-6 font-bold hover:bg-background/80"
+                                className="rounded-sm h-10 px-6 font-bold hover:bg-muted/50"
                             >
                                 <ChevronLeft className="mr-2 h-4 w-4" /> Anterior
                             </Button>
@@ -449,21 +445,21 @@ const Avaliacao: React.FC<AvaliacaoProps> = ({ isPublic = false }) => {
                                     <Button
                                         onClick={handleSubmit}
                                         disabled={loading}
-                                        className="rounded-2xl h-12 px-10 shadow-xl shadow-primary/30 font-bold bg-primary hover:scale-105 transition-transform"
+                                        className="rounded-sm h-10 px-10 font-bold bg-primary hover:bg-primary/90 transition-colors"
                                     >
                                         {loading ? 'Enviando...' : 'Enviar Agora'} <Send className="ml-2 h-4 w-4" />
                                     </Button>
                                 ) : (
                                     <Button
                                         onClick={handleNext}
-                                        className="rounded-2xl h-12 px-10 font-bold hover:scale-105 transition-transform"
+                                        className="rounded-sm h-10 px-10 font-bold hover:bg-primary/90 transition-colors"
                                     >
                                         Próximo <ChevronRight className="ml-2 h-4 w-4" />
                                     </Button>
                                 )}
                             </div>
-                        </CardFooter>
-                    </Card>
+                        </div>
+                    </div>
 
                     <div className="flex flex-col items-center gap-4 py-4">
                         <p className="text-[10px] text-muted-foreground/40 uppercase tracking-[0.2em] font-black flex items-center gap-2">

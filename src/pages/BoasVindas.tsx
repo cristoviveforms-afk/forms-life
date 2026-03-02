@@ -30,6 +30,43 @@ interface VisitorStats {
     wantsContact: number;
 }
 
+interface FamilyGroup {
+    id: string;
+    mainPerson: any;
+    dependents: any[];
+}
+
+const getFamilyGroups = (visitors: any[]): FamilyGroup[] => {
+    const groups = new Map<string, FamilyGroup>();
+
+    visitors.forEach(v => {
+        const key = v.family_id || v.id;
+        if (!groups.has(key)) {
+            groups.set(key, { id: key, mainPerson: v, dependents: [] });
+        } else {
+            const group = groups.get(key)!;
+            const ministries = Array.isArray(v.ministries) ? v.ministries as string[] : [];
+            const mainMinistries = Array.isArray(group.mainPerson.ministries) ? group.mainPerson.ministries as string[] : [];
+
+            const isVDependent = v.civil_status === 'conjuge' || v.civil_status === 'noivo' || v.civil_status === 'namorado' || ministries.includes('Ministério Infantil (Kids)');
+            const isMainDependent = group.mainPerson.civil_status === 'conjuge' || group.mainPerson.civil_status === 'noivo' || group.mainPerson.civil_status === 'namorado' || mainMinistries.includes('Ministério Infantil (Kids)');
+
+            if (isMainDependent && !isVDependent) {
+                group.dependents.push(group.mainPerson);
+                group.mainPerson = v;
+            } else if (new Date(v.created_at) < new Date(group.mainPerson.created_at) && !isVDependent && !isMainDependent) {
+                group.dependents.push(group.mainPerson);
+                group.mainPerson = v;
+            } else {
+                group.dependents.push(v);
+            }
+        }
+    });
+
+    return Array.from(groups.values());
+};
+
+
 export default function BoasVindas() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -67,13 +104,17 @@ export default function BoasVindas() {
 
             if (peopleError) throw peopleError;
 
-            const people = peopleData || [];
+            const people = (peopleData as any[]) || [];
 
             // Calculate stats
             const firstTime = people.filter(p => p.visitor_first_time).length;
             const returning = people.length - firstTime;
             const wantsContact = people.filter(p => p.visitor_wants_contact).length;
-            const totalChildren = people.reduce((acc, p) => acc + (p.children?.length || 0), 0);
+            const totalChildren = people.reduce((acc, p) => {
+                const legacyKids = p.children?.length || 0;
+                const isChild = Array.isArray(p.ministries) && p.ministries.includes('Ministério Infantil (Kids)') ? 1 : 0;
+                return acc + legacyKids + isChild;
+            }, 0);
 
             // Fetch active check-ins to show status
             const { data: activeCheckinsData } = await supabase
@@ -104,9 +145,11 @@ export default function BoasVindas() {
         }
     };
 
-    const filteredVisitors = visitors.filter(v =>
-        v.full_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredGroups = getFamilyGroups(visitors).filter(group => {
+        const term = searchTerm.toLowerCase();
+        return group.mainPerson.full_name.toLowerCase().includes(term) ||
+            group.dependents.some(dep => dep.full_name.toLowerCase().includes(term));
+    });
 
     return (
         <DashboardLayout title="Boas-Vindas">
@@ -127,126 +170,114 @@ export default function BoasVindas() {
                     <MonthYearPicker onDateChange={handleDateChange} />
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="border-l-4 border-l-primary bg-primary/5">
-                        <CardHeader className="pb-2">
-                            <CardDescription className="text-xs uppercase font-bold tracking-wider">Total de Visitantes</CardDescription>
-                            <CardTitle className="text-3xl font-black">{stats.total}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Users className="h-3 w-3" />
-                                <span>Registrados no período</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-l-4 border-l-green-500 bg-green-500/5">
-                        <CardHeader className="pb-2">
-                            <CardDescription className="text-xs uppercase font-bold tracking-wider">Primeira Vez</CardDescription>
-                            <CardTitle className="text-3xl font-black">{stats.firstTime}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Sparkles className="h-3 w-3 text-green-600" />
-                                <span>Novas experiências</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-l-4 border-l-orange-500 bg-orange-500/5">
-                        <CardHeader className="pb-2">
-                            <CardDescription className="text-xs uppercase font-bold tracking-wider">Crianças</CardDescription>
-                            <CardTitle className="text-3xl font-black">{stats.totalChildren}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Baby className="h-3 w-3 text-orange-600" />
-                                <span>Preparo para Kids</span>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-l-4 border-l-blue-500 bg-blue-500/5">
-                        <CardHeader className="pb-2">
-                            <CardDescription className="text-xs uppercase font-bold tracking-wider">Solicitaram Contato</CardDescription>
-                            <CardTitle className="text-3xl font-black">{stats.wantsContact}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <MessageSquare className="h-3 w-3 text-blue-600" />
-                                <span>Aguardando conexão</span>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* Stats Grid - Minimalist approach */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-8 gap-x-4 border-b border-border/60 pb-8 mb-8">
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Total Sched.</p>
+                        <div className="text-4xl font-light text-foreground">{stats.total}</div>
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">1ª Vez</p>
+                        <div className="text-4xl font-light text-foreground">{stats.firstTime}</div>
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Retornos</p>
+                        <div className="text-4xl font-light text-foreground">{stats.returning}</div>
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Kids Geral</p>
+                        <div className="text-4xl font-light text-primary">{stats.totalChildren}</div>
+                    </div>
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Contatos</p>
+                        <div className="text-4xl font-light text-foreground">{stats.wantsContact}</div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                     {/* Visitors List */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-bold flex items-center gap-2">
-                                <Calendar className="h-5 w-5 text-primary" />
-                                Visitantes do Dia/Período
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="flex items-center justify-between pb-2 border-b border-border/40">
+                            <h3 className="text-lg font-medium tracking-tight">
+                                Visitantes do Dia / Período
                             </h3>
                             <div className="relative w-48 sm:w-64">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Buscar..."
-                                    className="pl-9 h-9 rounded-xl text-xs"
+                                    className="pl-9 h-9 rounded-sm text-xs bg-muted/30 border-none"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <Card className="overflow-hidden border-border/40">
+                        <div className="overflow-hidden">
                             <ScrollArea className="h-[400px]">
-                                <div className="divide-y divide-border/40">
+                                <div className="divide-y divide-border/20">
                                     {loading ? (
                                         <div className="p-8 text-center text-muted-foreground">Carregando...</div>
-                                    ) : filteredVisitors.length === 0 ? (
+                                    ) : filteredGroups.length === 0 ? (
                                         <div className="p-8 text-center text-muted-foreground">Nenhum visitante encontrado.</div>
                                     ) : (
-                                        filteredVisitors.map((v) => (
-                                            <div key={v.id} className="p-4 hover:bg-secondary/20 transition-colors flex justify-between items-center group">
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-sm tracking-tight">{v.full_name}</span>
-                                                        {v.visitor_first_time && (
-                                                            <Badge variant="secondary" className="text-[10px] h-4 bg-green-500/10 text-green-700 border-green-500/20">1ª VEZ</Badge>
-                                                        )}
-                                                        {v.hasActiveCheckin && (
-                                                            <Badge variant="default" className="text-[10px] h-4 bg-primary text-primary-foreground border-none">KIDS EM SALA</Badge>
+                                        filteredGroups.map((group) => {
+                                            const v = group.mainPerson;
+                                            const totalKids = (v.children?.length || 0) + group.dependents.filter(d => d.ministries?.includes('Ministério Infantil (Kids)')).length;
+                                            return (
+                                                <div key={group.id} className="clean-list-item group flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 py-4">
+                                                    <div className="space-y-1 flex-1 relative">
+                                                        {group.dependents.length > 0 && <div className="family-node-line"></div>}
+
+                                                        <div className="flex items-center gap-3 relative z-10">
+                                                            <span className="font-semibold text-base tracking-tight">{v.full_name}</span>
+                                                            {v.visitor_first_time && (
+                                                                <span className="text-[10px] uppercase font-bold tracking-wider text-primary border border-primary/30 px-1.5 py-0.5 rounded-sm">1ª Vez</span>
+                                                            )}
+                                                            {v.hasActiveCheckin && (
+                                                                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground border border-border px-1.5 py-0.5 rounded-sm">Kids na Sala</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-[11px] text-muted-foreground uppercase tracking-wider font-medium relative z-10">
+                                                            {totalKids > 0 && (
+                                                                <span className="flex items-center gap-1.5">
+                                                                    <Baby className="h-3 w-3" />
+                                                                    {totalKids} crianças
+                                                                </span>
+                                                            )}
+                                                            <span className="flex items-center gap-1.5">
+                                                                <MessageSquare className="h-3 w-3" />
+                                                                {v.visitor_wants_contact ? "Requer contato" : "Apenas visita"}
+                                                            </span>
+                                                        </div>
+
+                                                        {group.dependents.length > 0 && (
+                                                            <div className="mt-3 pl-8 space-y-2 relative z-10">
+                                                                {group.dependents.map(dep => (
+                                                                    <div key={dep.id} className="text-xs text-muted-foreground flex items-center gap-2 relative">
+                                                                        <div className="family-sub-node-corner"></div>
+                                                                        <span className="font-medium text-foreground/80">{dep.full_name}</span>
+                                                                        <span className="text-[9px] uppercase tracking-widest opacity-60 bg-muted px-1.5 py-0.5 rounded-sm">{dep.civil_status || 'dependente'}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         )}
                                                     </div>
-                                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                                        <span className="flex items-center gap-1">
-                                                            <Baby className="h-3 w-3" />
-                                                            {v.children?.length || 0} crianças
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            <MessageSquare className="h-3 w-3" />
-                                                            {v.visitor_wants_contact ? "Quer contato" : "Apenas visita"}
-                                                        </span>
-                                                    </div>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity rounded-sm h-8 mt-4 sm:mt-0 font-medium"
+                                                        onClick={() => navigate(`/cadastro?id=${v.id}&mode=boas-vindas&tipo=visitante`)}
+                                                    >
+                                                        Visualizar Cadastro
+                                                    </Button>
                                                 </div>
-                                                <Button
-                                                    variant="secondary"
-                                                    size="sm"
-                                                    className="opacity-0 group-hover:opacity-100 transition-opacity rounded-xl h-8 font-bold"
-                                                    onClick={() => navigate(`/cadastro?id=${v.id}&mode=boas-vindas&tipo=visitante`)}
-                                                >
-                                                    Ver / Editar
-                                                </Button>
-                                            </div>
-                                        ))
+                                            )
+                                        })
                                     )}
                                 </div>
                             </ScrollArea>
-                        </Card>
+                        </div>
                     </div>
 
                     {/* Team Manual / Guidelines */}

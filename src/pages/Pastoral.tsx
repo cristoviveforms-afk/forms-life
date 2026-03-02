@@ -200,73 +200,71 @@ export default function Pastoral() {
 
                 {/* Stats Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-blue-500 bg-card/50 backdrop-blur-sm">
-                        <CardContent className="pt-6 flex items-center justify-between">
+                    <div className="p-4 rounded-sm border hover:border-blue-500/50 transition-all border-l-4 border-l-blue-500 bg-card/30">
+                        <div className="pt-2 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground mb-1">Total Membros</p>
-                                <div className="text-3xl font-bold text-foreground">{stats.totalMembers}</div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Total Membros</p>
+                                <div className="text-3xl font-light text-foreground">{stats.totalMembers}</div>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                                <Users className="h-6 w-6 text-blue-500" />
+                            <div className="h-10 w-10 rounded-sm bg-blue-500/10 flex items-center justify-center">
+                                <Users className="h-5 w-5 text-blue-500" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-purple-500 bg-card/50 backdrop-blur-sm">
-                        <CardContent className="pt-6 flex items-center justify-between">
+                    <div className="p-4 rounded-sm border hover:border-purple-500/50 transition-all border-l-4 border-l-purple-500 bg-card/30">
+                        <div className="pt-2 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground mb-1">Total Visitantes</p>
-                                <div className="text-3xl font-bold text-foreground">{stats.totalVisitors}</div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Total Visitantes</p>
+                                <div className="text-3xl font-light text-foreground">{stats.totalVisitors}</div>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                                <UserPlus className="h-6 w-6 text-purple-500" />
+                            <div className="h-10 w-10 rounded-sm bg-purple-500/10 flex items-center justify-center">
+                                <UserPlus className="h-5 w-5 text-purple-500" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-yellow-500 bg-card/50 backdrop-blur-sm">
-                        <CardContent className="pt-6 flex items-center justify-between">
+                    <div className="p-4 rounded-sm border hover:border-yellow-500/50 transition-all border-l-4 border-l-yellow-500 bg-card/30">
+                        <div className="pt-2 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground mb-1">Precisam de Contato</p>
-                                <div className="text-3xl font-bold text-foreground">{stats.needingContact}</div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Precisam de Contato</p>
+                                <div className="text-3xl font-light text-foreground">{stats.needingContact}</div>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-yellow-500/10 flex items-center justify-center">
-                                <AlertCircle className="h-6 w-6 text-yellow-500" />
+                            <div className="h-10 w-10 rounded-sm bg-yellow-500/10 flex items-center justify-center">
+                                <AlertCircle className="h-5 w-5 text-yellow-500" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="hover:shadow-lg transition-all duration-300 border-l-4 border-l-green-500 bg-card/50 backdrop-blur-sm">
-                        <CardContent className="pt-6 flex items-center justify-between">
+                    <div className="p-4 rounded-sm border hover:border-green-500/50 transition-all border-l-4 border-l-green-500 bg-card/30">
+                        <div className="pt-2 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground mb-1">Contatos (7 dias)</p>
-                                <div className="text-3xl font-bold text-foreground">{stats.contactedThisWeek}</div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Contatos (7 dias)</p>
+                                <div className="text-3xl font-light text-foreground">{stats.contactedThisWeek}</div>
                             </div>
-                            <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                                <Activity className="h-6 w-6 text-green-500" />
+                            <div className="h-10 w-10 rounded-sm bg-green-500/10 flex items-center justify-center">
+                                <Activity className="h-5 w-5 text-green-500" />
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* NEW: Survey Results Access */}
-                    <Card
+                    <div
                         onClick={() => navigate('/pastoral/resultados-avaliacao')}
-                        className="group hover:shadow-xl transition-all duration-500 cursor-pointer border-l-4 border-l-primary bg-gradient-to-br from-primary/10 via-background to-background relative overflow-hidden"
+                        className="group p-4 rounded-sm border group hover:bg-accent/5 transition-all cursor-pointer border-l-4 border-l-primary bg-card/30 relative overflow-hidden"
                     >
-                        <CardContent className="pt-6 flex items-center justify-between">
+                        <div className="pt-2 flex items-center justify-between">
                             <div className="z-10">
-                                <p className="text-sm font-bold text-primary mb-1 uppercase tracking-wider">Dash de Reação</p>
-                                <div className="text-xl font-black text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                                <p className="text-[10px] font-bold text-primary mb-1 uppercase tracking-widest">Dash de Reação</p>
+                                <div className="text-xl md:text-2xl font-light tracking-tight text-foreground group-hover:text-primary transition-colors flex items-center gap-1">
                                     Resultados <ChevronRight className="h-4 w-4" />
                                 </div>
                             </div>
-                            <div className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform z-10">
-                                <Sparkles className="h-7 w-7" />
+                            <div className="h-12 w-12 rounded-sm bg-primary/10 text-primary flex items-center justify-center transition-transform z-10 group-hover:bg-primary/20">
+                                <Sparkles className="h-6 w-6" />
                             </div>
-                            {/* Decorative background icon */}
-                            <Heart className="absolute -bottom-4 -right-4 h-24 w-24 text-primary/5 -rotate-12 transition-transform group-hover:scale-110" />
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Performance Section */}
@@ -277,9 +275,9 @@ export default function Pastoral() {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {ministryMetrics.map(metric => (
-                            <Card key={metric.id} className="relative overflow-hidden hover:shadow-md transition-all">
+                            <div key={metric.id} className="relative overflow-hidden bg-card border rounded-sm hover:border-primary/50 transition-all p-4">
                                 <div className={`absolute top-0 left-0 w-1 h-full ${metric.pendingCount > 0 ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
-                                <CardContent className="p-4 pl-5">
+                                <div className="pl-3">
                                     <div className="flex justify-between items-start mb-2">
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-semibold text-sm truncate" title={metric.name}>{metric.name}</h3>
@@ -288,13 +286,13 @@ export default function Pastoral() {
                                             </p>
                                         </div>
                                         {metric.pendingCount > 0 ? (
-                                            <Badge variant="destructive" className="ml-2 whitespace-nowrap">{metric.pendingCount} Pendentes</Badge>
+                                            <Badge variant="destructive" className="ml-2 whitespace-nowrap rounded-sm px-2 text-[10px] uppercase font-bold">{metric.pendingCount} Pendentes</Badge>
                                         ) : (
-                                            <Badge variant="outline" className="ml-2 border-green-500 text-green-600 bg-green-50 dark:bg-green-900/20">Em dia</Badge>
+                                            <Badge variant="outline" className="ml-2 border-green-500 text-green-600 bg-green-50 dark:bg-green-900/20 rounded-sm px-2 text-[10px] uppercase font-bold">Em dia</Badge>
                                         )}
                                     </div>
 
-                                    <Separator className="my-3" />
+                                    <Separator className="my-3 opacity-50" />
 
                                     <div className="flex items-center justify-between text-xs">
                                         <span className="text-muted-foreground">Tempo Médio Resposta:</span>
@@ -306,22 +304,22 @@ export default function Pastoral() {
                                         <span className="text-muted-foreground">Total Atribuídos:</span>
                                         <span className="font-mono">{metric.totalAssigned}</span>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Global Pipeline */}
-                    <Card className="lg:col-span-2 flex flex-col shadow-lg border-muted/40 h-[600px]">
-                        <CardHeader className="pb-3 border-b flex-none">
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <Activity className="h-5 w-5 text-primary" />
+                    <div className="lg:col-span-2 flex flex-col bg-card border rounded-sm h-[600px]">
+                        <div className="p-4 border-b flex-none">
+                            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                                <Activity className="h-4 w-4 text-primary" />
                                 Pipeline Geral de Visitantes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1 overflow-hidden p-4 bg-muted/10 min-h-0">
+                            </h2>
+                        </div>
+                        <div className="flex-1 overflow-hidden p-4 min-h-0 bg-card/30">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-full min-h-0">
                                 {/* Column 1: Aguardando */}
                                 <div className="flex flex-col bg-muted/30 rounded-xl p-2 border border-border/50 h-full max-h-full overflow-hidden">
@@ -334,7 +332,7 @@ export default function Pastoral() {
                                             {pipeline.filter(p => p.pipeline_status === 'aguardando').map(p => (
                                                 <div key={p.id}
                                                     onClick={() => navigate(`/acompanhamento?personId=${p.id}`)}
-                                                    className="group p-4 bg-card rounded-lg shadow-sm border border-border hover:border-yellow-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
+                                                    className="group p-4 bg-card rounded-sm shadow-sm border border-border hover:border-yellow-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                                                     <div className="pl-2">
                                                         <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{p.full_name}</p>
@@ -362,7 +360,7 @@ export default function Pastoral() {
                                             {pipeline.filter(p => p.pipeline_status === 'em_andamento').map(p => (
                                                 <div key={p.id}
                                                     onClick={() => navigate(`/acompanhamento?personId=${p.id}`)}
-                                                    className="group p-4 bg-card rounded-lg shadow-sm border border-border hover:border-blue-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
+                                                    className="group p-4 bg-card rounded-sm shadow-sm border border-border hover:border-blue-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400"></div>
                                                     <div className="pl-2">
                                                         <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{p.full_name}</p>
@@ -389,7 +387,7 @@ export default function Pastoral() {
                                             {pipeline.filter(p => p.pipeline_status === 'concluido').map(p => (
                                                 <div key={p.id}
                                                     onClick={() => navigate(`/acompanhamento?personId=${p.id}`)}
-                                                    className="group p-4 bg-card rounded-lg shadow-sm border border-border hover:border-green-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden opacity-90 hover:opacity-100">
+                                                    className="group p-4 bg-card rounded-sm shadow-sm border border-border hover:border-green-400 hover:shadow-md transition-all cursor-pointer relative overflow-hidden opacity-90 hover:opacity-100">
                                                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-400"></div>
                                                     <div className="pl-2">
                                                         <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{p.full_name}</p>
@@ -407,18 +405,18 @@ export default function Pastoral() {
                                     </ScrollArea>
                                 </div>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* Recent Activity Feed - Improved & Scroll fix */}
-                    <Card className="flex flex-col shadow-lg border-muted/40 h-[600px]">
-                        <CardHeader className="pb-3 border-b bg-card flex-none">
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <Clock className="h-5 w-5 text-primary" />
+                    <div className="flex flex-col bg-card border rounded-sm h-[600px]">
+                        <div className="p-4 border-b flex-none">
+                            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+                                <Clock className="h-4 w-4 text-primary" />
                                 Atividades Recentes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-1 overflow-hidden p-0 min-h-0">
+                            </h2>
+                        </div>
+                        <div className="flex-1 overflow-hidden p-0 min-h-0 bg-card/30">
                             <ScrollArea className="h-full">
                                 <div className="p-6">
                                     <div className="relative border-l border-border space-y-8 pl-6 ml-2">
@@ -459,8 +457,8 @@ export default function Pastoral() {
                                     </div>
                                 </div>
                             </ScrollArea>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
 
             </div>

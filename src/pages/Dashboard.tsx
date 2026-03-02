@@ -134,10 +134,10 @@ export default function Dashboard() {
       <div className="space-y-8 p-1">
 
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-2">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
+            <h2 className="text-3xl font-light tracking-tight text-foreground">Dashboard</h2>
+            <p className="text-sm text-muted-foreground">Acompanhe o crescimento e as estatísticas do ministério.</p>
           </div>
         </div>
 
@@ -145,32 +145,29 @@ export default function Dashboard() {
           <MonthYearPicker onDateChange={handleDateChange} />
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {statsCards.map((stat, i) => (
-            <Card key={i} className="hover:shadow-lg transition-all duration-200 border-l-4" style={{ borderLeftColor: stat.color ? `var(--${stat.color.split('-')[1]})` : '' }}>
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            <div key={i} className="p-6 rounded-sm border border-border/40 bg-card/30 hover:bg-card/60 transition-colors flex flex-col justify-between group">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   {stat.title}
-                </CardTitle>
-                <div className={`p-2 rounded-full bg-secondary/50 ${stat.color}`}>
-                  <stat.icon className="h-4 w-4" />
+                </span>
+                <stat.icon className={`h-4 w-4 opacity-50 group-hover:opacity-100 transition-opacity ${stat.color}`} />
+              </div>
+
+              {loading ? (
+                <div className="space-y-2 mt-4">
+                  <div className="h-10 w-16 bg-muted/50 animate-pulse rounded-sm" />
+                  <div className="h-3 w-24 bg-muted/50 animate-pulse rounded-sm" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="space-y-2">
-                    <div className="h-8 w-16 bg-secondary animate-pulse rounded" />
-                    <div className="h-4 w-24 bg-secondary animate-pulse rounded" />
-                  </div>
-                ) : (
-                  <>
-                    <div className="text-3xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.description}</p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+              ) : (
+                <div className="mt-2">
+                  <div className="text-4xl font-light tracking-tighter text-foreground">{stat.value}</div>
+                  <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-wider font-semibold opacity-70">{stat.description}</p>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -179,21 +176,19 @@ export default function Dashboard() {
 
           {/* Quick Actions */}
           <div className="lg:col-span-1">
-            <Card className="h-full border-none shadow-md bg-gradient-to-br from-card to-secondary/10">
-              <CardHeader>
-                <CardTitle className="text-lg">Ações Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
-                <Button onClick={() => navigate('/cadastro')} className="w-full justify-start text-left" size="lg">
-                  <UserPlus className="h-5 w-5 mr-3 text-primary-foreground/80" />
+            <div className="h-full p-6 space-y-5 rounded-sm border border-border/60 bg-muted/10">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ações Rápidas</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                <Button onClick={() => navigate('/cadastro')} className="w-full justify-start text-left rounded-sm h-11" variant="default">
+                  <UserPlus className="h-4 w-4 mr-3 opacity-70" />
                   Novo Cadastro
                 </Button>
-                <Button variant="secondary" onClick={() => navigate('/acompanhamento')} className="w-full justify-start text-left" size="lg">
-                  <ClipboardList className="h-5 w-5 mr-3" />
+                <Button variant="outline" onClick={() => navigate('/acompanhamento')} className="w-full justify-start text-left rounded-sm h-11 border-border/50 bg-background/50 hover:bg-background">
+                  <ClipboardList className="h-4 w-4 mr-3 opacity-70" />
                   Novo Acompanhamento
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/ministerios')} className="w-full justify-start text-left sm:col-span-2 lg:col-span-1" size="lg">
-                  <Building2 className="h-5 w-5 mr-3" />
+                <Button variant="outline" onClick={() => navigate('/ministerios')} className="w-full justify-start text-left sm:col-span-2 lg:col-span-1 rounded-sm h-11 border-border/50 bg-background/50 hover:bg-background">
+                  <Building2 className="h-4 w-4 mr-3 opacity-70" />
                   Gerenciar Ministérios
                 </Button>
                 <Button
@@ -206,58 +201,56 @@ export default function Dashboard() {
                       description: "O link foi copiado para a sua área de transferência.",
                     });
                   }}
-                  className="w-full justify-start text-left sm:col-span-2 lg:col-span-1 border-primary/20 text-primary hover:bg-primary/5"
-                  size="lg"
+                  className="w-full justify-start text-left sm:col-span-2 lg:col-span-1 rounded-sm h-11 border-primary/20 text-primary bg-primary/5 hover:bg-primary/10"
                 >
-                  <UserPlus className="h-5 w-5 mr-3" />
+                  <UserPlus className="h-4 w-4 mr-3" />
                   Link de Cadastro
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Charts Area */}
           <div className="lg:col-span-2">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="text-lg">Distribuição no Período</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="h-full p-6 space-y-4 rounded-sm border border-border/40 bg-card/30">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Distribuição no Período</h3>
+              <div className="pt-2">
                 {loading ? (
-                  <div className="h-[250px] md:h-[300px] w-full bg-secondary/30 animate-pulse rounded-lg flex items-center justify-center text-muted-foreground">
+                  <div className="h-[250px] md:h-[300px] w-full bg-muted/20 animate-pulse rounded-sm flex items-center justify-center text-muted-foreground text-xs uppercase tracking-widest">
                     Carregando dados...
                   </div>
                 ) : categoryData.length > 0 ? (
-                  <div className="h-[250px] md:h-[300px] w-full">
+                  <div className="h-[250px] md:h-[300px] w-full mt-4">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted" />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-muted/50" />
                         <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} />
+                        <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                         <Tooltip
                           contentStyle={{
                             backgroundColor: 'hsl(var(--card))',
                             border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px',
+                            borderRadius: '4px',
                             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                            fontSize: '12px'
                           }}
-                          cursor={{ fill: 'transparent' }}
+                          cursor={{ fill: 'hsl(var(--muted)/0.3)' }}
                         />
-                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={30}>
+                        <Bar dataKey="value" radius={[0, 2, 2, 0]} barSize={24}>
                           {categoryData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} className="opacity-80 hover:opacity-100 transition-opacity" />
                           ))}
                         </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 ) : (
-                  <div className="h-[250px] md:h-[300px] flex items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg">
+                  <div className="h-[250px] md:h-[300px] flex items-center justify-center text-muted-foreground border border-dashed border-border/40 rounded-sm text-xs uppercase tracking-widest">
                     Nenhum dado neste período
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

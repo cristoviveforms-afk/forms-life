@@ -236,12 +236,12 @@ export default function Financeiro() {
                     </div>
 
                     <div className="flex gap-2">
-                        <Button variant="outline" className="gap-2">
+                        <Button variant="outline" className="gap-2 rounded-sm">
                             <Download className="h-4 w-4" /> Exportar
                         </Button>
                         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <DialogTrigger asChild>
-                                <Button className="gap-2 bg-primary">
+                                <Button className="gap-2 bg-primary rounded-sm">
                                     <Plus className="h-4 w-4" /> Nova Transação
                                 </Button>
                             </DialogTrigger>
@@ -353,70 +353,58 @@ export default function Financeiro() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card className="border-l-4 border-l-emerald-500 shadow-sm overflow-hidden relative">
+                    <div className="bg-card border rounded-sm border-l-4 border-l-emerald-500 shadow-sm overflow-hidden relative p-6 hover:shadow-md transition-all">
                         <div className="absolute top-0 right-0 p-3 opacity-10">
                             <ArrowUpCircle size={64} className="text-emerald-500" />
                         </div>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground uppercase">Total Entradas</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-emerald-600">
-                                R$ {stats.totalIn.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                <TrendingUp size={12} className="text-emerald-500" /> +12% em relação ao mês anterior
-                            </p>
-                        </CardContent>
-                    </Card>
+                        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Total Entradas</h3>
+                        <div className="text-3xl font-light text-emerald-600">
+                            R$ {stats.totalIn.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <TrendingUp size={12} className="text-emerald-500" /> +12% em relação ao mês anterior
+                        </p>
+                    </div>
 
-                    <Card className="border-l-4 border-l-rose-500 shadow-sm overflow-hidden relative">
+                    <div className="bg-card border rounded-sm border-l-4 border-l-rose-500 shadow-sm overflow-hidden relative p-6 hover:shadow-md transition-all">
                         <div className="absolute top-0 right-0 p-3 opacity-10">
                             <ArrowDownCircle size={64} className="text-rose-500" />
                         </div>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground uppercase">Total Saídas</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold text-rose-600">
-                                R$ {stats.totalOut.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                                <TrendingDown size={12} className="text-rose-500" /> +5% em relação ao mês anterior
-                            </p>
-                        </CardContent>
-                    </Card>
+                        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Total Saídas</h3>
+                        <div className="text-3xl font-light text-rose-600">
+                            R$ {stats.totalOut.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <TrendingDown size={12} className="text-rose-500" /> +5% em relação ao mês anterior
+                        </p>
+                    </div>
 
-                    <Card className={`border-l-4 ${stats.balance >= 0 ? 'border-l-blue-500' : 'border-l-amber-500'} shadow-sm overflow-hidden relative`}>
+                    <div className={`bg-card border rounded-sm border-l-4 ${stats.balance >= 0 ? 'border-l-blue-500' : 'border-l-amber-500'} shadow-sm overflow-hidden relative p-6 hover:shadow-md transition-all`}>
                         <div className="absolute top-0 right-0 p-3 opacity-10">
                             <Wallet size={64} className="text-blue-500" />
                         </div>
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground uppercase">Saldo Disponível</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
-                                R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                                Recursos totais em caixa
-                            </p>
-                        </CardContent>
-                    </Card>
+                        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Saldo Disponível</h3>
+                        <div className={`text-3xl font-light ${stats.balance >= 0 ? 'text-blue-600' : 'text-amber-600'}`}>
+                            R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Recursos totais em caixa
+                        </p>
+                    </div>
                 </div>
 
                 {/* Charts & Tables */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                     {/* Main Chart */}
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5 text-primary" /> Fluxo de Caixa do Período
-                            </CardTitle>
-                            <CardDescription>Comparativo de entradas e saídas</CardDescription>
-                        </CardHeader>
-                        <CardContent className="h-[300px]">
+                    <div className="lg:col-span-2 bg-card border rounded-sm flex flex-col h-full min-h-[400px]">
+                        <div className="p-4 border-b">
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <TrendingUp className="h-4 w-4 text-primary" /> Fluxo de Caixa do Período
+                            </h2>
+                            <p className="text-xs text-muted-foreground mt-1">Comparativo de entradas e saídas</p>
+                        </div>
+                        <div className="p-4 flex-1 min-h-[300px] bg-card/30">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={chartData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -431,18 +419,18 @@ export default function Financeiro() {
                                     <Bar dataKey="saida" name="Saídas" fill="#ef4444" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* Category Distribution */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                                <Tag className="h-5 w-5 text-primary" /> Distribuição por Categoria
-                            </CardTitle>
-                            <CardDescription>Onde os recursos estão sendo aplicados</CardDescription>
-                        </CardHeader>
-                        <CardContent className="h-[300px] flex flex-col justify-center">
+                    <div className="bg-card border rounded-sm flex flex-col h-full min-h-[400px]">
+                        <div className="p-4 border-b">
+                            <h2 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2 text-muted-foreground">
+                                <Tag className="h-4 w-4 text-primary" /> Distribuição por Categoria
+                            </h2>
+                            <p className="text-xs text-muted-foreground mt-1">Onde os recursos estão sendo aplicados</p>
+                        </div>
+                        <div className="p-4 flex-1 flex flex-col justify-center bg-card/30">
                             {categoryData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -468,67 +456,67 @@ export default function Financeiro() {
                                     <p>Sem dados para exibir</p>
                                 </div>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
                     {/* Recent Transactions Table */}
-                    <Card className="lg:col-span-3">
-                        <CardHeader className="flex flex-row items-center justify-between">
+                    <div className="lg:col-span-3 bg-card border rounded-sm flex flex-col min-h-[400px]">
+                        <div className="p-4 border-b flex flex-col justify-between gap-4">
                             <div>
-                                <CardTitle className="text-lg">Transações no Período</CardTitle>
-                                <CardDescription>Lista detalhada das movimentações filtradas</CardDescription>
+                                <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Transações no Período</h2>
+                                <p className="text-xs text-muted-foreground mt-1">Lista detalhada das movimentações filtradas</p>
                             </div>
                             <div className="flex gap-2">
                                 <div className="relative">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         placeholder="Buscar..."
-                                        className="pl-8 w-[200px] lg:w-[300px]"
+                                        className="pl-8 w-[200px] lg:w-[300px] rounded-sm focus-visible:ring-1 focus-visible:ring-primary/20"
                                     />
                                 </div>
-                                <Button variant="outline" size="icon">
+                                <Button variant="outline" size="icon" className="rounded-sm">
                                     <Filter className="h-4 w-4" />
                                 </Button>
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="rounded-md border">
+                        </div>
+                        <div className="p-0 flex-1 overflow-x-auto bg-card/30">
+                            <div className="border-0">
                                 <Table>
                                     <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Data</TableHead>
-                                            <TableHead>Tipo</TableHead>
-                                            <TableHead>Categoria</TableHead>
-                                            <TableHead className="hidden md:table-cell">Descrição</TableHead>
-                                            <TableHead className="hidden md:table-cell">Pagamento</TableHead>
-                                            <TableHead className="text-right">Valor</TableHead>
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="py-4">Data</TableHead>
+                                            <TableHead className="py-4">Tipo</TableHead>
+                                            <TableHead className="py-4">Categoria</TableHead>
+                                            <TableHead className="hidden md:table-cell py-4">Descrição</TableHead>
+                                            <TableHead className="hidden md:table-cell py-4">Pagamento</TableHead>
+                                            <TableHead className="text-right py-4">Valor</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {transactions.length > 0 ? (
                                             transactions.map((t) => (
-                                                <TableRow key={t.id}>
-                                                    <TableCell className="font-medium">
+                                                <TableRow key={t.id} className="hover:bg-muted/50 border-border/50">
+                                                    <TableCell className="font-medium p-4">
                                                         {format(new Date(t.date), 'dd/MM/yyyy')}
                                                     </TableCell>
-                                                    <TableCell>
-                                                        <Badge variant={t.type === 'entrada' ? 'default' : 'destructive'} className={t.type === 'entrada' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none' : 'bg-rose-100 text-rose-700 hover:bg-rose-100 border-none'}>
+                                                    <TableCell className="p-4">
+                                                        <Badge variant={t.type === 'entrada' ? 'default' : 'destructive'} className={t.type === 'entrada' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-none rounded-sm uppercase tracking-wider text-[10px]' : 'bg-rose-100 text-rose-700 hover:bg-rose-100 border-none rounded-sm uppercase tracking-wider text-[10px]'}>
                                                             {t.type === 'entrada' ? 'Entrada' : 'Saída'}
                                                         </Badge>
                                                     </TableCell>
-                                                    <TableCell>{t.category}</TableCell>
-                                                    <TableCell className="hidden md:table-cell text-muted-foreground max-w-[200px] truncate">
+                                                    <TableCell className="p-4 text-sm">{t.category}</TableCell>
+                                                    <TableCell className="hidden md:table-cell text-muted-foreground max-w-[200px] truncate p-4 text-sm">
                                                         {t.description || '-'}
                                                     </TableCell>
-                                                    <TableCell className="hidden md:table-cell">{t.payment_method}</TableCell>
-                                                    <TableCell className={`text-right font-bold ${t.type === 'entrada' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                                    <TableCell className="hidden md:table-cell p-4 text-sm">{t.payment_method}</TableCell>
+                                                    <TableCell className={`text-right font-bold p-4 ${t.type === 'entrada' ? 'text-emerald-600' : 'text-rose-600'}`}>
                                                         {t.type === 'entrada' ? '+' : '-'} R$ {Number(t.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                     </TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground p-4">
                                                     {loading ? "Carregando..." : "Nenhuma transação encontrada no período."}
                                                 </TableCell>
                                             </TableRow>
@@ -536,8 +524,8 @@ export default function Financeiro() {
                                     </TableBody>
                                 </Table>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </DashboardLayout>
