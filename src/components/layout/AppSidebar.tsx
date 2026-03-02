@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -35,6 +36,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   Collapsible,
@@ -105,6 +107,11 @@ export function AppSidebar({ className }: { className?: string }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [location.pathname, setOpenMobile]);
 
   const handleLogout = async () => {
     await logout();

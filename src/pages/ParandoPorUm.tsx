@@ -198,21 +198,21 @@ export default function ParandoPorUm() {
                 <div className="constellation-overlay" />
 
                 <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-16 relative z-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-xs font-black uppercase tracking-widest mb-4">
+                    <div className="text-center mb-12 relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
                             <Sparkles className="h-3 w-3" />
-                            Visão Celestial
+                            Gestão de Discipulado
                         </div>
-                        <h2 className="text-4xl font-black text-white mb-2">Parando por Um</h2>
-                        <p className="text-slate-400 max-w-2xl mx-auto">
-                            Visualização dinâmica do fluxo de vida e discipulado. Cada conexão representa um compromisso eterno.
+                        <h2 className="text-3xl font-light tracking-tight text-foreground mb-2">Parando por Um</h2>
+                        <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
+                            Visualização da estrutura de cuidado e acompanhamento da igreja.
                         </p>
                     </div>
 
                     {loading ? (
                         <div className="flex flex-col items-center justify-center py-20 gap-4">
-                            <Loader2 className="h-10 w-10 animate-spin text-amber-500" />
-                            <p className="text-amber-500 font-bold animate-pulse">Iniciando Ecossistema...</p>
+                            <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+                            <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold">Carregando Estrutura...</p>
                         </div>
                     ) : (
                         <div className="pyramid-wrapper">
@@ -222,14 +222,14 @@ export default function ParandoPorUm() {
                                     hierarchy.slice(0, 1).map(root => renderNode(root, true))
                                 ) : (
                                     <div className="empty-slot pastoral-slot" onClick={() => { setSelectedSlot({ parentId: null, position: 0 }); setIsSearchModalOpen(true); }}>
-                                        <Plus className="h-6 w-6" />
-                                        <span>Definir Pastor(a)</span>
+                                        <Plus className="h-5 w-5" />
+                                        <span>Definir Pastor</span>
                                     </div>
                                 )}
                             </div>
 
                             {/* LEVEL 2: 10 LEADERS (GRID) */}
-                            <div className="pyramid-level level-2 mt-20">
+                            <div className="pyramid-level level-2 mt-16">
                                 <div className="leaders-grid">
                                     {Array.from({ length: 10 }).map((_, i) => {
                                         const leader = hierarchy[0]?.children[i];
@@ -242,51 +242,48 @@ export default function ParandoPorUm() {
                                     })}
                                 </div>
                             </div>
-
-                            {/* LEVEL 3: ACCOMPANIED (DYNAMIC GENERATIONS) */}
-                            {/* This is rendered recursively inside renderNode now */}
                         </div>
                     )}
                 </div>
 
                 {/* Search & Link Modal */}
                 <Dialog open={isSearchModalOpen} onOpenChange={setIsSearchModalOpen}>
-                    <DialogContent className="sm:max-w-[400px] bg-slate-900 text-white border-amber-500/50">
+                    <DialogContent className="sm:max-w-[400px] rounded-sm border-border/50">
                         <DialogHeader>
-                            <DialogTitle className="text-amber-500">Vincular ao Ecossistema</DialogTitle>
-                            <DialogDescription className="text-slate-400">
-                                Busque um membro já cadastrado para ocupar esta posição.
+                            <DialogTitle>Vincular ao Discipulado</DialogTitle>
+                            <DialogDescription>
+                                Selecione um membro para ocupar esta posição.
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="py-4 space-y-4">
+                        <div className="py-2 space-y-4">
                             <Input
-                                placeholder="Buscar por nome..."
+                                placeholder="Buscar membro..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="bg-slate-800 border-slate-700 text-white rounded-sm focus-visible:ring-1 focus-visible:ring-amber-500"
+                                className="rounded-sm bg-muted/20 border-border/40 focus-visible:ring-1 focus-visible:ring-primary/20"
                             />
 
-                            <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+                            <div className="max-h-[300px] overflow-y-auto space-y-2 pr-2 scrollbar-thin">
                                 {allMembers
                                     .filter(m => (m.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()))
                                     .slice(0, 5)
                                     .map(member => (
                                         <div
                                             key={member.id}
-                                            className="w-full flex items-center gap-3 p-3 rounded-sm bg-slate-800/50 border border-slate-700 transition-all text-left"
+                                            className="w-full flex items-center gap-3 p-3 rounded-sm border border-border/20 bg-muted/5 hover:bg-muted/10 transition-all text-left"
                                         >
-                                            <div className="h-10 w-10 rounded-full bg-slate-700 overflow-hidden">
+                                            <div className="h-9 w-9 rounded-full bg-muted overflow-hidden shrink-0">
                                                 <img src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`} alt="" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-bold text-sm truncate">{member.full_name}</p>
-                                                <p className="text-[10px] text-slate-500">{member.phone || 'Sem telefone'}</p>
+                                                <p className="font-bold text-xs truncate">{member.full_name}</p>
+                                                <p className="text-[10px] text-muted-foreground">{member.phone || 'Sem telefone'}</p>
                                             </div>
-                                            <div className="flex gap-1 items-center">
+                                            <div className="flex gap-1 items-center shrink-0">
                                                 <Button
                                                     size="sm"
-                                                    className="h-7 px-3 text-[10px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-sm uppercase tracking-widest"
+                                                    className="h-7 px-2 text-[9px] font-bold rounded-sm uppercase tracking-widest"
                                                     onClick={() => handleAssignMember(member, 'lider')}
                                                 >
                                                     Líder
@@ -294,7 +291,7 @@ export default function ParandoPorUm() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    className="h-7 px-3 text-[10px] border-slate-600 hover:bg-slate-700 text-white font-bold rounded-sm uppercase tracking-widest"
+                                                    className="h-7 px-2 text-[9px] font-bold rounded-sm uppercase tracking-widest border-border/60"
                                                     onClick={() => handleAssignMember(member, 'liderado')}
                                                 >
                                                     Liderado
@@ -313,28 +310,28 @@ export default function ParandoPorUm() {
                         className="add-disciple-btn"
                         onClick={() => setIsWelcomeModalOpen(true)}
                     >
-                        <UserPlus className="h-5 w-5" />
+                        <UserPlus className="h-4 w-4 mr-2" />
                         Adicionar Novo Discípulo
                     </Button>
                 </div>
 
                 {/* Welcome Modal */}
                 <Dialog open={isWelcomeModalOpen} onOpenChange={setIsWelcomeModalOpen}>
-                    <DialogContent className="sm:max-w-[500px] border-amber-500/30 bg-slate-950 text-white">
+                    <DialogContent className="sm:max-w-[500px] border-border/50 rounded-sm">
                         <DialogHeader>
-                            <DialogTitle className="text-2xl font-black text-amber-500 flex items-center gap-2">
-                                <Sparkles className="h-6 w-6" />
-                                Parando por Um
+                            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                Iniciar Acompanhamento
                             </DialogTitle>
-                            <DialogDescription className="text-slate-300 pt-4 leading-relaxed text-lg italic">
-                                "Bem-vindo ao Ecossistema 'Parando por Um'! 🌟 Esta é a sua jornada de discipulado, onde cada conexão gera frutos para a eternidade. Ao adicionar um novo discípulo, você está assumindo o compromisso de caminhar junto, ensinar e inspirar. Vamos juntos fazer a diferença na vida de mais um!"
+                            <DialogDescription className="pt-4 leading-relaxed text-sm text-muted-foreground">
+                                "Ao adicionar um novo discípulo, você está assumindo o compromisso de caminhar junto, ensinar e inspirar. Vamos juntos fazer a diferença na vida de mais um!"
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="pt-6">
                             <Button
                                 variant="outline"
                                 onClick={() => setIsWelcomeModalOpen(false)}
-                                className="rounded-sm border-slate-700 hover:bg-slate-800 uppercase tracking-widest text-xs h-10 px-6 font-bold"
+                                className="rounded-sm text-xs font-bold uppercase tracking-widest h-9"
                             >
                                 Voltar
                             </Button>
@@ -343,13 +340,14 @@ export default function ParandoPorUm() {
                                     setIsWelcomeModalOpen(false);
                                     navigate('/cadastro?tipo=membro');
                                 }}
-                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-sm uppercase tracking-widest text-xs h-10 px-6"
+                                className="rounded-sm text-xs font-bold uppercase tracking-widest h-9"
                             >
-                                Prosseguir para Cadastro
+                                Ir para Cadastro
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
             </div>
         </DashboardLayout>
     );
