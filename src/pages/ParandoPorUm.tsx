@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Person } from '@/types/database';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,7 @@ interface MemberNode {
 export default function ParandoPorUm() {
     const [loading, setLoading] = useState(true);
     const [hierarchy, setHierarchy] = useState<MemberNode[]>([]);
-    const [allMembers, setAllMembers] = useState<any[]>([]);
+    const [allMembers, setAllMembers] = useState<Person[]>([]);
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedSlot, setSelectedSlot] = useState<{ parentId: string | null, position: number | string } | null>(null);
@@ -47,7 +48,7 @@ export default function ParandoPorUm() {
         try {
             // Fetch all members to support search and build hierarchy
             const { data, error } = await supabase
-                .from('people' as any)
+                .from('people')
                 .select('id, full_name, avatar_url, member_role, leader_id, phone')
                 .eq('type', 'membro');
 
@@ -82,12 +83,12 @@ export default function ParandoPorUm() {
         }
     };
 
-    const handleAssignMember = async (member: any, role: string) => {
+    const handleAssignMember = async (member: Person, role: string) => {
         if (!selectedSlot) return;
 
         try {
             const { error } = await supabase
-                .from('people' as any)
+                .from('people')
                 .update({
                     leader_id: selectedSlot.parentId,
                     member_role: role
@@ -117,7 +118,7 @@ export default function ParandoPorUm() {
         setIsUpdatingPhoto(true);
         try {
             const { error } = await supabase
-                .from('people' as any)
+                .from('people')
                 .update({ avatar_url: url })
                 .eq('id', memberId);
 

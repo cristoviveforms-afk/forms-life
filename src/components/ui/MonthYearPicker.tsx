@@ -66,6 +66,7 @@ export function MonthYearPicker({ onDateChange }: MonthYearPickerProps) {
             const endStr = `${y}-${(m + 1).toString().padStart(2, '0')}-${lastDayDate.getDate().toString().padStart(2, '0')}`;
             onDateChange(startStr, endStr);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const calculateDays = (m: number, y: number) => {

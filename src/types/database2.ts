@@ -1,4 +1,4 @@
-import { Database } from "../integrations/supabase/types";
+﻿import { Database } from "../integrations/supabase/types";
 
 export type Person = Database['public']['Tables']['people']['Row'];
 export type Ministry = Database['public']['Tables']['ministries']['Row'];

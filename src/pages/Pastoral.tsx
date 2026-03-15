@@ -17,6 +17,12 @@ interface PastoralStats {
     contactedThisWeek: number;
 }
 
+interface PipelinePerson extends Person {
+    pipeline_status: string;
+    last_contact?: string;
+    first_contact?: string;
+}
+
 interface MinistryMetric {
     id: string;
     name: string;
@@ -34,8 +40,8 @@ export default function Pastoral() {
         needingContact: 0,
         contactedThisWeek: 0,
     });
-    const [recentFeedbacks, setRecentFeedbacks] = useState<any[]>([]);
-    const [pipeline, setPipeline] = useState<any[]>([]);
+    const [recentFeedbacks, setRecentFeedbacks] = useState<Accompaniment[]>([]);
+    const [pipeline, setPipeline] = useState<PipelinePerson[]>([]);
     const [ministryMetrics, setMinistryMetrics] = useState<MinistryMetric[]>([]);
     const navigate = useNavigate();
 
@@ -71,14 +77,14 @@ export default function Pastoral() {
             // --- PROCESSING ---
 
             // Process Stats
-            const visitors = people?.filter((p: any) => p.type === 'visitante' || p.type === 'convertido') || [];
-            const members = people?.filter((p: any) => p.type === 'membro') || [];
+            const visitors = people?.filter((p: Person) => p.type === 'visitante' || p.type === 'convertido') || [];
+            const members = people?.filter((p: Person) => p.type === 'membro') || [];
 
             // Process Pipeline Status
-            const processedPipeline = people?.map((p: any) => {
-                const pAccs = accompaniments?.filter((a: any) => a.person_id === p.id) || [];
+            const processedPipeline: PipelinePerson[] = (people as Person[])?.map((p: Person) => {
+                const pAccs = accompaniments?.filter((a: Accompaniment) => a.person_id === p.id) || [];
                 // Sort descending
-                pAccs.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                pAccs.sort((a: Accompaniment, b: Accompaniment) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
                 const lastAcc = pAccs[0];
 
                 let status = 'aguardando';
@@ -102,7 +108,7 @@ export default function Pastoral() {
             setPipeline(processedPipeline);
 
             // Process Ministry Metrics
-            const metrics: MinistryMetric[] = (ministries || []).map((m: any) => {
+            const metrics: MinistryMetric[] = (ministries || []).map((m: { id: string, name: string, leader: string | null }) => {
                 const lowerName = m.name.toLowerCase();
                 const assignedPeople = processedPipeline.filter(p => {
                     // Logic from Ministerios.tsx
@@ -169,7 +175,7 @@ export default function Pastoral() {
                 totalVisitors: visitors.length,
                 totalMembers: members.length,
                 needingContact: processedPipeline.filter(p => p.pipeline_status === 'aguardando' && (p.type === 'visitante' || p.type === 'convertido')).length,
-                contactedThisWeek: accompaniments?.filter((a: any) => {
+                contactedThisWeek: accompaniments?.filter((a: Accompaniment) => {
                     const date = new Date(a.created_at);
                     const now = new Date();
                     const oneWeek = 7 * 24 * 60 * 60 * 1000;
@@ -428,7 +434,7 @@ export default function Pastoral() {
                                                 <div className="space-y-2">
                                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                                                         <p className="text-sm font-medium">
-                                                            Contato com <span className="text-primary font-bold hover:underline cursor-pointer" onClick={() => navigate(`/acompanhamento?personId=${item.person_id}`)}>{item.person?.full_name || 'Desconhecido'}</span>
+                                                            Contato com <span className="text-primary font-bold hover:underline cursor-pointer" onClick={() => navigate(`/acompanhamento?personId=${item.person_id}`)}>{(item as any).person?.full_name || 'Desconhecido'}</span>
                                                         </p>
                                                         <span className="text-xs text-muted-foreground font-mono">
                                                             {new Date(item.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit' })} • {new Date(item.created_at).toLocaleTimeString().slice(0, 5)}

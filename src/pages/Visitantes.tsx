@@ -37,7 +37,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { supabase } from '@/integrations/supabase/client';
-import { Person } from '@/types/database';
+import { Person, Accompaniment, Ministry } from '@/types/database';
 import { MonthYearPicker } from '@/components/ui/MonthYearPicker';
 
 interface FamilyGroup {
@@ -84,9 +84,9 @@ export default function Visitantes() {
   const [visitanteToDelete, setVisitanteToDelete] = useState<Person | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [personHistory, setPersonHistory] = useState<any[]>([]);
+  const [personHistory, setPersonHistory] = useState<Accompaniment[]>([]);
   const [familyMembers, setFamilyMembers] = useState<Person[]>([]);
-  const [availableMinistries, setAvailableMinistries] = useState<any[]>([]);
+  const [availableMinistries, setAvailableMinistries] = useState<Ministry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   const navigate = useNavigate();
@@ -103,14 +103,14 @@ export default function Visitantes() {
       const endDay = `${end}T23:59:59`;
 
       const { data, error } = await supabase
-        .from('people' as any)
+        .from('people')
         .select('*')
         .eq('type', 'visitante')
         .gte('created_at', startDay)
         .lte('created_at', endDay);
 
       if (error) throw error;
-      setVisitantes(data as unknown as Person[]);
+      setVisitantes(data as Person[]);
     } catch (error) {
       console.error('Erro ao buscar visitantes:', error);
     } finally {
@@ -123,7 +123,7 @@ export default function Visitantes() {
 
     try {
       const { error } = await supabase
-        .from('people' as any)
+        .from('people')
         .delete()
         .eq('id', visitanteToDelete.id);
 
@@ -186,20 +186,20 @@ export default function Visitantes() {
     if (!window.confirm(confirmMsg)) return;
 
     try {
-      const updates: any = { type: newType };
+      const updates: Partial<Person> = { type: newType as 'membro' | 'visitante' };
       if (newType === 'membro') {
         updates.integration_date = new Date().toISOString().split('T')[0];
       }
 
       const { error } = await supabase
-        .from('people' as any)
+        .from('people')
         .update(updates)
         .eq('id', person.id);
 
       if (error) throw error;
       toast.success(`Status atualizado para ${newType === 'membro' ? 'Membro' : 'Visitante'}!`);
 
-      const updatedPerson = { ...person, type: newType as any };
+      const updatedPerson = { ...person, type: newType as 'membro' | 'visitante' };
       if (selectedPerson?.id === person.id) setSelectedPerson(updatedPerson);
       setVisitantes(visitantes.map(v => v.id === person.id ? updatedPerson : v));
     } catch (error) {
@@ -213,6 +213,7 @@ export default function Visitantes() {
       const person = visitantes.find(v => v.id === personId);
       if (person) handleViewDetails(person);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, visitantes, selectedPerson?.id]);
 
   const filteredGroups = getFamilyGroups(visitantes).filter((group) => {

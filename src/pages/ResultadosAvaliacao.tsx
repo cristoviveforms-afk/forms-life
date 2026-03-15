@@ -26,82 +26,106 @@ import { cn } from '@/lib/utils';
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'];
 
+interface Survey {
+    id: string;
+    created_at: string;
+    nps_score: number;
+    rating_reception?: number | null;
+    rating_environment?: number | null;
+    rating_worship?: number | null;
+    rating_arts?: number | null;
+    rating_word?: number | null;
+    testimony_prayer?: string | null;
+    suggestions?: string | null;
+}
+
+interface CategoryStat {
+    name: string;
+    val: string;
+}
+
+interface NpsData {
+    name: string;
+    value: number;
+    color: string;
+}
+
 const ResultadosAvaliacao: React.FC = () => {
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState<any[]>([]);
+    const [data, setData] = useState<Survey[]>([]);
     const [stats, setStats] = useState({
         totalResponses: 0,
         avgNps: 0,
         satisfactionRate: 0,
-        categories: [] as any[],
-        npsData: [] as any[]
+        categories: [] as CategoryStat[],
+        npsData: [] as NpsData[]
     });
     const navigate = useNavigate();
 
     useEffect(() => {
+        const processStats = (surveys: Survey[]) => {
+            const total = surveys.length;
+            if (total === 0) return;
+
+            // NPS Calculation
+            const promoters = surveys.filter(s => s.nps_score >= 9).length;
+            const detractors = surveys.filter(s => s.nps_score <= 6).length;
+            const nps = Math.round(((promoters - detractors) / total) * 100);
+
+            // Satisfaction Rate (Rating >= 4 across all categories)
+            const avgRatings = surveys.reduce((acc, s) => {
+                acc.reception += s.rating_reception || 0;
+                acc.env += s.rating_environment || 0;
+                acc.worship += s.rating_worship || 0;
+                acc.arts += s.rating_arts || 0;
+                acc.word += s.rating_word || 0;
+                return acc;
+            }, { reception: 0, env: 0, worship: 0, arts: 0, word: 0 });
+
+            const categories = [
+                { name: 'Recepção', val: (avgRatings.reception / total).toFixed(1) },
+                { name: 'Ambiente', val: (avgRatings.env / total).toFixed(1) },
+                { name: 'Louvor', val: (avgRatings.worship / total).toFixed(1) },
+                { name: 'Artes', val: (avgRatings.arts / total).toFixed(1) },
+                { name: 'Palavra', val: (avgRatings.word / total).toFixed(1) }
+            ];
+
+            const npsData = [
+                { name: 'Promotores (9-10)', value: promoters, color: '#10b981' },
+                { name: 'Passivos (7-8)', value: total - promoters - detractors, color: '#f59e0b' },
+                { name: 'Detratores (0-6)', value: detractors, color: '#ef4444' }
+            ];
+
+            setStats({
+                totalResponses: total,
+                avgNps: nps,
+                satisfactionRate: Math.round((promoters / total) * 100),
+                categories,
+                npsData
+            });
+        };
+
+        const fetchResults = async () => {
+            try {
+                setLoading(true);
+                const { data: surveys, error } = await supabase
+                    .from('experience_surveys')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                setData((surveys as Survey[]) || []);
+                processStats((surveys as Survey[]) || []);
+            } catch (error) {
+                console.error('Erro ao buscar resultados:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchResults();
     }, []);
-
-    const fetchResults = async () => {
-        try {
-            setLoading(true);
-            const { data: surveys, error } = await supabase
-                .from('experience_surveys')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            setData(surveys || []);
-            processStats(surveys || []);
-        } catch (error) {
-            console.error('Erro ao buscar resultados:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const processStats = (surveys: any[]) => {
-        const total = surveys.length;
-        if (total === 0) return;
-
-        // NPS Calculation
-        const promoters = surveys.filter(s => s.nps_score >= 9).length;
-        const detractors = surveys.filter(s => s.nps_score <= 6).length;
-        const nps = Math.round(((promoters - detractors) / total) * 100);
-
-        // Satisfaction Rate (Rating >= 4 across all categories)
-        const avgRatings = surveys.reduce((acc, s) => {
-            acc.reception += s.rating_reception || 0;
-            acc.env += s.rating_environment || 0;
-            acc.worship += s.rating_worship || 0;
-            acc.arts += s.rating_arts || 0;
-            acc.word += s.rating_word || 0;
-            return acc;
-        }, { reception: 0, env: 0, worship: 0, arts: 0, word: 0 });
-
-        const categories = [
-            { name: 'Recepção', val: (avgRatings.reception / total).toFixed(1) },
-            { name: 'Ambiente', val: (avgRatings.env / total).toFixed(1) },
-            { name: 'Louvor', val: (avgRatings.worship / total).toFixed(1) },
-            { name: 'Artes', val: (avgRatings.arts / total).toFixed(1) },
-            { name: 'Palavra', val: (avgRatings.word / total).toFixed(1) }
-        ];
-
-        const npsData = [
-            { name: 'Promotores (9-10)', value: promoters, color: '#10b981' },
-            { name: 'Passivos (7-8)', value: total - promoters - detractors, color: '#f59e0b' },
-            { name: 'Detratores (0-6)', value: detractors, color: '#ef4444' }
-        ];
-
-        setStats({
-            totalResponses: total,
-            avgNps: nps,
-            satisfactionRate: Math.round((promoters / total) * 100),
-            categories,
-            npsData
-        });
-    };
 
     if (loading) {
         return (
