@@ -72,6 +72,7 @@ export default function Pastoral() {
                 `)
                 .order('created_at', { ascending: false });
 
+
             if (accError) throw accError;
 
             // --- PROCESSING ---
